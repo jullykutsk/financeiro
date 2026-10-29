@@ -5,10 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FinControl Pro - Fatura Fechada & Raio-X</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-    <script>
-        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-    </script>
     <style>
         body { background-color: #0f172a; color: #f8fafc; }
     </style>
@@ -25,21 +21,34 @@
                 </div>
                 <div>
                     <h1 class="font-bold text-lg text-white leading-tight">FinControl <span class="text-xs bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-500/30">Pro</span></h1>
-                    <p class="text-xs text-slate-400">Método Fatura Fechada + Raio-X de Compras</p>
+                    <p class="text-xs text-slate-400">Método Fatura Fechada + Raio-X Leve</p>
                 </div>
             </div>
             <div class="flex items-center gap-2">
                 <input type="month" id="seletorMes" class="bg-slate-900 border border-slate-700 text-xs text-slate-200 px-3 py-2 rounded-xl focus:outline-none focus:border-emerald-500" value="2026-10" onchange="renderizarTela()">
-                <button onclick="document.getElementById('fileInput').click()" class="bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-semibold p-2.5 rounded-xl transition text-xs flex items-center gap-1 shadow-lg shadow-emerald-500/10">
-                    <span>⚡ Importar PDF</span>
-                </button>
-                <input type="file" id="fileInput" accept="application/pdf" class="hidden" onchange="processarPDF(event)">
             </div>
         </header>
 
-        <!-- Indicador de Processamento -->
-        <div id="loading" class="hidden bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 p-4 rounded-2xl text-center text-xs mb-6 animate-pulse">
-            ⏳ A processar PDF da fatura... A filtrar resumos, totais e simulações do banco...
+        <!-- Modos de Importação -->
+        <div class="bg-slate-800/60 p-4 rounded-2xl border border-slate-700/40 mb-6 space-y-3">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300">⚡ Lançar Fatura (Escolha uma opção):</h3>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <!-- Opção 1: Selecionar Arquivo -->
+                <div>
+                    <button onclick="document.getElementById('fileInput').click()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-semibold p-3 rounded-xl transition text-xs flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/10">
+                        📄 Importar Fatura (PDF / TXT)
+                    </button>
+                    <input type="file" id="fileInput" accept=".pdf,.txt,application/pdf,text/plain" class="hidden" onchange="processarArquivo(event)">
+                </div>
+
+                <!-- Opção 2: Colar Texto -->
+                <div>
+                    <button onclick="abrirModalTexto()" class="w-full bg-slate-700 hover:bg-slate-600 text-white font-semibold p-3 rounded-xl transition text-xs flex items-center justify-center gap-2">
+                        📋 Colar Texto da Fatura (Sem Erro de Memória)
+                    </button>
+                </div>
+            </div>
         </div>
 
         <!-- Resumo de Caixa (Aba 1) -->
@@ -63,7 +72,7 @@
             <div class="p-4 border-b border-slate-700/40 flex justify-between items-center">
                 <div>
                     <h3 class="font-bold text-sm text-slate-200">Raio-X de Compras e Parcelas Ativas</h3>
-                    <p class="text-[11px] text-slate-400">Somente compras e parcelamentos reais (sem duplicidades ou textos bancários).</p>
+                    <p class="text-[11px] text-slate-400">Somente compras reais (descartes institucionais automáticos).</p>
                 </div>
             </div>
 
@@ -79,7 +88,7 @@
                     </thead>
                     <tbody id="tabelaRaioX" class="divide-y divide-slate-700/30">
                         <tr>
-                            <td colspan="4" class="p-6 text-center text-slate-500">Nenhuma fatura importada para este mês. Clique em "Importar PDF" para carregar a fatura do Bradesco.</td>
+                            <td colspan="4" class="p-6 text-center text-slate-500">Nenhuma fatura importada. Use os botões acima para carregar.</td>
                         </tr>
                     </tbody>
                 </table>
@@ -88,10 +97,21 @@
 
     </div>
 
-    <script>
-        let db = JSON.parse(localStorage.getItem('fincontrol_db_v4')) || {};
+    <!-- Modal Colar Texto -->
+    <div id="modalTexto" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50">
+        <div class="bg-slate-800 p-5 rounded-2xl border border-slate-700 max-w-lg w-full space-y-4">
+            <h3 class="font-bold text-sm text-white">Copie e cole o texto da fatura abaixo:</h3>
+            <textarea id="textoFatura" rows="10" class="w-full bg-slate-900 border border-slate-700 text-xs text-slate-200 p-3 rounded-xl focus:outline-none focus:border-emerald-500" placeholder="Selecione tudo no PDF do seu celular, copie e cole aqui..."></textarea>
+            <div class="flex justify-end gap-2">
+                <button onclick="fecharModalTexto()" class="bg-slate-700 hover:bg-slate-600 px-4 py-2 rounded-xl text-xs">Cancelar</button>
+                <button onclick="processarTextoBruto()" class="bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold px-4 py-2 rounded-xl text-xs">Processar Fatura</button>
+            </div>
+        </div>
+    </div>
 
-        // Lista estrita de termos bancários, simulações e totalizadores a ignorar
+    <script>
+        let db = JSON.parse(localStorage.getItem('fincontrol_db_v5')) || {};
+
         const termosIgnorar = [
             'total da fatura', 'limite de compras', 'limite de saque', 'recomendado pagamento',
             'pagamento minimo', 'pagamento maximo', 'rotativo', 'saque parcelado', 'proximas faturas',
@@ -108,46 +128,33 @@
             return txt.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
         }
 
-        async function processarPDF(event) {
+        function processarArquivo(event) {
             const file = event.target.files[0];
             if (!file) return;
 
-            document.getElementById('loading').classList.remove('hidden');
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const conteudo = e.target.result;
+                let linhas = conteudo.split('\n');
+                extrairDadosFatura(linhas);
+            };
+            reader.readAsText(file);
+        }
 
-            try {
-                const arrayBuffer = await file.arrayBuffer();
-                const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-                
-                let linhasTexto = [];
+        function abrirModalTexto() {
+            document.getElementById('modalTexto').classList.remove('hidden');
+        }
 
-                for (let i = 1; i <= pdf.numPages; i++) {
-                    const page = await pdf.getPage(i);
-                    const textContent = await page.getTextContent();
-                    
-                    let linhas = {};
-                    textContent.items.forEach(item => {
-                        let y = Math.round(item.transform[5]);
-                        if (!linhas[y]) linhas[y] = [];
-                        linhas[y].push(item.str);
-                    });
+        function fecharModalTexto() {
+            document.getElementById('modalTexto').classList.add('hidden');
+        }
 
-                    let keys = Object.keys(linhas).sort((a,b) => b - a);
-                    keys.forEach(y => {
-                        let linhaCompleta = linhas[y].join(" ").trim();
-                        if (linhaCompleta.length > 2) {
-                            linhasTexto.push(linhaCompleta);
-                        }
-                    });
-                }
-
-                extrairDadosFatura(linhasTexto);
-
-            } catch (err) {
-                alert("Erro ao ler o arquivo PDF. Tente novamente.");
-                console.error(err);
-            } finally {
-                document.getElementById('loading').classList.add('hidden');
-            }
+        function processarTextoBruto() {
+            const texto = document.getElementById('textoFatura').value;
+            if (!texto) return;
+            let linhas = texto.split('\n');
+            extrairDadosFatura(linhas);
+            fecharModalTexto();
         }
 
         function extrairDadosFatura(linhas) {
@@ -158,8 +165,7 @@
             linhas.forEach(linha => {
                 let linhaNorm = normalizarTexto(linha);
 
-                // Captura o valor total real da fatura
-                if (linhaNorm.includes("total da fatura") || linhaNorm.includes("(=)total")) {
+                if (linhaNorm.includes("total da fatura") || linhaNorm.includes("(=)total") || linhaNorm.includes("total em real")) {
                     let matchTotal = linha.match(/R?\$?\s*(\d{1,3}(?:\.\d{3})*,\d{2})/);
                     if (matchTotal) {
                         let valTot = parseFloat(matchTotal[1].replace(/\./g, '').replace(',', '.'));
@@ -167,19 +173,16 @@
                     }
                 }
 
-                // Descarte de ruídos, termos de resumo e linhas de juros/simulações
                 if (termosIgnorar.some(termo => linhaNorm.includes(termo)) || linha.includes('%')) {
                     return;
                 }
 
-                // Captura o valor monetário da compra
                 let matchValor = linha.match(/R?\$?\s*(\d{1,3}(?:\.\d{3})*,\d{2})/);
                 if (!matchValor) return;
 
                 let valor = parseFloat(matchValor[1].replace(/\./g, '').replace(',', '.'));
                 if (isNaN(valor) || valor <= 0) return;
 
-                // Extração e validação do padrão de parcelas (ex: 08/12, 02/03)
                 let parcela = "À vista";
                 let regexParcela = /(\d{1,2})\/(\d{1,2})/g;
                 let matches = [...linha.matchAll(regexParcela)];
@@ -188,26 +191,22 @@
                     let numAtual = parseInt(m[1], 10);
                     let numTotal = parseInt(m[2], 10);
 
-                    // Valida se é parcela real (e não data de compra ou ano como 2026)
                     if (numAtual <= numTotal && numTotal > 1 && numTotal <= 48 && numTotal !== 26) {
                         parcela = `${String(numAtual).padStart(2, '0')}/${String(numTotal).padStart(2, '0')}`;
                     }
                 });
 
-                // Limpeza do nome do estabelecimento
                 let nome = linha
-                    .replace(/R?\$?\s*\d{1,3}(?:\.\d{3})*,\d{2}/g, '') // Remove o valor
-                    .replace(/\d{1,2}\/\d{1,2}/g, '')                 // Remove padrões de parcela/data
+                    .replace(/R?\$?\s*\d{1,3}(?:\.\d{3})*,\d{2}/g, '')
+                    .replace(/\d{1,2}\/\d{1,2}/g, '')
                     .replace(/PARC/gi, '')
-                    .replace(/^\d+\s+/, '')                           // Remove códigos numéricos do início
-                    .replace(/[\.\*\%]/g, ' ')                        // Remove pontuações desnecessárias
-                    .replace(/SERÁ DEVOLVIDA EM FATURA.*/gi, '')       // Remove sobras de aviso legal
+                    .replace(/^\d+\s+/, '')
+                    .replace(/[\.\*\%]/g, ' ')
+                    .replace(/SERÁ DEVOLVIDA EM FATURA.*/gi, '')
                     .trim();
 
-                // Ignora linhas sem nome relevante ou que ficaram vazias após a limpeza
                 if (nome.length < 3 || nome === "/2026" || nome === "2026") return;
 
-                // Categorização de despesas
                 let categoria = "Pessoal";
                 let nLower = nome.toLowerCase();
 
@@ -238,7 +237,7 @@
                 compras: compras
             };
 
-            localStorage.setItem('fincontrol_db_v4', JSON.stringify(db));
+            localStorage.setItem('fincontrol_db_v5', JSON.stringify(db));
             renderizarTela();
         }
 
@@ -253,7 +252,7 @@
             tbody.innerHTML = '';
 
             if (dadosMes.compras.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="4" class="p-6 text-center text-slate-500">Nenhuma fatura importada para este mês. Clique em "Importar PDF" para carregar a fatura do Bradesco.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="4" class="p-6 text-center text-slate-500">Nenhuma fatura importada. Use os botões acima para carregar.</td></tr>`;
                 return;
             }
 
