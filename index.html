@@ -29,25 +29,13 @@
             </div>
         </header>
 
-        <!-- Modos de Importação -->
+        <!-- Botão de Colar Texto -->
         <div class="bg-slate-800/60 p-4 rounded-2xl border border-slate-700/40 mb-6 space-y-3">
-            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300">⚡ Lançar Fatura (Escolha uma opção):</h3>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <!-- Opção 1: Selecionar Arquivo -->
-                <div>
-                    <button onclick="document.getElementById('fileInput').click()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-semibold p-3 rounded-xl transition text-xs flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/10">
-                        📄 Importar Fatura (PDF / TXT)
-                    </button>
-                    <input type="file" id="fileInput" accept=".pdf,.txt,application/pdf,text/plain" class="hidden" onchange="processarArquivo(event)">
-                </div>
-
-                <!-- Opção 2: Colar Texto -->
-                <div>
-                    <button onclick="abrirModalTexto()" class="w-full bg-slate-700 hover:bg-slate-600 text-white font-semibold p-3 rounded-xl transition text-xs flex items-center justify-center gap-2">
-                        📋 Colar Texto da Fatura (Sem Erro de Memória)
-                    </button>
-                </div>
+            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300">⚡ Lançar Fatura:</h3>
+            <div>
+                <button onclick="abrirModalTexto()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-semibold p-3 rounded-xl transition text-xs flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/10">
+                    📋 Colar Texto da Fatura
+                </button>
             </div>
         </div>
 
@@ -88,7 +76,7 @@
                     </thead>
                     <tbody id="tabelaRaioX" class="divide-y divide-slate-700/30">
                         <tr>
-                            <td colspan="4" class="p-6 text-center text-slate-500">Nenhuma fatura importada. Use os botões acima para carregar.</td>
+                            <td colspan="4" class="p-6 text-center text-slate-500">Nenhuma fatura importada. Use o botão acima para colar os dados.</td>
                         </tr>
                     </tbody>
                 </table>
@@ -126,19 +114,6 @@
 
         function normalizarTexto(txt) {
             return txt.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
-        }
-
-        function processarArquivo(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const conteudo = e.target.result;
-                let linhas = conteudo.split('\n');
-                extrairDadosFatura(linhas);
-            };
-            reader.readAsText(file);
         }
 
         function abrirModalTexto() {
@@ -252,7 +227,7 @@
             tbody.innerHTML = '';
 
             if (dadosMes.compras.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="4" class="p-6 text-center text-slate-500">Nenhuma fatura importada. Use os botões acima para carregar.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="4" class="p-6 text-center text-slate-500">Nenhuma fatura importada. Use o botão acima para colar os dados.</td></tr>`;
                 return;
             }
 
