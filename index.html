@@ -3,251 +3,269 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Controle Financeiro - Fatura Fechada & Fixas</title>
+    <title>FinControl Pro - Fatura Fechada & Raio-X</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script>
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    </script>
+    <style>
+        body { background-color: #0f172a; color: #f8fafc; }
+    </style>
 </head>
-<body class="bg-slate-50 text-slate-800 font-sans">
+<body class="font-sans antialiased min-h-screen pb-12">
 
-    <div class="max-w-5xl mx-auto p-4 md:p-8">
-        <!-- Cabeçalho -->
-        <header class="mb-8 flex flex-col md:flex-row justify-between items-center bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-            <div>
-                <h1 class="text-2xl font-bold text-blue-600">Controle Financeiro Pessoal</h1>
-                <p class="text-slate-500 text-sm mt-1">Gestão de Caixa, Fatura Fechada e Contas Fixas sem Duplicidade</p>
+    <div class="max-w-4xl mx-auto p-4 md:p-6">
+        
+        <!-- Topo / Cabeçalho -->
+        <header class="flex justify-between items-center mb-6 bg-slate-800/80 p-4 rounded-2xl border border-slate-700/50 backdrop-blur">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-emerald-500/20 text-emerald-400 rounded-xl flex items-center justify-center font-bold text-xl border border-emerald-500/30">
+                    💳
+                </div>
+                <div>
+                    <h1 class="font-bold text-lg text-white leading-tight">FinControl <span class="text-xs bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-500/30">Pro</span></h1>
+                    <p class="text-xs text-slate-400">Método Fatura Fechada + Raio-X de Compras</p>
+                </div>
             </div>
-            <div class="mt-4 md:mt-0 flex gap-2">
-                <button onclick="gerarMesSeguinte()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-4 py-2.5 rounded-xl transition shadow-sm">
-                    ⚡ Gerar Contas Fixas p/ Próximo Mês
+            <div class="flex items-center gap-2">
+                <input type="month" id="seletorMes" class="bg-slate-900 border border-slate-700 text-xs text-slate-200 px-3 py-2 rounded-xl focus:outline-none focus:border-emerald-500" value="2027-02" onchange="alternarMes()">
+                <button onclick="document.getElementById('fileInput').click()" class="bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-semibold p-2.5 rounded-xl transition text-xs flex items-center gap-1 shadow-lg shadow-emerald-500/10">
+                    <span>⚡ Importar PDF</span>
                 </button>
+                <input type="file" id="fileInput" accept="application/pdf" class="hidden" onchange="processarPDF(event)">
             </div>
         </header>
 
-        <!-- Painel de Resumo -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-            <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
-                <span class="text-xs font-semibold text-slate-400 uppercase">Total Entradas</span>
-                <h2 id="resumoEntradas" class="text-2xl font-bold text-emerald-600 mt-1">R$ 0,00</h2>
+        <!-- Indicador de Carregamento -->
+        <div id="loading" class="hidden bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 p-4 rounded-2xl text-center text-xs mb-6 animate-pulse">
+            ⏳ A ler fatura PDF e a extrair parcelas e categorias...
+        </div>
+
+        <!-- Resumo de Caixa (Aba 1) -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-6">
+            <div class="bg-slate-800/60 p-4 rounded-2xl border border-slate-700/40">
+                <span class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Total Entradas</span>
+                <h2 id="totalEntradas" class="text-xl font-bold text-emerald-400 mt-1">R$ 0,00</h2>
             </div>
-            <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
-                <span class="text-xs font-semibold text-slate-400 uppercase">Total Saídas (Com Fatura Fechada)</span>
-                <h2 id="resumoSaidas" class="text-2xl font-bold text-rose-600 mt-1">R$ 0,00</h2>
+            <div class="bg-slate-800/60 p-4 rounded-2xl border border-slate-700/40">
+                <span class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Total Saídas (Fatura Fechada)</span>
+                <h2 id="totalSaidas" class="text-xl font-bold text-rose-400 mt-1">R$ 0,00</h2>
             </div>
-            <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
-                <span class="text-xs font-semibold text-slate-400 uppercase">Saldo Livre do Mês</span>
-                <h2 id="resumoSaldo" class="text-2xl font-bold text-blue-600 mt-1">R$ 0,00</h2>
+            <div class="bg-slate-800/60 p-4 rounded-2xl border border-slate-700/40">
+                <span class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Saldo Líquido</span>
+                <h2 id="saldoLiquido" class="text-xl font-bold text-blue-400 mt-1">R$ 0,00</h2>
             </div>
         </div>
 
-        <!-- Painel de Ferramentas: Fatura e Lançamento -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-            <!-- Bloco 1: Upload / Importação da Fatura Fechada -->
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col justify-between">
+        <!-- Tabela do Raio-X (Aba 2) -->
+        <div class="bg-slate-800/60 rounded-2xl border border-slate-700/40 overflow-hidden backdrop-blur">
+            <div class="p-4 border-b border-slate-700/40 flex justify-between items-center">
                 <div>
-                    <h3 class="text-base font-bold text-slate-700 mb-2">💳 Lançar Fatura Bradesco (Fechada)</h3>
-                    <p class="text-xs text-slate-500 mb-4">Insira o valor total fechado da fatura para atualizar o caixa sem duplicar as compras picadas.</p>
+                    <h3 class="font-bold text-sm text-slate-200">Raio-X de Compras e Parcelas Ativas</h3>
+                    <p class="text-[11px] text-slate-400">Estas linhas não duplicam o seu caixa (são usadas apenas para o seu controlo de categorias e parcelas a vencer).</p>
                 </div>
-                <form id="faturaForm" class="space-y-3">
-                    <div class="grid grid-cols-2 gap-2">
-                        <input type="text" id="fatMes" value="11/26" class="p-2 border rounded-xl text-sm" placeholder="Mês/Ano" required>
-                        <input type="number" step="0.01" id="fatValor" placeholder="Ex: 8570.05" class="p-2 border rounded-xl text-sm" required>
-                    </div>
-                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-xl text-xs transition">
-                        Importar Fatura Fechada no Caixa
-                    </button>
-                </form>
             </div>
 
-            <!-- Bloco 2: Lançamento Manual Simples -->
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col justify-between">
-                <div>
-                    <h3 class="text-base font-bold text-slate-700 mb-2">➕ Novo Lançamento Rápido</h3>
-                    <p class="text-xs text-slate-500 mb-4">Adicione salários, extras ou contas avulsas manualmente.</p>
-                </div>
-                <form id="transacaoForm" class="space-y-3">
-                    <div class="grid grid-cols-3 gap-2">
-                        <input type="text" id="mes" value="11/26" class="p-2 border rounded-xl text-sm" required>
-                        <select id="tipo" class="p-2 border rounded-xl text-sm">
-                            <option value="saída">Saída</option>
-                            <option value="entrada">Entrada</option>
-                        </select>
-                        <input type="number" step="0.01" id="valor" placeholder="Valor R$" class="p-2 border rounded-xl text-sm" required>
-                    </div>
-                    <input type="text" id="descricao" placeholder="Descrição (Ex: Salário Cris, Água, Luz...)" class="w-full p-2 border rounded-xl text-sm" required>
-                    <button type="submit" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-semibold py-2 rounded-xl text-xs transition">
-                        Adicionar Transação
-                    </button>
-                </form>
-            </div>
-        </div>
-
-        <!-- Filtro por Mês e Tabela -->
-        <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-            <div class="p-4 border-b border-slate-100 flex flex-col sm:flex-row justify-between items-center gap-2">
-                <h3 class="font-bold text-slate-700">Extrato Consolidado</h3>
-                <div class="flex items-center gap-2">
-                    <label class="text-xs font-semibold text-slate-400">Filtrar Mês:</label>
-                    <select id="filtroMes" onchange="atualizarApp()" class="p-1.5 border rounded-xl text-xs font-medium">
-                        <option value="todos">Todos os Meses</option>
-                        <option value="11/26" selected>11/26</option>
-                        <option value="12/26">12/26</option>
-                        <option value="01/27">01/27</option>
-                    </select>
-                    <button onclick="resetarDados()" class="text-xs text-rose-500 hover:underline ml-4">Restaurar Exemplo</button>
-                </div>
-            </div>
             <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse text-sm">
+                <table class="w-full text-left border-collapse text-xs">
                     <thead>
-                        <tr class="bg-slate-50 text-slate-400 text-xs uppercase border-b">
-                            <th class="p-3">Mês</th>
-                            <th class="p-3">Tipo</th>
-                            <th class="p-3">Descrição</th>
-                            <th class="p-3">Valor</th>
-                            <th class="p-3 text-right">Ações</th>
+                        <tr class="bg-slate-900/50 text-slate-400 text-[10px] uppercase tracking-wider border-b border-slate-700/40">
+                            <th class="p-3">Descrição da Compra</th>
+                            <th class="p-3">Categoria</th>
+                            <th class="p-3 text-center">Parcela Atual</th>
+                            <th class="p-3 text-right">Valor Parcela</th>
                         </tr>
                     </thead>
-                    <tbody id="tabelaCorpo">
-                        <!-- Injetado por JS -->
+                    <tbody id="tabelaRaioX" class="divide-y divide-slate-700/30">
+                        <tr>
+                            <td colspan="4" class="p-6 text-center text-slate-500">Nenhuma fatura importada para este mês. Clique em "Importar PDF" para carregar a fatura do Bradesco.</td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
         </div>
+
     </div>
 
     <script>
-        // Banco de dados inicial baseado na estrutura limpa aprovada
-        let transacoes = JSON.parse(localStorage.getItem('minhas_financas_v2')) || [
-            { id: 1, mes: '11/26', tipo: 'entrada', descricao: 'Salário Cris', valor: 3150.00 },
-            { id: 2, mes: '11/26', tipo: 'entrada', descricao: 'Salário Francisco', valor: 3200.00 },
-            { id: 3, mes: '11/26', tipo: 'entrada', descricao: 'Aposentadoria Pai', valor: 1600.00 },
-            { id: 4, mes: '11/26', tipo: 'entrada', descricao: 'Décimo Francisco', valor: 1600.00 },
-            { id: 5, mes: '11/26', tipo: 'saída', descricao: 'Luz', valor: 520.00 },
-            { id: 6, mes: '11/26', tipo: 'saída', descricao: 'Água', valor: 200.00 },
-            { id: 7, mes: '11/26', tipo: 'saída', descricao: 'Internet', valor: 130.00 },
-            { id: 8, mes: '11/26', tipo: 'saída', descricao: 'INSS DAS', valor: 90.00 },
-            { id: 9, mes: '11/26', tipo: 'saída', descricao: 'Empréstimo BB Portabilidade', valor: 537.93 },
-            { id: 10, mes: '11/26', tipo: 'saída', descricao: 'Empréstimo Itaú', valor: 766.00 },
-            { id: 11, mes: '11/26', tipo: 'saída', descricao: 'Fatura Fechada Bradesco', valor: 8570.05 }
+        let db = JSON.parse(localStorage.getItem('fincontrol_db')) || {};
+
+        // Palavras e frases institucionais a ignorar no PDF
+        const termosIgnorar = [
+            'total da fatura', 'limite de compras', 'limite de saque', 'recomendado pagamento',
+            'pagamento minimo', 'pagamento maximo', 'rotativo', 'saque parcelado', 'proximas faturas',
+            'compras parceladas', 'parcelamento fatura', 'encargos', 'protecao financeira',
+            'anuidade', 'saldo anterior', 'pagamentos/creditos', 'subtotal'
         ];
 
-        function atualizarApp() {
-            const corpo = document.getElementById('tabelaCorpo');
-            const filtro = document.getElementById('filtroMes').value;
-            corpo.innerHTML = '';
-            
-            let totalEntradas = 0;
-            let totalSaidas = 0;
-
-            transacoes.forEach((t, index) => {
-                if (filtro === 'todos' || t.mes === filtro) {
-                    if (t.tipo === 'entrada') totalEntradas += t.valor;
-                    if (t.tipo === 'saída') totalSaidas += t.valor;
-
-                    const tr = document.createElement('tr');
-                    tr.className = "border-b border-slate-50 hover:bg-slate-50";
-                    tr.innerHTML = `
-                        <td class="p-3 text-xs font-semibold text-slate-500">${t.mes}</td>
-                        <td class="p-3"><span class="px-2 py-0.5 rounded-lg text-xs font-semibold ${t.tipo === 'entrada' ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}">${t.tipo}</span></td>
-                        <td class="p-3 font-medium text-slate-700">${t.descricao}</td>
-                        <td class="p-3 font-semibold ${t.tipo === 'entrada' ? 'text-emerald-600' : 'text-slate-700'}">R$ ${t.valor.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
-                        <td class="p-3 text-right">
-                            <button onclick="remover(${index})" class="text-slate-300 hover:text-rose-600 text-xs">Excluir</button>
-                        </td>
-                    `;
-                    corpo.appendChild(tr);
-                }
-            });
-
-            document.getElementById('resumoEntradas').innerText = `R$ ${totalEntradas.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
-            document.getElementById('resumoSaidas').innerText = `R$ ${totalSaidas.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
-            
-            const saldo = totalEntradas - totalSaidas;
-            const elSaldo = document.getElementById('resumoSaldo');
-            elSaldo.innerText = `R$ ${saldo.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
-            elSaldo.className = `text-2xl font-bold mt-1 ${saldo >= 0 ? 'text-blue-600' : 'text-rose-600'}`;
-
-            localStorage.setItem('minhas_financas_v2', JSON.stringify(transacoes));
+        function normalizarTexto(txt) {
+            return txt.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
         }
 
-        // Adicionar Lançamento Manual
-        document.getElementById('transacaoForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            transacoes.push({
-                id: Date.now(),
-                mes: document.getElementById('mes').value,
-                tipo: document.getElementById('tipo').value,
-                descricao: document.getElementById('descricao').value,
-                valor: parseFloat(document.getElementById('valor').value)
+        async function processarPDF(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            document.getElementById('loading').classList.remove('hidden');
+
+            try {
+                const arrayBuffer = await file.arrayBuffer();
+                const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+                
+                let linhasTexto = [];
+
+                for (let i = 1; i <= pdf.numPages; i++) {
+                    const page = await pdf.getPage(i);
+                    const textContent = await page.getTextContent();
+                    
+                    // Agrupa itens por posição Y aproximada para formar linhas completas de texto
+                    let linhas = {};
+                    textContent.items.forEach(item => {
+                        let y = Math.round(item.transform[5]);
+                        if (!linhas[y]) linhas[y] = [];
+                        linhas[y].push(item.str);
+                    });
+
+                    // Ordena do topo para o fundo
+                    let keys = Object.keys(linhas).sort((a,b) => b - a);
+                    keys.forEach(y => {
+                        let linhaCompleta = linhas[y].join(" ").trim();
+                        if (linhaCompleta.length > 5) {
+                            linhasTexto.push(linhaCompleta);
+                        }
+                    });
+                }
+
+                extrairDadosFatura(linhasTexto);
+
+            } catch (err) {
+                alert("Erro ao ler o ficheiro PDF. Verifique se o ficheiro está correto.");
+                console.error(err);
+            } finally {
+                document.getElementById('loading').classList.add('hidden');
+            }
+        }
+
+        function extrairDadosFatura(linhas) {
+            let mesChave = document.getElementById('seletorMes').value; // ex: "2027-02"
+            let compras = [];
+            let valorTotalFatura = 0;
+
+            linhas.forEach(linha => {
+                let linhaNorm = normalizarTexto(linha);
+
+                // 1. Ignorar termos institucionais/bancários
+                if (termosIgnorar.some(termo => linhaNorm.includes(termo))) {
+                    return;
+                }
+
+                // Extrair Valor no final da linha (ex: R$ 150,00 ou 150,00)
+                let matchValor = linha.match(/R?\$?\s*(\d{1,3}(?:\.\d{3})*,\d{2})/);
+                if (!matchValor) return;
+
+                let valor = parseFloat(matchValor[1].replace(/\./g, '').replace(',', '.'));
+                if (isNaN(valor) || valor <= 0) return;
+
+                // 2. Extrair Padrão de Parcela (ex: 02/03, 2/3, PARC 01/10, 01 DE 05)
+                let parcela = "À vista";
+                let matchParcela = linha.match(/(\d{1,2}\/\d{1,2})/) || 
+                                   linha.match(/PARC\s*(\d{1,2}\/\d{1,2})/i) ||
+                                   linha.match(/(\d{1,2})\s*DE\s*(\d{1,2})/i);
+
+                if (matchParcela) {
+                    if (matchParcela[1] && matchParcela[2]) {
+                        parcela = `${matchParcela[1].padStart(2, '0')}/${matchParcela[2].padStart(2, '0')}`;
+                    } else {
+                        parcela = matchParcela[1];
+                    }
+                }
+
+                // 3. Limpar Nome da Compra (remover datas, códigos numéricos iniciais e valores)
+                let nome = linha
+                    .replace(/R?\$?\s*\d{1,3}(?:\.\d{3})*,\d{2}/g, '') // remove valor
+                    .replace(/\d{1,2}\/\d{1,2}/g, '') // remove parcelas/datas
+                    .replace(/PARC/gi, '')
+                    .replace(/^\d+\s+/, '') // remove número solto no início (ex: "10 CONSTRUMAD" -> "CONSTRUMAD")
+                    .trim();
+
+                if (nome.length < 3) return;
+
+                // 4. Categorização Automática
+                let categoria = "Pessoal";
+                let nomeLower = nome.toLowerCase();
+
+                if (nomeLower.includes("posto") || nomeLower.includes("combustivel") || nomeLower.includes("auto posto")) {
+                    categoria = "Combustível";
+                } else if (nomeLower.includes("mercado") || nomeLower.includes("jacomar") || nomeLower.includes("panif") || nomeLower.includes("bonato") || nomeLower.includes("sacolao") || nomeLower.includes("condor")) {
+                    categoria = "Mercado";
+                } else if (nomeLower.includes("farmacia") || nomeLower.includes("droga") || nomeLower.includes("saude") || nomeLower.includes("medprev") || nomeLower.includes("panvel")) {
+                    categoria = "Saúde";
+                } else if (nomeLower.includes("materiais") || nomeLower.includes("casa") || nomeLower.includes("toka") || nomeLower.includes("comercio de madeiras")) {
+                    categoria = "Manutenção Casa";
+                }
+
+                compras.push({
+                    descricao: nome,
+                    categoria: categoria,
+                    parcela: parcela,
+                    valor: valor
+                });
+
+                valorTotalFatura += valor;
             });
-            atualizarApp();
-            this.reset();
-            document.getElementById('mes').value = '11/26';
-        });
 
-        // Importar Fatura Fechada
-        document.getElementById('faturaForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            transacoes.push({
-                id: Date.now(),
-                mes: document.getElementById('fatMes').value,
-                tipo: 'saída',
-                descricao: 'Fatura Fechada Bradesco',
-                valor: parseFloat(document.getElementById('fatValor').value)
-            });
-            atualizarApp();
-            this.reset();
-            document.getElementById('fatMes').value = '11/26';
-            alert('Fatura fechada importada com sucesso no caixa!');
-        });
+            // Guardar na base de dados local por mês
+            db[mesChave] = {
+                faturaFechada: valorTotalFatura,
+                compras: compras
+            };
 
-        // Gerador Automático de Contas Fixas para o Mês Seguinte
-        function gerarMesSeguinte() {
-            const mesAtual = prompt("Qual o mês base atual (ex: 11/26)?", "11/26");
-            const mesNovo = prompt("Para qual mês deseja gerar as contas fixas (ex: 12/26)?", "12/26");
-            
-            if (!mesAtual || !mesNovo) return;
+            localStorage.setItem('fincontrol_db', JSON.stringify(db));
+            renderizarTela();
+        }
 
-            // Filtra as saídas fixas/contas do mês base e duplica para o novo mês
-            const fixasParaDuplicar = transacoes.filter(t => t.mes === mesAtual && t.tipo === 'saída' && t.descricao !== 'Fatura Fechada Bradesco');
-            
-            if (fixasParaDuplicar.length === 0) {
-                alert("Nenhuma conta fixa encontrada para o mês base informado.");
+        function renderizarTela() {
+            let mesChave = document.getElementById('seletorMes').value;
+            let dadosMes = db[mesChave] || { faturaFechada: 0, compras: [] };
+
+            // Atualiza Resumo de Caixa
+            document.getElementById('totalSaidas').innerText = `R$ ${dadosMes.faturaFechada.toLocaleString('pt-PT', {minimumFractionDigits: 2})}`;
+            document.getElementById('saldoLiquido').innerText = `R$ ${(-dadosMes.faturaFechada).toLocaleString('pt-PT', {minimumFractionDigits: 2})}`;
+
+            // Atualiza Tabela Raio-X
+            let tbody = document.getElementById('tabelaRaioX');
+            tbody.innerHTML = '';
+
+            if (dadosMes.compras.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="p-6 text-center text-slate-500">Nenhuma fatura importada para este mês. Clique em "Importar PDF" para carregar a fatura do Bradesco.</td></tr>`;
                 return;
             }
 
-            fixasParaDuplicar.forEach(f => {
-                transacoes.push({
-                    id: Date.now() + Math.random(),
-                    mes: mesNovo,
-                    tipo: 'saída',
-                    descricao: f.descricao,
-                    valor: f.valor
-                });
+            dadosMes.compras.forEach(item => {
+                let tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-700/20 transition";
+                
+                let badgeParcela = item.parcela !== "À vista" 
+                    ? `<span class="bg-amber-500/10 text-amber-400 border border-amber-500/20 px-2 py-0.5 rounded-md font-semibold text-[10px]">${item.parcela}</span>`
+                    : `<span class="bg-slate-700/40 text-slate-400 px-2 py-0.5 rounded-md text-[10px]">${item.parcela}</span>`;
+
+                tr.innerHTML = `
+                    <td class="p-3 font-medium text-slate-200">${item.descricao}</td>
+                    <td class="p-3"><span class="bg-slate-700/50 text-slate-300 px-2 py-0.5 rounded-md text-[10px]">${item.categoria}</span></td>
+                    <td class="p-3 text-center">${badgeParcela}</td>
+                    <td class="p-3 text-right font-semibold text-slate-200">R$ ${item.valor.toLocaleString('pt-PT', {minimumFractionDigits: 2})}</td>
+                `;
+                tbody.appendChild(tr);
             });
-
-            // Adiciona também as entradas padrão (Salários) para o novo mês se desejar
-            transacoes.push({ id: Date.now() + 1, mes: mesNovo, tipo: 'entrada', descricao: 'Salário Cris', valor: 3150.00 });
-            transacoes.push({ id: Date.now() + 2, mes: mesNovo, tipo: 'entrada', descricao: 'Salário Francisco', valor: 3200.00 });
-            transacoes.push({ id: Date.now() + 3, mes: mesNovo, tipo: 'entrada', descricao: 'Aposentadoria Pai', valor: 1600.00 });
-
-            document.getElementById('filtroMes').value = mesNovo;
-            atualizarApp();
-            alert(`Contas fixas e salários gerados com sucesso para o mês ${mesNovo}! Agora basta lançar a fatura fechada desse mês.`);
         }
 
-function remover(index) {
-            transacoes.splice(index, 1);
-            atualizarApp();
+        function alternarMes() {
+            renderizarTela();
         }
 
-        function resetarDados() {
-            if (confirm("Deseja restaurar os dados de exemplo padrão?")) {
-                localStorage.removeItem('minhas_financas_v2');
-                location.reload();
-            }
-        }
-
-        atualizarApp();
+        // Carregamento Inicial
+        renderizarTela();
     </script>
 </body>
 </html>
