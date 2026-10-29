@@ -39,7 +39,7 @@
 
         <!-- Indicador de Processamento -->
         <div id="loading" class="hidden bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 p-4 rounded-2xl text-center text-xs mb-6 animate-pulse">
-            ⏳ A processar PDF da fatura... A filtrar taxas do banco e a validar parcelas reais...
+            ⏳ A processar PDF da fatura... A filtrar resumos, totais e simulações do banco...
         </div>
 
         <!-- Resumo de Caixa (Aba 1) -->
@@ -63,7 +63,7 @@
             <div class="p-4 border-b border-slate-700/40 flex justify-between items-center">
                 <div>
                     <h3 class="font-bold text-sm text-slate-200">Raio-X de Compras e Parcelas Ativas</h3>
-                    <p class="text-[11px] text-slate-400">Linhas informativas e categorias filtradas automaticamente do PDF.</p>
+                    <p class="text-[11px] text-slate-400">Somente compras e parcelamentos reais (sem duplicidades ou textos bancários).</p>
                 </div>
             </div>
 
@@ -89,18 +89,19 @@
     </div>
 
     <script>
-        let db = JSON.parse(localStorage.getItem('fincontrol_db_v3')) || {};
+        let db = JSON.parse(localStorage.getItem('fincontrol_db_v4')) || {};
 
-        // Termos institucionais do banco a descartar
+        // Lista estrita de termos bancários, simulações e totalizadores a ignorar
         const termosIgnorar = [
             'total da fatura', 'limite de compras', 'limite de saque', 'recomendado pagamento',
             'pagamento minimo', 'pagamento maximo', 'rotativo', 'saque parcelado', 'proximas faturas',
             'compras parceladas', 'parcelamento fatura', 'encargos', 'protecao financeira',
-            'anuidade', 'saldo anterior', 'pagamentos/creditos', 'subtotal', ' total para ',
+            'anuidade', 'saldo anterior', 'pagamentos/creditos', 'subtotal', 'total para',
             'pagto. por deb', 'creditos/pagamentos', 'compras/debitos', 'cet do', 'taxa ao',
             'valor total financiado', 'total a financiar', 'valor do iof', 'valor total a pagar',
             'pagamento de contas', 'saque a vista', 'crediario', 'com juros', 'ultrapassem o limite',
-            'será devolvida em fatura', 'de acordo com a legislação', 'caso o pagamento realizado'
+            'será devolvida em fatura', 'de acordo com a legislação', 'caso o pagamento realizado',
+            '1ª ela de', '1a ela de', '(=)total', '(-) creditos', '(+)compras', 'total para gilberto'
         ];
 
         function normalizarTexto(txt) {
@@ -133,7 +134,7 @@
                     let keys = Object.keys(linhas).sort((a,b) => b - a);
                     keys.forEach(y => {
                         let linhaCompleta = linhas[y].join(" ").trim();
-                        if (linhaCompleta.length > 3) {
+                        if (linhaCompleta.length > 2) {
                             linhasTexto.push(linhaCompleta);
                         }
                     });
@@ -142,7 +143,7 @@
                 extrairDadosFatura(linhasTexto);
 
             } catch (err) {
-                alert("Erro ao ler o ficheiro PDF. Tente novamente.");
+                alert("Erro ao ler o arquivo PDF. Tente novamente.");
                 console.error(err);
             } finally {
                 document.getElementById('loading').classList.add('hidden');
@@ -157,7 +158,7 @@
             linhas.forEach(linha => {
                 let linhaNorm = normalizarTexto(linha);
 
-                // Captura o Total Real da Fatura se a linha indicar totalização
+                // Captura o valor total real da fatura
                 if (linhaNorm.includes("total da fatura") || linhaNorm.includes("(=)total")) {
                     let matchTotal = linha.match(/R?\$?\s*(\d{1,3}(?:\.\d{3})*,\d{2})/);
                     if (matchTotal) {
@@ -166,19 +167,19 @@
                     }
                 }
 
-                // 1. Descarta ruídos e textos de encargos do banco
+                // Descarte de ruídos, termos de resumo e linhas de juros/simulações
                 if (termosIgnorar.some(termo => linhaNorm.includes(termo)) || linha.includes('%')) {
                     return;
                 }
 
-                // Captura valor no fim da linha
+                // Captura o valor monetário da compra
                 let matchValor = linha.match(/R?\$?\s*(\d{1,3}(?:\.\d{3})*,\d{2})/);
                 if (!matchValor) return;
 
                 let valor = parseFloat(matchValor[1].replace(/\./g, '').replace(',', '.'));
                 if (isNaN(valor) || valor <= 0) return;
 
-                // 2. Análise inteligente de Parcelas x Datas
+                // Extração e validação do padrão de parcelas (ex: 08/12, 02/03)
                 let parcela = "À vista";
                 let regexParcela = /(\d{1,2})\/(\d{1,2})/g;
                 let matches = [...linha.matchAll(regexParcela)];
@@ -187,31 +188,26 @@
                     let numAtual = parseInt(m[1], 10);
                     let numTotal = parseInt(m[2], 10);
 
-                    // Validação: Só é parcela se o total for maior que o atual e até 48x
-                    // Se o 2º número for um mês válido (1 a 12), provavelmente é data de compra e é descartado
-                    if (numAtual <= numTotal && numTotal > 1 && numTotal <= 48 && numTotal > 12) {
+                    // Valida se é parcela real (e não data de compra ou ano como 2026)
+                    if (numAtual <= numTotal && numTotal > 1 && numTotal <= 48 && numTotal !== 26) {
                         parcela = `${String(numAtual).padStart(2, '0')}/${String(numTotal).padStart(2, '0')}`;
-                    } else if (numAtual <= numTotal && numTotal <= 12 && !linhaNorm.includes('2026')) {
-                        // Caso de parcelas curtas (ex: 1/3, 2/5)
-                        // Verifica se não se trata de dia/mês de calendário isolado
-                        if (linha.toLowerCase().includes('parc') || numAtual > 0) {
-                            parcela = `${String(numAtual).padStart(2, '0')}/${String(numTotal).padStart(2, '0')}`;
-                        }
                     }
                 });
 
-                // 3. Limpeza do Nome do Estabelecimento
+                // Limpeza do nome do estabelecimento
                 let nome = linha
-                    .replace(/R?\$?\s*\d{1,3}(?:\.\d{3})*,\d{2}/g, '') // remove valor
-                    .replace(/\d{1,2}\/\d{1,2}/g, '') // remove padrões numéricos de datas
+                    .replace(/R?\$?\s*\d{1,3}(?:\.\d{3})*,\d{2}/g, '') // Remove o valor
+                    .replace(/\d{1,2}\/\d{1,2}/g, '')                 // Remove padrões de parcela/data
                     .replace(/PARC/gi, '')
-                    .replace(/^\d+\s+/, '') // remove código no início
-                    .replace(/[\.\*\%]/g, ' ') // remove caracteres especiais
+                    .replace(/^\d+\s+/, '')                           // Remove códigos numéricos do início
+                    .replace(/[\.\*\%]/g, ' ')                        // Remove pontuações desnecessárias
+                    .replace(/SERÁ DEVOLVIDA EM FATURA.*/gi, '')       // Remove sobras de aviso legal
                     .trim();
 
-                if (nome.length < 3) return;
+                // Ignora linhas sem nome relevante ou que ficaram vazias após a limpeza
+                if (nome.length < 3 || nome === "/2026" || nome === "2026") return;
 
-                // 4. Categorização Automática
+                // Categorização de despesas
                 let categoria = "Pessoal";
                 let nLower = nome.toLowerCase();
 
@@ -233,7 +229,6 @@
                 });
             });
 
-            // Se o total da fatura não foi achado via texto "total", soma as compras encontradas
             if (valorFaturaFechada === 0) {
                 valorFaturaFechada = compras.reduce((acc, c) => acc + c.valor, 0);
             }
@@ -243,7 +238,7 @@
                 compras: compras
             };
 
-            localStorage.setItem('fincontrol_db_v3', JSON.stringify(db));
+            localStorage.setItem('fincontrol_db_v4', JSON.stringify(db));
             renderizarTela();
         }
 
@@ -251,11 +246,9 @@
             let mesChave = document.getElementById('seletorMes').value;
             let dadosMes = db[mesChave] || { faturaFechada: 0, compras: [] };
 
-            // Atualiza Caixas da Tela Principal
             document.getElementById('totalSaidas').innerText = `R$ ${dadosMes.faturaFechada.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
             document.getElementById('saldoLiquido').innerText = `R$ ${(-dadosMes.faturaFechada).toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
 
-            // Preenche Tabela Raio-X
             let tbody = document.getElementById('tabelaRaioX');
             tbody.innerHTML = '';
 
@@ -282,7 +275,6 @@
             });
         }
 
-        // Renderização ao Abrir
         renderizarTela();
     </script>
 </body>
