@@ -21,7 +21,7 @@
                 </div>
                 <div>
                     <h1 class="font-bold text-lg text-white leading-tight">FinControl <span class="text-xs bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-500/30">Pro</span></h1>
-                    <p class="text-xs text-slate-400">Método Fatura Fechada + Raio-X Leve</p>
+                    <p class="text-xs text-slate-400">Método Fatura Fechada + Previsão Futura</p>
                 </div>
             </div>
             <div class="flex items-center gap-2">
@@ -29,9 +29,61 @@
             </div>
         </header>
 
-        <!-- Botão de Colar Texto -->
+        <!-- Resumo de Caixa (Aba 1) -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-3 mb-6">
+            <div class="bg-slate-800/60 p-4 rounded-2xl border border-slate-700/40">
+                <span class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Total Entradas</span>
+                <h2 id="totalEntradas" class="text-xl font-bold text-emerald-400 mt-1">R$ 0,00</h2>
+            </div>
+            <div class="bg-slate-800/60 p-4 rounded-2xl border border-slate-700/40">
+                <span class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">(-) Fixos, Empréstimos & Assinaturas</span>
+                <h2 id="totalFixosEmprestimos" class="text-xl font-bold text-amber-400 mt-1">R$ 0,00</h2>
+            </div>
+            <div class="bg-slate-800/60 p-4 rounded-2xl border border-slate-700/40">
+                <span class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">(=) Saldo Líquido Real</span>
+                <h2 id="saldoLiquidoReal" class="text-xl font-bold text-blue-400 mt-1">R$ 0,00</h2>
+            </div>
+            <div class="bg-slate-800/60 p-4 rounded-2xl border border-slate-700/40 border-emerald-500/30 bg-emerald-950/10">
+                <span class="text-[10px] font-semibold text-emerald-400 uppercase tracking-wider">🔮 Previsão Próxima Fatura</span>
+                <h2 id="previsaoProximaFatura" class="text-xl font-bold text-emerald-300 mt-1">R$ 0,00</h2>
+            </div>
+        </div>
+
+        <!-- Adicionar Entradas, Custos Fixos, Empréstimos ou Assinaturas -->
         <div class="bg-slate-800/60 p-4 rounded-2xl border border-slate-700/40 mb-6 space-y-3">
-            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300">⚡ Lançar Fatura:</h3>
+            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300">💰 Gestão de Entradas, Fixos e Empréstimos:</h3>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-4 gap-2 text-xs">
+                <label class="flex items-center gap-2 bg-slate-900/60 p-2.5 rounded-xl border border-slate-700/50 cursor-pointer">
+                    <input type="radio" name="tipoLancamento" value="entrada" checked class="text-emerald-500">
+                    <span class="text-emerald-400 font-medium">Entrada</span>
+                </label>
+                <label class="flex items-center gap-2 bg-slate-900/60 p-2.5 rounded-xl border border-slate-700/50 cursor-pointer">
+                    <input type="radio" name="tipoLancamento" value="fixo" class="text-rose-500">
+                    <span class="text-rose-400 font-medium">Custo Fixo</span>
+                </label>
+                <label class="flex items-center gap-2 bg-slate-900/60 p-2.5 rounded-xl border border-slate-700/50 cursor-pointer">
+                    <input type="radio" name="tipoLancamento" value="emprestimo" class="text-amber-500">
+                    <span class="text-amber-400 font-medium">Empréstimo</span>
+                </label>
+                <label class="flex items-center gap-2 bg-slate-900/60 p-2.5 rounded-xl border border-slate-700/50 cursor-pointer">
+                    <input type="radio" name="tipoLancamento" value="assinatura" class="text-purple-500">
+                    <span class="text-purple-400 font-medium">Assinatura</span>
+                </label>
+            </div>
+
+            <div class="flex gap-2">
+                <input type="text" id="descLancamento" placeholder="Descrição (Ex: Salário, Aluguel, Netflix...)" class="flex-1 bg-slate-900 border border-slate-700 text-xs text-slate-200 px-3 py-2.5 rounded-xl focus:outline-none focus:border-emerald-500">
+                <input type="number" step="0.01" id="valorLancamento" placeholder="Valor R$" class="w-28 sm:w-36 bg-slate-900 border border-slate-700 text-xs text-slate-200 px-3 py-2.5 rounded-xl focus:outline-none focus:border-emerald-500">
+                <button onclick="adicionarLancamentoManual()" class="bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold px-4 py-2.5 rounded-xl text-xs transition">Adicionar</button>
+            </div>
+
+            <div id="listaLancamentosManuais" class="space-y-1.5 pt-2"></div>
+        </div>
+
+        <!-- Botão de Colar Texto da Fatura -->
+        <div class="bg-slate-800/60 p-4 rounded-2xl border border-slate-700/40 mb-6 space-y-3">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300">⚡ Lançar Fatura do Cartão (Raio-X):</h3>
             <div>
                 <button onclick="abrirModalTexto()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-semibold p-3 rounded-xl transition text-xs flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/10">
                     📋 Colar Texto da Fatura
@@ -39,23 +91,7 @@
             </div>
         </div>
 
-        <!-- Resumo de Caixa (Aba 1) -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-6">
-            <div class="bg-slate-800/60 p-4 rounded-2xl border border-slate-700/40">
-                <span class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Total Entradas</span>
-                <h2 id="totalEntradas" class="text-xl font-bold text-emerald-400 mt-1">R$ 0,00</h2>
-            </div>
-            <div class="bg-slate-800/60 p-4 rounded-2xl border border-slate-700/40">
-                <span class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Total Saídas (Fatura Fechada)</span>
-                <h2 id="totalSaidas" class="text-xl font-bold text-rose-400 mt-1">R$ 0,00</h2>
-            </div>
-            <div class="bg-slate-800/60 p-4 rounded-2xl border border-slate-700/40">
-                <span class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Saldo Líquido</span>
-                <h2 id="saldoLiquido" class="text-xl font-bold text-blue-400 mt-1">R$ 0,00</h2>
-            </div>
-        </div>
-
-        <!-- Painel de Gastos Por Categoria (Recolhível/Expansível) -->
+        <!-- Painel de Gastos Por Categoria -->
         <div class="bg-slate-800/60 p-4 rounded-2xl border border-slate-700/40 mb-6">
             <div class="flex justify-between items-center cursor-pointer select-none" onclick="alternarPainelCategorias()">
                 <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300">📊 Total Gastos por Categoria</h3>
@@ -63,12 +99,10 @@
                     [ Recolher ▲ ]
                 </button>
             </div>
-            <div id="conteudoPainelCategorias" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 mt-3 transition-all duration-300">
-                <!-- Injetado via JS -->
-            </div>
+            <div id="conteudoPainelCategorias" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 mt-3 transition-all duration-300"></div>
         </div>
 
-        <!-- Tabela do Raio-X (Aba 2) -->
+        <!-- Tabela do Raio-X -->
         <div class="bg-slate-800/60 rounded-2xl border border-slate-700/40 overflow-hidden backdrop-blur">
             <div class="p-4 border-b border-slate-700/40 flex justify-between items-center">
                 <div>
@@ -112,7 +146,7 @@
     </div>
 
     <script>
-        let db = JSON.parse(localStorage.getItem('fincontrol_db_v7')) || {};
+        let db = JSON.parse(localStorage.getItem('fincontrol_db_v9')) || {};
         let painelRecolhido = localStorage.getItem('fincontrol_painel_recolhido') === 'true';
 
         const termosIgnorar = [
@@ -128,29 +162,16 @@
         ];
 
         const categoriasDisponiveis = [
-            "Pessoal",
-            "Mercado",
-            "Combustível",
-            "Saúde",
-            "Manutenção Casa",
-            "Manutenção carro",
-            "Estudo",
-            "Locomoção",
-            "Lazer",
-            "Presentes"
+            "Pessoal", "Mercado", "Combustível", "Saúde", "Manutenção Casa",
+            "Manutenção carro", "Estudo", "Locomoção", "Lazer", "Presentes"
         ];
 
         function normalizarTexto(txt) {
             return txt.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
         }
 
-        function abrirModalTexto() {
-            document.getElementById('modalTexto').classList.remove('hidden');
-        }
-
-        function fecharModalTexto() {
-            document.getElementById('modalTexto').classList.add('hidden');
-        }
+        function abrirModalTexto() { document.getElementById('modalTexto').classList.remove('hidden'); }
+        function fecharModalTexto() { document.getElementById('modalTexto').classList.add('hidden'); }
 
         function alternarPainelCategorias() {
             painelRecolhido = !painelRecolhido;
@@ -161,13 +182,43 @@
         function atualizarEstadoPainel() {
             let conteudo = document.getElementById('conteudoPainelCategorias');
             let btn = document.getElementById('btnTogglePainel');
-
             if (painelRecolhido) {
                 conteudo.classList.add('hidden');
                 btn.innerText = '[ Expandir ▼ ]';
             } else {
                 conteudo.classList.remove('hidden');
                 btn.innerText = '[ Recolher ▲ ]';
+            }
+        }
+
+        function adicionarLancamentoManual() {
+            let tipo = document.querySelector('input[name="tipoLancamento"]:checked').value;
+            let descricao = document.getElementById('descLancamento').value.trim();
+            let valor = parseFloat(document.getElementById('valorLancamento').value);
+
+            if (!descricao || isNaN(valor) || valor <= 0) {
+                alert("Preencha a descrição e um valor válido.");
+                return;
+            }
+
+            let mesChave = document.getElementById('seletorMes').value;
+            if (!db[mesChave]) db[mesChave] = { faturaFechada: 0, compras: [], manuais: [] };
+            if (!db[mesChave].manuais) db[mesChave].manuais = [];
+
+            db[mesChave].manuais.push({ tipo, descricao, valor });
+            localStorage.setItem('fincontrol_db_v9', JSON.stringify(db));
+
+            document.getElementById('descLancamento').value = '';
+            document.getElementById('valorLancamento').value = '';
+            renderizarTela();
+        }
+
+        function removerLancamentoManual(index) {
+            let mesChave = document.getElementById('seletorMes').value;
+            if (db[mesChave] && db[mesChave].manuais) {
+                db[mesChave].manuais.splice(index, 1);
+                localStorage.setItem('fincontrol_db_v9', JSON.stringify(db));
+                renderizarTela();
             }
         }
 
@@ -195,9 +246,7 @@
                     }
                 }
 
-                if (termosIgnorar.some(termo => linhaNorm.includes(termo)) || linha.includes('%')) {
-                    return;
-                }
+                if (termosIgnorar.some(termo => linhaNorm.includes(termo)) || linha.includes('%')) return;
 
                 let matchValor = linha.match(/R?\$?\s*(\d{1,3}(?:\.\d{3})*,\d{2})/);
                 if (!matchValor) return;
@@ -212,7 +261,6 @@
                 matches.forEach(m => {
                     let numAtual = parseInt(m[1], 10);
                     let numTotal = parseInt(m[2], 10);
-
                     if (numAtual <= numTotal && numTotal > 1 && numTotal <= 48 && numTotal !== 26) {
                         parcela = `${String(numAtual).padStart(2, '0')}/${String(numTotal).padStart(2, '0')}`;
                     }
@@ -232,43 +280,21 @@
                 let categoria = "Pessoal";
                 let nLower = nome.toLowerCase();
 
-                if (nLower.includes("posto") || nLower.includes("combustivel") || nLower.includes("auto posto") || nLower.includes("gas 1")) {
-                    categoria = "Combustível";
-                } else if (nLower.includes("mercado") || nLower.includes("jacomar") || nLower.includes("bonato") || nLower.includes("sacolao") || nLower.includes("condor") || nLower.includes("panif") || nLower.includes("fuchs")) {
-                    categoria = "Mercado";
-                } else if (nLower.includes("farmacia") || nLower.includes("droga") || nLower.includes("saude") || nLower.includes("medprev") || nLower.includes("panvel") || nLower.includes("niss")) {
-                    categoria = "Saúde";
-                } else if (nLower.includes("materiais") || nLower.includes("toka") || nLower.includes("madeira") || nLower.includes("casa china") || nLower.includes("reforma")) {
-                    categoria = "Manutenção Casa";
-                } else if (nLower.includes("uber") || nLower.includes("99app") || nLower.includes("taxi") || nLower.includes("99 pop")) {
-                    categoria = "Locomoção";
-                } else if (nLower.includes("oficina") || nLower.includes("autopecas") || nLower.includes("pneu") || nLower.includes("mecanica")) {
-                    categoria = "Manutenção carro";
-                } else if (nLower.includes("livro") || nLower.includes("curso") || nLower.includes("escola") || nLower.includes("faculdade")) {
-                    categoria = "Estudo";
-                } else if (nLower.includes("netflix") || nLower.includes("spotify") || nLower.includes("cinema") || nLower.includes("ingressos")) {
-                    categoria = "Lazer";
-                }
+                if (nLower.includes("posto") || nLower.includes("combustivel") || nLower.includes("auto posto")) categoria = "Combustível";
+                else if (nLower.includes("mercado") || nLower.includes("jacomar") || nLower.includes("bonato") || nLower.includes("condor")) categoria = "Mercado";
+                else if (nLower.includes("farmacia") || nLower.includes("saude") || nLower.includes("medprev")) categoria = "Saúde";
+                else if (nLower.includes("materiais") || nLower.includes("toka") || nLower.includes("madeira")) categoria = "Manutenção Casa";
 
-                compras.push({
-                    descricao: nome.toUpperCase(),
-                    categoria: categoria,
-                    parcela: parcela,
-                    valor: valor,
-                    nota: ""
-                });
+                compras.push({ descricao: nome.toUpperCase(), categoria, parcela, valor, nota: "" });
             });
 
-            if (valorFaturaFechada === 0) {
-                valorFaturaFechada = compras.reduce((acc, c) => acc + c.valor, 0);
-            }
+            if (valorFaturaFechada === 0) valorFaturaFechada = compras.reduce((acc, c) => acc + c.valor, 0);
 
-            db[mesChave] = {
-                faturaFechada: valorFaturaFechada,
-                compras: compras
-            };
+            if (!db[mesChave]) db[mesChave] = { manuais: [] };
+            db[mesChave].faturaFechada = valorFaturaFechada;
+            db[mesChave].compras = compras;
 
-            localStorage.setItem('fincontrol_db_v7', JSON.stringify(db));
+            localStorage.setItem('fincontrol_db_v9', JSON.stringify(db));
             renderizarTela();
         }
 
@@ -276,7 +302,7 @@
             let mesChave = document.getElementById('seletorMes').value;
             if (db[mesChave] && db[mesChave].compras[index]) {
                 db[mesChave].compras[index].categoria = novaCategoria;
-                localStorage.setItem('fincontrol_db_v7', JSON.stringify(db));
+                localStorage.setItem('fincontrol_db_v9', JSON.stringify(db));
                 renderizarTela();
             }
         }
@@ -285,33 +311,109 @@
             let mesChave = document.getElementById('seletorMes').value;
             if (db[mesChave] && db[mesChave].compras[index]) {
                 db[mesChave].compras[index].nota = novaNota;
-                localStorage.setItem('fincontrol_db_v7', JSON.stringify(db));
+                localStorage.setItem('fincontrol_db_v9', JSON.stringify(db));
             }
+        }
+
+        function calcularPrevisaoProximaFatura() {
+            // Soma todas as compras ativas de meses salvos que possuem parcelas futuras para cair
+            let previsaoTotal = 0;
+            let mesAtualStr = document.getElementById('seletorMes').value; // ex: "2026-10"
+            let [anoAtual, mesAtual] = mesAtualStr.split('-').map(Number);
+
+            // Calcula o próximo mês
+            let proximoMes = mesAtual + 1;
+            let proximoAno = anoAtual;
+            if (proximoMes > 12) { proximoMes = 1; proximoAno++; }
+            let proximoMesStr = `${proximoAno}-${String(proximoMes).padStart(2, '0')}`;
+
+            // Se houver dados salvos especificamente para o próximo mês, usa eles
+            if (db[proximoMesStr] && db[proximoMesStr].compras && db[proximoMesStr].compras.length > 0) {
+                return db[proximoMesStr].compras.reduce((acc, c) => acc + c.valor, 0);
+            }
+
+            // Caso contrário, varre as compras atuais e identifica o que continua ativo (ex: X/Y onde X < Y)
+            Object.keys(db).forEach(mKey => {
+                if (db[mKey] && db[mKey].compras) {
+                    db[mKey].compras.forEach(item => {
+                        if (item.parcela && item.parcela !== "À vista") {
+                            let partes = item.parcela.split('/');
+                            let atual = parseInt(partes[0], 10);
+                            let total = parseInt(partes[1], 10);
+                            if (atual < total) {
+                                previsaoTotal += item.valor;
+                            }
+                        }
+                    });
+                }
+            });
+
+            return previsaoTotal > 0 ? previsaoTotal : 0;
         }
 
         function renderizarTela() {
             let mesChave = document.getElementById('seletorMes').value;
-            let dadosMes = db[mesChave] || { faturaFechada: 0, compras: [] };
+            let dadosMes = db[mesChave] || { faturaFechada: 0, compras: [], manuais: [] };
 
-            document.getElementById('totalSaidas').innerText = `R$ ${dadosMes.faturaFechada.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
-            document.getElementById('saldoLiquido').innerText = `R$ ${(-dadosMes.faturaFechada).toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+            let totalEntradas = 0;
+            let totalFixosEmprestimos = (dadosMes.faturaFechada || 0);
 
-            // Cálculo dos Totais por Categoria
+            let listaDiv = document.getElementById('listaLancamentosManuais');
+            listaDiv.innerHTML = '';
+
+            if (dadosMes.manuais && dadosMes.manuais.length > 0) {
+                dadosMes.manuais.forEach((item, index) => {
+                    if (item.tipo === 'entrada') totalEntradas += item.valor;
+                    else totalFixosEmprestimos += item.valor;
+
+                    let corBorda = item.tipo === 'entrada' ? 'border-emerald-500/30 text-emerald-400' :
+                                   item.tipo === 'fixo' ? 'border-rose-500/30 text-rose-400' :
+                                   item.tipo === 'emprestimo' ? 'border-amber-500/30 text-amber-400' : 'border-purple-500/30 text-purple-400';
+
+                    let badgeTexto = item.tipo === 'entrada' ? 'Entrada' :
+                                     item.tipo === 'fixo' ? 'Custo Fixo' :
+                                     item.tipo === 'emprestimo' ? 'Empréstimo' : 'Assinatura';
+
+                    let divItem = document.createElement('div');
+                    divItem.className = `flex justify-between items-center bg-slate-900/80 border ${corBorda} p-2.5 rounded-xl text-xs`;
+                    divItem.innerHTML = `
+                        <div class="flex items-center gap-2">
+                            <span class="text-[10px] px-2 py-0.5 rounded bg-slate-800 font-semibold uppercase">${badgeTexto}</span>
+                            <span class="text-slate-200 font-medium">${item.descricao}</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <span class="font-bold">R$ ${item.valor.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</span>
+                            <button onclick="removerLancamentoManual(${index})" class="text-slate-500 hover:text-rose-400 font-bold">✕</button>
+                        </div>
+                    `;
+                    listaDiv.appendChild(divItem);
+                });
+            } else {
+                listaDiv.innerHTML = `<p class="text-[11px] text-slate-500 text-center py-1">Nenhum lançamento fixo, empréstimo, assinatura ou entrada extra cadastrada.</p>`;
+            }
+
+            let saldoReal = totalEntradas - totalFixosEmprestimos;
+            let previsaoProxima = calcularPrevisaoProximaFatura();
+
+            document.getElementById('totalEntradas').innerText = `R$ ${totalEntradas.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+            document.getElementById('totalFixosEmprestimos').innerText = `R$ ${totalFixosEmprestimos.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+            
+            let elSaldo = document.getElementById('saldoLiquidoReal');
+            elSaldo.innerText = `R$ ${saldoReal.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+            elSaldo.className = `text-xl font-bold mt-1 ${saldoReal >= 0 ? 'text-blue-400' : 'text-rose-400'}`;
+
+            document.getElementById('previsaoProximaFatura').innerText = `R$ ${previsaoProxima.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+
+            // Totais por Categoria
             let totaisCategoria = {};
             categoriasDisponiveis.forEach(cat => totaisCategoria[cat] = 0);
-
             dadosMes.compras.forEach(item => {
-                if (totaisCategoria[item.categoria] !== undefined) {
-                    totaisCategoria[item.categoria] += item.valor;
-                } else {
-                    totaisCategoria["Pessoal"] += item.valor;
-                }
+                if (totaisCategoria[item.categoria] !== undefined) totaisCategoria[item.categoria] += item.valor;
+                else totaisCategoria["Pessoal"] += item.valor;
             });
 
-            // Renderizar Cards de Categoria
             let containerCards = document.getElementById('conteudoPainelCategorias');
             containerCards.innerHTML = '';
-
             categoriasDisponiveis.forEach(cat => {
                 let valor = totaisCategoria[cat];
                 let card = document.createElement('div');
@@ -325,7 +427,6 @@
 
             atualizarEstadoPainel();
 
-            // Renderizar Tabela
             let tbody = document.getElementById('tabelaRaioX');
             tbody.innerHTML = '';
 
