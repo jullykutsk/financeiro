@@ -56,14 +56,17 @@
                     </button>
                 </div>
                 
-                <button onclick="exportarDados()" class="bg-[#2d333b] hover:bg-[#38404a] text-[#c5cbd3] border border-[#3b434a] px-2.5 py-2 rounded-2xl text-[11px] font-semibold transition shadow-md active:scale-95" title="Salvar Backup">
-                    Backup
-                </button>
+                <!-- Grupo de Backup e Restaurar (Apenas visível na aba Controle Geral) -->
+                <div id="botoesBackupRestaurar" class="flex items-center gap-2">
+                    <button onclick="exportarDados()" class="bg-[#2d333b] hover:bg-[#38404a] text-[#c5cbd3] border border-[#3b434a] px-2.5 py-2 rounded-2xl text-[11px] font-semibold transition shadow-md active:scale-95" title="Salvar Backup">
+                        Backup
+                    </button>
 
-                <button onclick="document.getElementById('fileBackupInput').click()" class="bg-[#2d333b] hover:bg-[#38404a] text-[#c5cbd3] border border-[#3b434a] px-2.5 py-2 rounded-2xl text-[11px] font-semibold transition shadow-md active:scale-95" title="Carregar Backup">
-                    Restaurar
-                </button>
-                <input type="file" id="fileBackupInput" accept="*" class="hidden" onchange="importarDados(event)">
+                    <button onclick="document.getElementById('fileBackupInput').click()" class="bg-[#2d333b] hover:bg-[#38404a] text-[#c5cbd3] border border-[#3b434a] px-2.5 py-2 rounded-2xl text-[11px] font-semibold transition shadow-md active:scale-95" title="Carregar Backup">
+                        Restaurar
+                    </button>
+                    <input type="file" id="fileBackupInput" accept="*" class="hidden" onchange="importarDados(event)">
+                </div>
             </div>
         </header>
 
@@ -429,17 +432,20 @@
             let btnDash = document.getElementById('abaBtnDashboard');
             let btnMetas = document.getElementById('abaBtnMetas');
             let controlesDash = document.getElementById('controlesDashboard');
+            let botoesBackupRestaurar = document.getElementById('botoesBackupRestaurar');
 
             if (aba === 'dashboard') {
                 secDash.classList.remove('hidden');
                 secMetas.classList.add('hidden');
                 controlesDash.classList.remove('hidden');
+                botoesBackupRestaurar.classList.remove('hidden');
                 btnDash.className = "px-3 py-1 rounded-xl text-[11px] font-bold transition bg-[#4a777a] text-[#f4f1ea] cursor-pointer";
                 btnMetas.className = "px-3 py-1 rounded-xl text-[11px] font-bold transition text-[#9fa8b0] hover:text-[#f4f1ea] cursor-pointer";
             } else {
                 secDash.classList.add('hidden');
                 secMetas.classList.remove('hidden');
                 controlesDash.classList.add('hidden');
+                botoesBackupRestaurar.classList.add('hidden');
                 btnMetas.className = "px-3 py-1 rounded-xl text-[11px] font-bold transition bg-[#4a777a] text-[#f4f1ea] cursor-pointer";
                 btnDash.className = "px-3 py-1 rounded-xl text-[11px] font-bold transition text-[#9fa8b0] hover:text-[#f4f1ea] cursor-pointer";
                 renderizarMetas();
