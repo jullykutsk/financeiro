@@ -41,8 +41,8 @@
                 
                 <!-- Botões de Alternância de Abas -->
                 <div class="bg-[#1a1e23] p-1 rounded-2xl border border-[#3b434a] flex items-center gap-1 z-10">
-                    <button type="button" onclick="mudarAba('dashboard')" id="abaBtnDashboard" class="px-3 py-1.5 rounded-xl text-xs font-bold transition bg-[#4a777a] text-[#f4f1ea] cursor-pointer">Dashboard</button>
-                    <button type="button" onclick="mudarAba('metas')" id="abaBtnMetas" class="px-3 py-1.5 rounded-xl text-xs font-bold transition text-[#9fa8b0] hover:text-[#f4f1ea] cursor-pointer">Metas & Ideias</button>
+                    <button type="button" onclick="mudarAba('dashboard')" id="abaBtnDashboard" class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition bg-[#4a777a] text-[#f4f1ea] cursor-pointer">Dashboard</button>
+                    <button type="button" onclick="mudarAba('metas')" id="abaBtnMetas" class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition text-[#9fa8b0] hover:text-[#f4f1ea] cursor-pointer">Metas & Ideias</button>
                 </div>
 
                 <div id="controlesDashboard" class="flex items-center gap-2.5">
@@ -304,8 +304,8 @@
     <script>
         let db = JSON.parse(localStorage.getItem('mindcash_db_v1')) || { faturas: {}, recorrentes: [], metas: [], regrasCategorias: {}, regrasCartoes: {}, cartoesPersonalizados: [] };
         
-        let painelRecolhido = localStorage.getItem('mindcash_painel_recolhido') !== null ? localStorage.getItem('mindcash_painel_recolhido'] === 'true' : true;
-        let painelCartoesRecolhido = localStorage.getItem('mindcash_painel_cartoes_recolhido') !== null ? localStorage.getItem('mindcash_painel_cartoes_recolhido'] === 'true' : true;
+        let painelRecolhido = localStorage.getItem('mindcash_painel_recolhido') !== null ? localStorage.getItem('mindcash_painel_recolhido') === 'true' : true;
+        let painelCartoesRecolhido = localStorage.getItem('mindcash_painel_cartoes_recolhido') !== null ? localStorage.getItem('mindcash_painel_cartoes_recolhido') === 'true' : true;
         let gruposRecolhidos = JSON.parse(localStorage.getItem('mindcash_grupos_recolhidos')) || { entrada: true, fixo: true, emprestimo: true, assinatura: true };
         let itemParaExcluirIndex = null;
 
@@ -525,6 +525,7 @@
         function atualizarEstadoPainelCartoes() {
             let conteudo = document.getElementById('conteudoPainelCartoes');
             let btn = document.getElementById('btnTogglePainelCartoes');
+            if (!conteudo || !btn) return;
             if (painelCartoesRecolhido) {
                 conteudo.classList.add('hidden');
                 btn.innerText = '▼';
@@ -543,6 +544,7 @@
         function atualizarEstadoPainel() {
             let conteudo = document.getElementById('conteudoPainelCategorias');
             let btn = document.getElementById('btnTogglePainel');
+            if (!conteudo || !btn) return;
             if (painelRecolhido) {
                 conteudo.classList.add('hidden');
                 btn.innerText = '▼';
