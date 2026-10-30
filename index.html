@@ -55,10 +55,15 @@
             </div>
         </div>
 
-        <!-- Painel de Gastos Por Categoria -->
+        <!-- Painel de Gastos Por Categoria (Recolhível/Expansível) -->
         <div class="bg-slate-800/60 p-4 rounded-2xl border border-slate-700/40 mb-6">
-            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300 mb-3">📊 Total Gastos por Categoria:</h3>
-            <div id="cardsCategorias" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2">
+            <div class="flex justify-between items-center cursor-pointer select-none" onclick="alternarPainelCategorias()">
+                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300">📊 Total Gastos por Categoria</h3>
+                <button id="btnTogglePainel" class="text-xs bg-slate-700/60 hover:bg-slate-700 text-slate-300 px-3 py-1 rounded-lg transition">
+                    [ Recolher ▲ ]
+                </button>
+            </div>
+            <div id="conteudoPainelCategorias" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 mt-3 transition-all duration-300">
                 <!-- Injetado via JS -->
             </div>
         </div>
@@ -108,6 +113,7 @@
 
     <script>
         let db = JSON.parse(localStorage.getItem('fincontrol_db_v7')) || {};
+        let painelRecolhido = localStorage.getItem('fincontrol_painel_recolhido') === 'true';
 
         const termosIgnorar = [
             'total da fatura', 'limite de compras', 'limite de saque', 'recomendado pagamento',
@@ -144,6 +150,25 @@
 
         function fecharModalTexto() {
             document.getElementById('modalTexto').classList.add('hidden');
+        }
+
+        function alternarPainelCategorias() {
+            painelRecolhido = !painelRecolhido;
+            localStorage.setItem('fincontrol_painel_recolhido', painelRecolhido);
+            atualizarEstadoPainel();
+        }
+
+        function atualizarEstadoPainel() {
+            let conteudo = document.getElementById('conteudoPainelCategorias');
+            let btn = document.getElementById('btnTogglePainel');
+
+            if (painelRecolhido) {
+                conteudo.classList.add('hidden');
+                btn.innerText = '[ Expandir ▼ ]';
+            } else {
+                conteudo.classList.remove('hidden');
+                btn.innerText = '[ Recolher ▲ ]';
+            }
         }
 
         function processarTextoBruto() {
@@ -284,7 +309,7 @@
             });
 
             // Renderizar Cards de Categoria
-            let containerCards = document.getElementById('cardsCategorias');
+            let containerCards = document.getElementById('conteudoPainelCategorias');
             containerCards.innerHTML = '';
 
             categoriasDisponiveis.forEach(cat => {
@@ -297,6 +322,8 @@
                 `;
                 containerCards.appendChild(card);
             });
+
+            atualizarEstadoPainel();
 
             // Renderizar Tabela
             let tbody = document.getElementById('tabelaRaioX');
