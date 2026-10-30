@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FinControl Pro - Fatura Fechada & Raio-X</title>
+    <title>FinControl Pro - Extensão & Projeção Contínua</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body { background-color: #0f172a; color: #f8fafc; }
@@ -21,7 +21,7 @@
                 </div>
                 <div>
                     <h1 class="font-bold text-lg text-white leading-tight">FinControl <span class="text-xs bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-500/30">Pro</span></h1>
-                    <p class="text-xs text-slate-400">Método Fatura Fechada + Previsão Futura</p>
+                    <p class="text-xs text-slate-400">Projeção de Meses Futuros & Parcelas</p>
                 </div>
             </div>
             <div class="flex items-center gap-2">
@@ -40,12 +40,12 @@
                 <h2 id="totalFixosEmprestimos" class="text-xl font-bold text-amber-400 mt-1">R$ 0,00</h2>
             </div>
             <div class="bg-slate-800/60 p-4 rounded-2xl border border-slate-700/40">
-                <span class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">(=) Saldo Líquido Real</span>
-                <h2 id="saldoLiquidoReal" class="text-xl font-bold text-blue-400 mt-1">R$ 0,00</h2>
+                <span class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">(-) Cartão (Fatura/Parcelas)</span>
+                <h2 id="totalFaturaCartao" class="text-xl font-bold text-rose-400 mt-1">R$ 0,00</h2>
             </div>
             <div class="bg-slate-800/60 p-4 rounded-2xl border border-slate-700/40 border-emerald-500/30 bg-emerald-950/10">
-                <span class="text-[10px] font-semibold text-emerald-400 uppercase tracking-wider">🔮 Previsão Próxima Fatura</span>
-                <h2 id="previsaoProximaFatura" class="text-xl font-bold text-emerald-300 mt-1">R$ 0,00</h2>
+                <span class="text-[10px] font-semibold text-emerald-400 uppercase tracking-wider">(=) Saldo Líquido Previsto</span>
+                <h2 id="saldoLiquidoReal" class="text-xl font-bold text-blue-400 mt-1">R$ 0,00</h2>
             </div>
         </div>
 
@@ -77,7 +77,7 @@
                     <input type="text" id="descLancamento" placeholder="Descrição (Ex: Salário, Aluguel, Netflix...)" class="flex-1 bg-slate-900 border border-slate-700 text-xs text-slate-200 px-3 py-2.5 rounded-xl focus:outline-none focus:border-emerald-500">
                     <input type="number" step="0.01" id="valorLancamento" placeholder="Valor R$" class="w-full sm:w-36 bg-slate-900 border border-slate-700 text-xs text-slate-200 px-3 py-2.5 rounded-xl focus:outline-none focus:border-emerald-500">
                 </div>
-                <button onclick="adicionarLancamentoManual()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold p-3 rounded-xl text-xs transition shadow-lg shadow-emerald-500/10">Adicionar Lançamento</button>
+                <button onclick="adicionarLancamentoManual()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold p-3 rounded-xl text-xs transition shadow-lg shadow-emerald-500/10">Adicionar Lançamento Contínuo</button>
             </div>
 
             <div id="listaLancamentosManuais" class="space-y-1.5 pt-2"></div>
@@ -88,7 +88,7 @@
             <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300">⚡ Lançar Fatura do Cartão (Raio-X):</h3>
             <div>
                 <button onclick="abrirModalTexto()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-semibold p-3 rounded-xl transition text-xs flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/10">
-                    📋 Colar Texto da Fatura
+                    📋 Colar Texto da Fatura do Mês
                 </button>
             </div>
         </div>
@@ -109,7 +109,7 @@
             <div class="p-4 border-b border-slate-700/40 flex justify-between items-center">
                 <div>
                     <h3 class="font-bold text-sm text-slate-200">Raio-X de Compras e Parcelas Ativas</h3>
-                    <p class="text-[11px] text-slate-400">Somente compras reais (descartes institucionais automáticos).</p>
+                    <p class="text-[11px] text-slate-400">Somente compras reais e parcelas projetadas para este mês.</p>
                 </div>
             </div>
 
@@ -147,9 +147,23 @@
         </div>
     </div>
 
+    <!-- Modal de Confirmação de Exclusão -->
+    <div id="modalExclusao" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50">
+        <div class="bg-slate-800 p-5 rounded-2xl border border-slate-700 max-w-sm w-full space-y-4">
+            <h3 class="font-bold text-sm text-white">Excluir Lançamento</h3>
+            <p class="text-xs text-slate-300">Como você deseja remover este lançamento?</p>
+            <div class="space-y-2 pt-2">
+                <button onclick="confirmarExclusao('apenas_este')" class="w-full bg-slate-700 hover:bg-slate-600 text-white font-medium p-2.5 rounded-xl text-xs">Excluir SOMENTE deste mês</button>
+                <button onclick="confirmarExclusao('este_e_futuros')" class="w-full bg-rose-500 hover:bg-rose-600 text-white font-bold p-2.5 rounded-xl text-xs">Excluir deste mês E DOS PRÓXIMOS</button>
+                <button onclick="fecharModalExclusao()" class="w-full bg-transparent text-slate-400 p-2 text-xs">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
     <script>
-        let db = JSON.parse(localStorage.getItem('fincontrol_db_v9')) || {};
+        let db = JSON.parse(localStorage.getItem('fincontrol_db_v10')) || { faturas: {}, recorrentes: [] };
         let painelRecolhido = localStorage.getItem('fincontrol_painel_recolhido') === 'true';
+        let itemParaExcluirIndex = null;
 
         const termosIgnorar = [
             'total da fatura', 'limite de compras', 'limite de saque', 'recomendado pagamento',
@@ -193,33 +207,72 @@
             }
         }
 
+        // Adiciona lançamento contínuo/recorrente
         function adicionarLancamentoManual() {
             let tipo = document.querySelector('input[name="tipoLancamento"]:checked').value;
             let descricao = document.getElementById('descLancamento').value.trim();
             let valor = parseFloat(document.getElementById('valorLancamento').value);
+            let mesInicio = document.getElementById('seletorMes').value;
 
             if (!descricao || isNaN(valor) || valor <= 0) {
                 alert("Preencha a descrição e um valor válido.");
                 return;
             }
 
-            let mesChave = document.getElementById('seletorMes').value;
-            if (!db[mesChave]) db[mesChave] = { faturaFechada: 0, compras: [], manuais: [] };
-            if (!db[mesChave].manuais) db[mesChave].manuais = [];
+            if (!db.recorrentes) db.recorrentes = [];
 
-            db[mesChave].manuais.push({ tipo, descricao, valor });
-            localStorage.setItem('fincontrol_db_v9', JSON.stringify(db));
+            db.recorrentes.push({
+                id: Date.now(),
+                tipo,
+                descricao,
+                valor,
+                mesInicio,
+                mesFimExclusao: null,
+                exclusoesMês: [] // meses específicos ignorados
+            });
+
+            localStorage.setItem('fincontrol_db_v10', JSON.stringify(db));
 
             document.getElementById('descLancamento').value = '';
             document.getElementById('valorLancamento').value = '';
             renderizarTela();
         }
 
-        function removerLancamentoManual(index) {
-            let mesChave = document.getElementById('seletorMes').value;
-            if (db[mesChave] && db[mesChave].manuais) {
-                db[mesChave].manuais.splice(index, 1);
-                localStorage.setItem('fincontrol_db_v9', JSON.stringify(db));
+        function solicitarExclusaoManual(id) {
+            itemParaExcluirIndex = id;
+            document.getElementById('modalExclusao').classList.remove('hidden');
+        }
+
+        function fecharModalExclusao() {
+            itemParaExcluirIndex = null;
+            document.getElementById('modalExclusao').classList.add('hidden');
+        }
+
+        function confirmarExclusao(modo) {
+            let mesAtual = document.getElementById('seletorMes').value;
+            let item = db.recorrentes.find(r => r.id === itemParaExcluirIndex);
+
+            if (item) {
+                if (modo === 'apenas_este') {
+                    if (!item.exclusoesMês) item.exclusoesMês = [];
+                    item.exclusoesMês.push(mesAtual);
+                } else if (modo === 'este_e_futuros') {
+                    item.mesFimExclusao = mesAtual;
+                }
+                localStorage.setItem('fincontrol_db_v10', JSON.stringify(db));
+            }
+
+            fecharModalExclusao();
+            renderizarTela();
+        }
+
+        function alterarValorManual(id, novoValor) {
+            let val = parseFloat(novoValor);
+            if (isNaN(val) || val <= 0) return;
+            let item = db.recorrentes.find(r => r.id === id);
+            if (item) {
+                item.valor = val;
+                localStorage.setItem('fincontrol_db_v10', JSON.stringify(db));
                 renderizarTela();
             }
         }
@@ -292,62 +345,81 @@
 
             if (valorFaturaFechada === 0) valorFaturaFechada = compras.reduce((acc, c) => acc + c.valor, 0);
 
-            if (!db[mesChave]) db[mesChave] = { manuais: [] };
-            db[mesChave].faturaFechada = valorFaturaFechada;
-            db[mesChave].compras = compras;
+            if (!db.faturas) db.faturas = {};
+            db.faturas[mesChave] = { faturaFechada: valorFaturaFechada, compras: compras };
 
-            localStorage.setItem('fincontrol_db_v9', JSON.stringify(db));
+            localStorage.setItem('fincontrol_db_v10', JSON.stringify(db));
             renderizarTela();
         }
 
-        function alterarCategoria(index, novaCategoria) {
-            let mesChave = document.getElementById('seletorMes').value;
-            if (db[mesChave] && db[mesChave].compras[index]) {
-                db[mesChave].compras[index].categoria = novaCategoria;
-                localStorage.setItem('fincontrol_db_v9', JSON.stringify(db));
-                renderizarTela();
-            }
-        }
+        // Calcula compras e parcelas projetadas para qualquer mês futuro
+        function obterComprasEParcelasDoMes(mesAlvoStr) {
+            let resultado = [];
 
-        function alterarNota(index, novaNota) {
-            let mesChave = document.getElementById('seletorMes').value;
-            if (db[mesChave] && db[mesChave].compras[index]) {
-                db[mesChave].compras[index].nota = novaNota;
-                localStorage.setItem('fincontrol_db_v9', JSON.stringify(db));
+            if (db.faturas && db.faturas[mesAlvoStr] && db.faturas[mesAlvoStr].compras) {
+                return db.faturas[mesAlvoStr].compras;
             }
-        }
 
-        function calcularPrevisaoProximaFatura() {
-            let previsaoTotal = 0;
-            Object.keys(db).forEach(mKey => {
-                if (db[mKey] && db[mKey].compras) {
-                    db[mKey].compras.forEach(item => {
-                        if (item.parcela && item.parcela !== "À vista") {
-                            let partes = item.parcela.split('/');
-                            let atual = parseInt(partes[0], 10);
-                            let total = parseInt(partes[1], 10);
-                            if (atual < total) {
-                                previsaoTotal += item.valor;
+            // Se o mês ainda não teve fatura colada, calcula as parcelas vindas de faturas passadas
+            let [anoAlvo, mesAlvo] = mesAlvoStr.split('-').map(Number);
+
+            if (db.faturas) {
+                Object.keys(db.faturas).forEach(mOrigemKey => {
+                    let [anoOrigem, mesOrigem] = mOrigemKey.split('-').map(Number);
+                    let diffMeses = (anoAlvo - anoOrigem) * 12 + (mesAlvo - mesOrigem);
+
+                    if (diffMeses > 0 && db.faturas[mOrigemKey].compras) {
+                        db.faturas[mOrigemKey].compras.forEach(item => {
+                            if (item.parcela && item.parcela !== "À vista") {
+                                let partes = item.parcela.split('/');
+                                let parcAtualOrigem = parseInt(partes[0], 10);
+                                let parcTotal = parseInt(partes[1], 10);
+
+                                let novaParcelaAtual = parcAtualOrigem + diffMeses;
+
+                                if (novaParcelaAtual <= parcTotal) {
+                                    resultado.push({
+                                        descricao: item.descricao,
+                                        categoria: item.categoria,
+                                        parcela: `${String(novaParcelaAtual).padStart(2, '0')}/${String(parcTotal).padStart(2, '0')}`,
+                                        valor: item.valor,
+                                        nota: item.nota || "Projeção Futura"
+                                    });
+                                }
                             }
-                        }
-                    });
-                }
-            });
-            return previsaoTotal > 0 ? previsaoTotal : 0;
+                        });
+                    }
+                });
+            }
+
+            return resultado;
         }
 
         function renderizarTela() {
             let mesChave = document.getElementById('seletorMes').value;
-            let dadosMes = db[mesChave] || { faturaFechada: 0, compras: [], manuais: [] };
+            
+            // 1. Obter Compras do Mês (ou Projeção de Parcelas)
+            let comprasMes = obterComprasEParcelasDoMes(mesChave);
+            let valorFaturaMes = (db.faturas && db.faturas[mesChave]) 
+                ? db.faturas[mesChave].faturaFechada 
+                : comprasMes.reduce((acc, c) => acc + c.valor, 0);
 
+            // 2. Filtrar Lançamentos Recorrentes
             let totalEntradas = 0;
-            let totalFixosEmprestimos = (dadosMes.faturaFechada || 0);
+            let totalFixosEmprestimos = 0;
 
             let listaDiv = document.getElementById('listaLancamentosManuais');
             listaDiv.innerHTML = '';
 
-            if (dadosMes.manuais && dadosMes.manuais.length > 0) {
-                dadosMes.manuais.forEach((item, index) => {
+            let manuaisAtivos = (db.recorrentes || []).filter(item => {
+                if (item.mesInicio > mesChave) return false; // Ainda não começou
+                if (item.mesFimExclusao && mesChave >= item.mesFimExclusao) return false; // Foi excluído a partir deste mês
+                if (item.exclusoesMês && item.exclusoesMês.includes(mesChave)) return false; // Foi excluído somente neste mês
+                return true;
+            });
+
+            if (manuaisAtivos.length > 0) {
+                manuaisAtivos.forEach(item => {
                     if (item.tipo === 'entrada') totalEntradas += item.valor;
                     else totalFixosEmprestimos += item.valor;
 
@@ -366,33 +438,32 @@
                             <span class="text-[10px] px-2 py-0.5 rounded bg-slate-800 font-semibold uppercase">${badgeTexto}</span>
                             <span class="text-slate-200 font-medium">${item.descricao}</span>
                         </div>
-                        <div class="flex items-center gap-3">
-                            <span class="font-bold">R$ ${item.valor.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</span>
-                            <button onclick="removerLancamentoManual(${index})" class="text-slate-500 hover:text-rose-400 font-bold">✕</button>
+                        <div class="flex items-center gap-2">
+                            <span class="text-slate-400">R$</span>
+                            <input type="number" step="0.01" value="${item.valor}" onchange="alterarValorManual(${item.id}, this.value)" class="w-20 bg-slate-950 border border-slate-700 text-right px-1.5 py-0.5 rounded text-xs font-bold text-slate-100 focus:outline-none focus:border-emerald-500" />
+                            <button onclick="solicitarExclusaoManual(${item.id})" class="text-slate-500 hover:text-rose-400 font-bold ml-1">✕</button>
                         </div>
                     `;
                     listaDiv.appendChild(divItem);
                 });
             } else {
-                listaDiv.innerHTML = `<p class="text-[11px] text-slate-500 text-center py-1">Nenhum lançamento fixo, empréstimo, assinatura ou entrada extra cadastrada.</p>`;
+                listaDiv.innerHTML = `<p class="text-[11px] text-slate-500 text-center py-1">Nenhum lançamento recorrente ativo para este mês.</p>`;
             }
 
-            let saldoReal = totalEntradas - totalFixosEmprestimos;
-            let previsaoProxima = calcularPrevisaoProximaFatura();
+            let saldoReal = totalEntradas - (totalFixosEmprestimos + valorFaturaMes);
 
             document.getElementById('totalEntradas').innerText = `R$ ${totalEntradas.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
             document.getElementById('totalFixosEmprestimos').innerText = `R$ ${totalFixosEmprestimos.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+            document.getElementById('totalFaturaCartao').innerText = `R$ ${valorFaturaMes.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
             
             let elSaldo = document.getElementById('saldoLiquidoReal');
             elSaldo.innerText = `R$ ${saldoReal.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
             elSaldo.className = `text-xl font-bold mt-1 ${saldoReal >= 0 ? 'text-blue-400' : 'text-rose-400'}`;
 
-            document.getElementById('previsaoProximaFatura').innerText = `R$ ${previsaoProxima.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
-
-            // Totais por Categoria
+            // 3. Totais por Categoria
             let totaisCategoria = {};
             categoriasDisponiveis.forEach(cat => totaisCategoria[cat] = 0);
-            dadosMes.compras.forEach(item => {
+            comprasMes.forEach(item => {
                 if (totaisCategoria[item.categoria] !== undefined) totaisCategoria[item.categoria] += item.valor;
                 else totaisCategoria["Pessoal"] += item.valor;
             });
@@ -412,15 +483,16 @@
 
             atualizarEstadoPainel();
 
+            // 4. Renderizar Tabela do Raio-X
             let tbody = document.getElementById('tabelaRaioX');
             tbody.innerHTML = '';
 
-            if (dadosMes.compras.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-slate-500">Nenhuma fatura importada. Use o botão acima para colar os dados.</td></tr>`;
+            if (comprasMes.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-slate-500">Nenhuma fatura importada ou parcela projetada para este mês.</td></tr>`;
                 return;
             }
 
-            dadosMes.compras.forEach((item, index) => {
+            comprasMes.forEach((item, index) => {
                 let tr = document.createElement('tr');
                 tr.className = "hover:bg-slate-700/20 transition";
                 
