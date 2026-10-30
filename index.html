@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MindCash-Up | Paz Financeira & Saúde Emocional</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Biblioteca para gerar PDF de alta qualidade -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         body { 
             background: radial-gradient(circle at top, #0f172a 0%, #07090e 100%); 
@@ -14,7 +16,6 @@
             filter: invert(1);
             cursor: pointer;
         }
-        /* Efeito de brilho suave alinhado à marca */
         .mind-glow {
             box-shadow: 0 0 25px -5px rgba(16, 185, 129, 0.08);
         }
@@ -22,13 +23,14 @@
 </head>
 <body class="font-sans antialiased min-h-screen pb-12 selection:bg-emerald-500 selection:text-slate-950">
 
-    <div class="max-w-6xl mx-auto p-4 md:p-6 space-y-6">
+    <!-- Elemento wrapper que será transformado em PDF -->
+    <div id="conteudoPDF" class="max-w-6xl mx-auto p-4 md:p-6 space-y-6">
         
         <!-- Cabeçalho Alinhado à Marca -->
         <header class="bg-gradient-to-br from-slate-900/95 via-slate-900/80 to-slate-950/90 p-5 md:p-6 rounded-3xl border border-emerald-500/20 shadow-2xl shadow-emerald-950/20 backdrop-blur-xl flex flex-col md:flex-row justify-between items-center gap-4 mind-glow">
             
             <div class="flex items-center gap-4 w-full md:w-auto">
-                <div class="w-13 h-13 w-14 h-14 bg-gradient-to-br from-emerald-400 to-teal-600 text-slate-950 rounded-2xl flex items-center justify-center text-xl font-black shadow-lg shadow-emerald-500/20 tracking-tighter">
+                <div class="w-14 h-14 bg-gradient-to-br from-emerald-400 to-teal-600 text-slate-950 rounded-2xl flex items-center justify-center text-xl font-black shadow-lg shadow-emerald-500/20 tracking-tighter">
                     MC
                 </div>
                 <div>
@@ -46,6 +48,11 @@
                     <input type="month" id="seletorMes" class="bg-transparent text-xs font-bold text-emerald-400 focus:outline-none cursor-pointer" onchange="renderizarTela()">
                 </div>
                 
+                <!-- Botão Gerar PDF -->
+                <button onclick="gerarPDF()" class="bg-emerald-600 hover:bg-emerald-500 text-white border border-emerald-500/40 px-3.5 py-2.5 rounded-2xl text-xs font-bold transition flex items-center gap-1.5 shadow-md active:scale-95" title="Baixar PDF do Mês">
+                    📄 <span class="hidden sm:inline">PDF</span>
+                </button>
+                
                 <button onclick="exportarDados()" class="bg-slate-800/80 hover:bg-slate-700 text-slate-200 border border-slate-700/60 px-3.5 py-2.5 rounded-2xl text-xs font-semibold transition flex items-center gap-1.5 shadow-md active:scale-95" title="Salvar Backup">
                     💾 <span class="hidden sm:inline">Backup</span>
                 </button>
@@ -57,7 +64,7 @@
             </div>
         </header>
 
-        <!-- Resumo de Caixa (Cards Mind-Up) -->
+        <!-- Resumo de Caixa -->
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3.5">
             <div class="bg-slate-900/60 p-4 rounded-3xl border border-slate-800/80 shadow-lg backdrop-blur flex flex-col justify-between">
                 <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Total Entradas</span>
@@ -77,8 +84,8 @@
             </div>
         </div>
 
-        <!-- Adicionar Lançamento Manual -->
-        <div class="bg-slate-900/60 p-5 rounded-3xl border border-slate-800/80 shadow-lg backdrop-blur space-y-4">
+        <!-- Adicionar Lançamento Manual (Ocultado automaticamente ao gerar PDF se desejar, ou impresso) -->
+        <div id="blocoAdicionar" class="bg-slate-900/60 p-5 rounded-3xl border border-slate-800/80 shadow-lg backdrop-blur space-y-4">
             <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-2">
                 <span>➕</span> Adicionar Novo Lançamento:
             </h3>
@@ -123,7 +130,7 @@
                         <span class="text-xs bg-emerald-500 text-slate-950 font-black px-2 py-0.5 rounded-lg uppercase">Entradas</span>
                         <span id="somaEntrada" class="text-xs font-bold text-emerald-400">R$ 0,00</span>
                     </div>
-                    <button id="btnGrupoentrada" class="text-sm bg-slate-800 hover:bg-slate-700 text-slate-300 px-3.5 py-1.5 rounded-xl transition border border-slate-700 font-bold">▲</button>
+                    <button id="btnGrupoentrada" class="nao-imprimir text-sm bg-slate-800 hover:bg-slate-700 text-slate-300 px-3.5 py-1.5 rounded-xl transition border border-slate-700 font-bold">▲</button>
                 </div>
                 <div id="conteudoGrupoentrada" class="p-4 space-y-2.5 border-t border-slate-800/60"></div>
             </div>
@@ -135,7 +142,7 @@
                         <span class="text-xs bg-rose-500 text-slate-950 font-black px-2 py-0.5 rounded-lg uppercase">Custos Fixos</span>
                         <span id="somaFixo" class="text-xs font-bold text-rose-400">R$ 0,00</span>
                     </div>
-                    <button id="btnGrupofixo" class="text-sm bg-slate-800 hover:bg-slate-700 text-slate-300 px-3.5 py-1.5 rounded-xl transition border border-slate-700 font-bold">▲</button>
+                    <button id="btnGrupofixo" class="nao-imprimir text-sm bg-slate-800 hover:bg-slate-700 text-slate-300 px-3.5 py-1.5 rounded-xl transition border border-slate-700 font-bold">▲</button>
                 </div>
                 <div id="conteudoGrupofixo" class="p-4 space-y-2.5 border-t border-slate-800/60"></div>
             </div>
@@ -147,7 +154,7 @@
                         <span class="text-xs bg-amber-500 text-slate-950 font-black px-2 py-0.5 rounded-lg uppercase">Empréstimos</span>
                         <span id="somaEmprestimo" class="text-xs font-bold text-amber-400">R$ 0,00</span>
                     </div>
-                    <button id="btnGrupoemprestimo" class="text-sm bg-slate-800 hover:bg-slate-700 text-slate-300 px-3.5 py-1.5 rounded-xl transition border border-slate-700 font-bold">▲</button>
+                    <button id="btnGrupoemprestimo" class="nao-imprimir text-sm bg-slate-800 hover:bg-slate-700 text-slate-300 px-3.5 py-1.5 rounded-xl transition border border-slate-700 font-bold">▲</button>
                 </div>
                 <div id="conteudoGrupoemprestimo" class="p-4 space-y-2.5 border-t border-slate-800/60"></div>
             </div>
@@ -159,7 +166,7 @@
                         <span class="text-xs bg-purple-500 text-slate-950 font-black px-2 py-0.5 rounded-lg uppercase">Assinaturas</span>
                         <span id="somaAssinatura" class="text-xs font-bold text-purple-400">R$ 0,00</span>
                     </div>
-                    <button id="btnGrupoassinatura" class="text-sm bg-slate-800 hover:bg-slate-700 text-slate-300 px-3.5 py-1.5 rounded-xl transition border border-slate-700 font-bold">▲</button>
+                    <button id="btnGrupoassinatura" class="nao-imprimir text-sm bg-slate-800 hover:bg-slate-700 text-slate-300 px-3.5 py-1.5 rounded-xl transition border border-slate-700 font-bold">▲</button>
                 </div>
                 <div id="conteudoGrupoassinatura" class="p-4 space-y-2.5 border-t border-slate-800/60"></div>
             </div>
@@ -167,7 +174,7 @@
         </div>
 
         <!-- Botão de Colar Texto da Fatura -->
-        <div class="bg-slate-900/60 p-5 rounded-3xl border border-slate-800/80 shadow-lg backdrop-blur space-y-3">
+        <div id="blocoFaturaBtn" class="bg-slate-900/60 p-5 rounded-3xl border border-slate-800/80 shadow-lg backdrop-blur space-y-3">
             <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-2">
                 <span>⚡</span> Lançar Fatura do Cartão (Raio-X):
             </h3>
@@ -184,7 +191,7 @@
                 <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-2">
                     <span>📊</span> TOTAL GASTOS POR CATEGORIA
                 </h3>
-                <button id="btnTogglePainel" class="text-sm bg-slate-800 hover:bg-slate-700 text-slate-300 px-3.5 py-1.5 rounded-xl transition border border-slate-700 font-bold">
+                <button id="btnTogglePainel" class="nao-imprimir text-sm bg-slate-800 hover:bg-slate-700 text-slate-300 px-3.5 py-1.5 rounded-xl transition border border-slate-700 font-bold">
                     ▲
                 </button>
             </div>
@@ -262,6 +269,31 @@
                 let mes = String(agora.getMonth() + 1).padStart(2, '0');
                 seletor.value = `${ano}-${mes}`;
             }
+        }
+
+        function gerarPDF() {
+            let elemento = document.getElementById('conteudoPDF');
+            let mesAtual = document.getElementById('seletorMes').value;
+            
+            // Oculta temporariamente elementos interativos (botões de adicionar, fechar, inputs de edição rápida) para o PDF ficar limpo
+            let blocoAdd = document.getElementById('blocoAdicionar');
+            let blocoFat = document.getElementById('blocoFaturaBtn');
+            blocoAdd.style.display = 'none';
+            blocoFat.style.display = 'none';
+
+            let opt = {
+                margin:       [10, 10, 10, 10],
+                filename:     `MindCash_Relatorio_${mesAtual}.pdf`,
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2, useCORS: true, backgroundColor: '#07090e' },
+                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+
+            html2pdf().from(elemento).set(opt).save().then(() => {
+                // Restaura os blocos na tela após gerar o PDF
+                blocoAdd.style.display = 'block';
+                blocoFat.style.display = 'block';
+            });
         }
 
         const termosIgnorar = [
@@ -672,7 +704,7 @@
                                 <span class="text-slate-400 font-medium">Valor: R$</span>
                                 <div class="flex items-center gap-2">
                                     <input type="number" step="0.01" value="${item.valor}" onchange="alterarValorManual(${item.id}, this.value)" class="w-28 bg-slate-900 border border-slate-700/80 text-right px-2.5 py-1.5 rounded-xl text-xs font-bold text-emerald-400 focus:outline-none focus:border-emerald-500 shadow-inner" />
-                                    <button onclick="solicitarExclusaoManual(${item.id})" class="text-slate-500 hover:text-rose-400 font-bold p-1.5 rounded-lg hover:bg-rose-500/10 transition" title="Excluir">✕</button>
+                                    <button onclick="solicitarExclusaoManual(${item.id})" class="nao-imprimir text-slate-500 hover:text-rose-400 font-bold p-1.5 rounded-lg hover:bg-rose-500/10 transition" title="Excluir">✕</button>
                                 </div>
                             </div>
                         `;
@@ -760,7 +792,7 @@
                     <td class="p-3.5 text-right font-black text-slate-200">R$ ${item.valor.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
                     <td class="p-3.5 flex items-center justify-between gap-2">
                         <input type="text" value="${item.nota || ''}" placeholder="Nota..." onchange="alterarNota(${index}, this.value)" class="w-full bg-slate-950 border border-slate-800 text-slate-300 text-[11px] px-2.5 py-1.5 rounded-xl focus:outline-none focus:border-emerald-500 placeholder:text-slate-600 shadow-inner" />
-                        <button onclick="excluirItemRaioX(${index})" class="text-slate-500 hover:text-rose-400 font-bold p-1.5 rounded-lg hover:bg-rose-500/10 transition" title="Excluir item">✕</button>
+                        <button onclick="excluirItemRaioX(${index})" class="nao-imprimir text-slate-500 hover:text-rose-400 font-bold p-1.5 rounded-lg hover:bg-rose-500/10 transition" title="Excluir item">✕</button>
                     </td>
                 `;
                 tbody.appendChild(tr);
