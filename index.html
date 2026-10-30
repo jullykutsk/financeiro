@@ -7,7 +7,6 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body { background-color: #0b0f19; color: #f8fafc; }
-        /* Suavizar scrollbar e inputs */
         input[type="month"]::-webkit-calendar-picker-indicator {
             filter: invert(1);
             cursor: pointer;
@@ -21,7 +20,6 @@
         <!-- Cabeçalho Moderno & Fluído -->
         <header class="bg-gradient-to-br from-slate-900/90 to-slate-800/80 p-5 rounded-3xl border border-slate-700/60 shadow-xl shadow-black/40 backdrop-blur-xl flex flex-col md:flex-row justify-between items-center gap-4">
             
-            <!-- Logo e Título -->
             <div class="flex items-center gap-3.5 w-full md:w-auto">
                 <div class="w-12 h-12 bg-gradient-to-tr from-emerald-500/30 to-emerald-400/10 text-emerald-400 rounded-2xl flex items-center justify-center text-2xl border border-emerald-500/30 shadow-inner">
                     💳
@@ -35,28 +33,25 @@
                 </div>
             </div>
             
-            <!-- Ações do Cabeçalho (Mês e Backups) -->
             <div class="flex items-center gap-2.5 w-full md:w-auto justify-end overflow-x-auto pb-1 md:pb-0">
-                <!-- Seletor de Mês Estilizado -->
                 <div class="relative bg-slate-950/80 border border-slate-700/80 rounded-2xl px-3 py-2 flex items-center gap-2 shadow-inner">
                     <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">📅 Mês:</span>
                     <input type="month" id="seletorMes" class="bg-transparent text-xs font-bold text-emerald-400 focus:outline-none cursor-pointer" value="2026-10" onchange="renderizarTela()">
                 </div>
                 
-                <!-- Botão Salvar Backup -->
                 <button onclick="exportarDados()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700/80 px-3.5 py-2.5 rounded-2xl text-xs font-semibold transition flex items-center gap-1.5 shadow-md active:scale-95" title="Salvar Backup">
                     💾 <span class="hidden sm:inline">Backup</span>
                 </button>
 
-                <!-- Botão Carregar Backup -->
+                <!-- Alterado accept="*" para desbloquear todos os ficheiros no telemóvel -->
                 <button onclick="document.getElementById('fileBackupInput').click()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700/80 px-3.5 py-2.5 rounded-2xl text-xs font-semibold transition flex items-center gap-1.5 shadow-md active:scale-95" title="Carregar Backup">
                     📂 <span class="hidden sm:inline">Restaurar</span>
                 </button>
-                <input type="file" id="fileBackupInput" accept=".json" class="hidden" onchange="importarDados(event)">
+                <input type="file" id="fileBackupInput" accept="*" class="hidden" onchange="importarDados(event)">
             </div>
         </header>
 
-        <!-- Resumo de Caixa (Cards Modernos) -->
+        <!-- Resumo de Caixa -->
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3.5">
             <div class="bg-slate-900/60 p-4 rounded-3xl border border-slate-800 shadow-lg backdrop-blur flex flex-col justify-between">
                 <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Total Entradas</span>
@@ -76,7 +71,7 @@
             </div>
         </div>
 
-        <!-- Adicionar Entradas, Custos Fixos, Empréstimos ou Assinaturas -->
+        <!-- Gestão de Lançamentos Manuais -->
         <div class="bg-slate-900/60 p-5 rounded-3xl border border-slate-800 shadow-lg backdrop-blur space-y-4">
             <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-2">
                 <span>💰</span> Gestão de Entradas, Fixos e Empréstimos:
@@ -182,7 +177,7 @@
         </div>
     </div>
 
-    <!-- Modal de Confirmação de Exclusão de Recorrentes -->
+    <!-- Modal de Confirmação de Exclusão -->
     <div id="modalExclusao" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 z-50">
         <div class="bg-slate-900 p-6 rounded-3xl border border-slate-700 max-w-sm w-full space-y-4 shadow-2xl">
             <h3 class="font-bold text-sm text-white">Excluir Lançamento</h3>
@@ -238,14 +233,18 @@
             reader.onload = function(e) {
                 try {
                     let conteudo = JSON.parse(e.target.result);
-                    if (conteudo && conteudo.faturas) {
-                        db = conteudo;
-                        if (!db.regrasCategorias) db.regrasCategorias = {};
+                    // Validação flexível para aceitar o backup
+                    if (conteudo) {
+                        db = {
+                            faturas: conteudo.faturas || {},
+                            recorrentes: conteudo.recorrentes || [],
+                            regrasCategorias: conteudo.regrasCategorias || {}
+                        };
                         localStorage.setItem('fincontrol_db_v13', JSON.stringify(db));
                         renderizarTela();
                         alert("Backup carregado com sucesso!");
                     } else {
-                        alert("O ficheiro selecionado não é um backup válido do FinControl.");
+                        alert("O ficheiro selecionado não contém dados válidos.");
                     }
                 } catch (err) {
                     alert("Erro ao ler o ficheiro de backup.");
