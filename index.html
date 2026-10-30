@@ -36,7 +36,7 @@
             <div class="flex items-center gap-2.5 w-full md:w-auto justify-end overflow-x-auto pb-1 md:pb-0">
                 <div class="relative bg-slate-950/80 border border-slate-700/80 rounded-2xl px-3 py-2 flex items-center gap-2 shadow-inner">
                     <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">📅 Mês:</span>
-                    <input type="month" id="seletorMes" class="bg-transparent text-xs font-bold text-emerald-400 focus:outline-none cursor-pointer" value="2026-10" onchange="renderizarTela()">
+                    <input type="month" id="seletorMes" class="bg-transparent text-xs font-bold text-emerald-400 focus:outline-none cursor-pointer" onchange="renderizarTela()">
                 </div>
                 
                 <button onclick="exportarDados()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700/80 px-3.5 py-2.5 rounded-2xl text-xs font-semibold transition flex items-center gap-1.5 shadow-md active:scale-95" title="Salvar Backup">
@@ -70,10 +70,10 @@
             </div>
         </div>
 
-        <!-- Gestão de Lançamentos Manuais -->
+        <!-- Adicionar Lançamento Manual -->
         <div class="bg-slate-900/60 p-5 rounded-3xl border border-slate-800 shadow-lg backdrop-blur space-y-4">
             <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-2">
-                <span>💰</span> Gestão de Entradas, Fixos e Empréstimos:
+                <span>➕</span> Adicionar Novo Lançamento:
             </h3>
             
             <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
@@ -104,8 +104,59 @@
                     + Adicionar Lançamento Contínuo
                 </button>
             </div>
+        </div>
 
-            <div id="listaLancamentosManuais" class="space-y-2.5 pt-1"></div>
+        <!-- OS 4 GRUPOS RETRÁTEIS -->
+        <div class="space-y-4">
+            
+            <!-- 1. GRUPO: ENTRADAS -->
+            <div class="bg-slate-900/60 rounded-3xl border border-emerald-500/30 shadow-lg backdrop-blur overflow-hidden">
+                <div class="p-4 flex justify-between items-center cursor-pointer select-none bg-emerald-950/20" onclick="alternarGrupo('entrada')">
+                    <div class="flex items-center gap-2.5">
+                        <span class="text-xs bg-emerald-500 text-slate-950 font-black px-2 py-0.5 rounded-lg uppercase">Entradas</span>
+                        <span id="somaEntrada" class="text-xs font-bold text-emerald-400">R$ 0,00</span>
+                    </div>
+                    <button id="btnGrupoentrada" class="text-sm bg-slate-800 hover:bg-slate-700 text-slate-300 px-3.5 py-1.5 rounded-xl transition border border-slate-700 font-bold">▲</button>
+                </div>
+                <div id="conteudoGrupoentrada" class="p-4 space-y-2.5 border-t border-slate-800/60"></div>
+            </div>
+
+            <!-- 2. GRUPO: CUSTOS FIXOS -->
+            <div class="bg-slate-900/60 rounded-3xl border border-rose-500/30 shadow-lg backdrop-blur overflow-hidden">
+                <div class="p-4 flex justify-between items-center cursor-pointer select-none bg-rose-950/20" onclick="alternarGrupo('fixo')">
+                    <div class="flex items-center gap-2.5">
+                        <span class="text-xs bg-rose-500 text-slate-950 font-black px-2 py-0.5 rounded-lg uppercase">Custos Fixos</span>
+                        <span id="somaFixo" class="text-xs font-bold text-rose-400">R$ 0,00</span>
+                    </div>
+                    <button id="btnGrupofixo" class="text-sm bg-slate-800 hover:bg-slate-700 text-slate-300 px-3.5 py-1.5 rounded-xl transition border border-slate-700 font-bold">▲</button>
+                </div>
+                <div id="conteudoGrupofixo" class="p-4 space-y-2.5 border-t border-slate-800/60"></div>
+            </div>
+
+            <!-- 3. GRUPO: EMPRÉSTIMOS -->
+            <div class="bg-slate-900/60 rounded-3xl border border-amber-500/30 shadow-lg backdrop-blur overflow-hidden">
+                <div class="p-4 flex justify-between items-center cursor-pointer select-none bg-amber-950/20" onclick="alternarGrupo('emprestimo')">
+                    <div class="flex items-center gap-2.5">
+                        <span class="text-xs bg-amber-500 text-slate-950 font-black px-2 py-0.5 rounded-lg uppercase">Empréstimos</span>
+                        <span id="somaEmprestimo" class="text-xs font-bold text-amber-400">R$ 0,00</span>
+                    </div>
+                    <button id="btnGrupoemprestimo" class="text-sm bg-slate-800 hover:bg-slate-700 text-slate-300 px-3.5 py-1.5 rounded-xl transition border border-slate-700 font-bold">▲</button>
+                </div>
+                <div id="conteudoGrupoemprestimo" class="p-4 space-y-2.5 border-t border-slate-800/60"></div>
+            </div>
+
+            <!-- 4. GRUPO: ASSINATURAS -->
+            <div class="bg-slate-900/60 rounded-3xl border border-purple-500/30 shadow-lg backdrop-blur overflow-hidden">
+                <div class="p-4 flex justify-between items-center cursor-pointer select-none bg-purple-950/20" onclick="alternarGrupo('assinatura')">
+                    <div class="flex items-center gap-2.5">
+                        <span class="text-xs bg-purple-500 text-slate-950 font-black px-2 py-0.5 rounded-lg uppercase">Assinaturas</span>
+                        <span id="somaAssinatura" class="text-xs font-bold text-purple-400">R$ 0,00</span>
+                    </div>
+                    <button id="btnGrupoassinatura" class="text-sm bg-slate-800 hover:bg-slate-700 text-slate-300 px-3.5 py-1.5 rounded-xl transition border border-slate-700 font-bold">▲</button>
+                </div>
+                <div id="conteudoGrupoassinatura" class="p-4 space-y-2.5 border-t border-slate-800/60"></div>
+            </div>
+
         </div>
 
         <!-- Botão de Colar Texto da Fatura -->
@@ -191,9 +242,21 @@
     </div>
 
     <script>
-        let db = JSON.parse(localStorage.getItem('fincontrol_db_v14')) || { faturas: {}, recorrentes: [], regrasCategorias: {}, regrasCartoes: {} };
+        let db = JSON.parse(localStorage.getItem('fincontrol_db_v15')) || { faturas: {}, recorrentes: [], regrasCategorias: {}, regrasCartoes: {} };
         let painelRecolhido = localStorage.getItem('fincontrol_painel_recolhido') === 'true';
+        let gruposRecolhidos = JSON.parse(localStorage.getItem('fincontrol_grupos_recolhidos')) || { entrada: false, fixo: false, emprestimo: false, assinatura: false };
         let itemParaExcluirIndex = null;
+
+        // Definir o mês atual automaticamente ao iniciar
+        function inicializarMesAtual() {
+            let seletor = document.getElementById('seletorMes');
+            if (!seletor.value) {
+                let agora = new Date();
+                let ano = agora.getFullYear();
+                let mes = String(agora.getMonth() + 1).padStart(2, '0');
+                seletor.value = `${ano}-${mes}`;
+            }
+        }
 
         const termosIgnorar = [
             'total da fatura', 'limite de compras', 'limite de saque', 'recomendado pagamento',
@@ -244,7 +307,7 @@
                             regrasCategorias: conteudo.regrasCategorias || {},
                             regrasCartoes: conteudo.regrasCartoes || {}
                         };
-                        localStorage.setItem('fincontrol_db_v14', JSON.stringify(db));
+                        localStorage.setItem('fincontrol_db_v15', JSON.stringify(db));
                         renderizarTela();
                         alert("Backup carregado com sucesso!");
                     } else {
@@ -278,6 +341,12 @@
             }
         }
 
+        function alternarGrupo(tipo) {
+            gruposRecolhidos[tipo] = !gruposRecolhidos[tipo];
+            localStorage.setItem('fincontrol_grupos_recolhidos', JSON.stringify(gruposRecolhidos));
+            renderizarTela();
+        }
+
         function adicionarLancamentoManual() {
             let tipo = document.querySelector('input[name="tipoLancamento"]:checked').value;
             let descricao = document.getElementById('descLancamento').value.trim();
@@ -301,7 +370,7 @@
                 exclusoesMês: []
             });
 
-            localStorage.setItem('fincontrol_db_v14', JSON.stringify(db));
+            localStorage.setItem('fincontrol_db_v15', JSON.stringify(db));
 
             document.getElementById('descLancamento').value = '';
             document.getElementById('valorLancamento').value = '';
@@ -329,7 +398,7 @@
                 } else if (modo === 'este_e_futuros') {
                     item.mesFimExclusao = mesAtual;
                 }
-                localStorage.setItem('fincontrol_db_v14', JSON.stringify(db));
+                localStorage.setItem('fincontrol_db_v15', JSON.stringify(db));
             }
 
             fecharModalExclusao();
@@ -342,7 +411,7 @@
             let item = db.recorrentes.find(r => r.id === id);
             if (item) {
                 item.valor = val;
-                localStorage.setItem('fincontrol_db_v14', JSON.stringify(db));
+                localStorage.setItem('fincontrol_db_v15', JSON.stringify(db));
                 renderizarTela();
             }
         }
@@ -406,7 +475,6 @@
                 if (nome.length < 3 || nome === "/2026" || nome === "2026") return;
                 let nomeUpper = nome.toUpperCase();
 
-                // Categoria
                 let categoria = "Pessoal";
                 if (db.regrasCategorias[nomeUpper]) {
                     categoria = db.regrasCategorias[nomeUpper];
@@ -419,7 +487,6 @@
                     else if (nLower.includes("oficina") || nLower.includes("autopecas") || nLower.includes("pneu") || nLower.includes("mecanica") || nLower.includes("renesto")) categoria = "Manutenção carro";
                 }
 
-                // Cartão
                 let cartao = db.regrasCartoes[nomeUpper] || "Bradesco";
 
                 compras.push({ descricao: nomeUpper, cartao, categoria, parcela, valor, nota: "" });
@@ -430,7 +497,7 @@
             if (!db.faturas) db.faturas = {};
             db.faturas[mesChave] = { faturaFechada: valorFaturaFechada, compras: compras };
 
-            localStorage.setItem('fincontrol_db_v14', JSON.stringify(db));
+            localStorage.setItem('fincontrol_db_v15', JSON.stringify(db));
             renderizarTela();
         }
 
@@ -491,7 +558,7 @@
                     db.faturas[mesChave].compras[index].cartao = novoCartao;
                 }
 
-                localStorage.setItem('fincontrol_db_v14', JSON.stringify(db));
+                localStorage.setItem('fincontrol_db_v15', JSON.stringify(db));
                 renderizarTela();
             }
         }
@@ -511,7 +578,7 @@
                     db.faturas[mesChave].compras[index].categoria = novaCategoria;
                 }
 
-                localStorage.setItem('fincontrol_db_v14', JSON.stringify(db));
+                localStorage.setItem('fincontrol_db_v15', JSON.stringify(db));
                 renderizarTela();
             }
         }
@@ -520,7 +587,7 @@
             let mesChave = document.getElementById('seletorMes').value;
             if (db.faturas && db.faturas[mesChave] && db.faturas[mesChave].compras[index]) {
                 db.faturas[mesChave].compras[index].nota = novaNota;
-                localStorage.setItem('fincontrol_db_v14', JSON.stringify(db));
+                localStorage.setItem('fincontrol_db_v15', JSON.stringify(db));
             }
         }
 
@@ -529,7 +596,7 @@
             if (db.faturas && db.faturas[mesChave] && db.faturas[mesChave].compras) {
                 db.faturas[mesChave].compras.splice(index, 1);
                 db.faturas[mesChave].faturaFechada = db.faturas[mesChave].compras.reduce((acc, c) => acc + c.valor, 0);
-                localStorage.setItem('fincontrol_db_v14', JSON.stringify(db));
+                localStorage.setItem('fincontrol_db_v15', JSON.stringify(db));
                 renderizarTela();
             }
         }
@@ -545,9 +612,6 @@
             let totalEntradas = 0;
             let totalFixosEmprestimos = 0;
 
-            let listaDiv = document.getElementById('listaLancamentosManuais');
-            listaDiv.innerHTML = '';
-
             let manuaisAtivos = (db.recorrentes || []).filter(item => {
                 if (item.mesInicio > mesChave) return false;
                 if (item.mesFimExclusao && mesChave >= item.mesFimExclusao) return false;
@@ -555,39 +619,63 @@
                 return true;
             });
 
-            if (manuaisAtivos.length > 0) {
-                manuaisAtivos.forEach(item => {
-                    if (item.tipo === 'entrada') totalEntradas += item.valor;
-                    else totalFixosEmprestimos += item.valor;
+            let gruposMap = { entrada: [], fixo: [], emprestimo: [], assinatura: [] };
+            let somasGrupos = { entrada: 0, fixo: 0, emprestimo: 0, assinatura: 0 };
 
-                    let corBorda = item.tipo === 'entrada' ? 'border-emerald-500/30 text-emerald-400' :
-                                   item.tipo === 'fixo' ? 'border-rose-500/30 text-rose-400' :
-                                   item.tipo === 'emprestimo' ? 'border-amber-500/30 text-amber-400' : 'border-purple-500/30 text-purple-400';
+            manuaisAtivos.forEach(item => {
+                if (gruposMap[item.tipo]) {
+                    gruposMap[item.tipo].push(item);
+                    somasGrupos[item.tipo] += item.valor;
+                    if (item.tipo === 'entrada') {
+                        totalEntradas += item.valor;
+                    } else {
+                        totalFixosEmprestimos += item.valor;
+                    }
+                }
+            });
 
-                    let badgeTexto = item.tipo === 'entrada' ? 'Entrada' :
-                                     item.tipo === 'fixo' ? 'Custo Fixo' :
-                                     item.tipo === 'emprestimo' ? 'Empréstimo' : 'Assinatura';
+            ['entrada', 'fixo', 'emprestimo', 'assinatura'].forEach(tipo => {
+                let container = document.getElementById(`conteudoGrupo${tipo}`);
+                let btn = document.getElementById(`btnGrupo${tipo}`);
+                let spanSoma = document.getElementById(`soma${tipo.charAt(0).toUpperCase() + tipo.slice(1)}`);
+                
+                spanSoma.innerText = `R$ ${somasGrupos[tipo].toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
 
-                    let divItem = document.createElement('div');
-                    divItem.className = `flex flex-col gap-2 bg-slate-950/80 border ${corBorda} p-3.5 rounded-2xl text-xs shadow-inner`;
-                    divItem.innerHTML = `
-                        <div class="flex items-center justify-between gap-2">
-                            <span class="text-[10px] px-2 py-0.5 rounded-lg bg-slate-900 font-bold uppercase tracking-wider">${badgeTexto}</span>
-                            <span class="text-slate-100 font-bold text-sm tracking-wide text-right break-words flex-1">${item.descricao}</span>
-                        </div>
-                        <div class="flex items-center justify-between pt-1 border-t border-slate-900/80">
-                            <span class="text-slate-400 font-medium">Valor: R$</span>
-                            <div class="flex items-center gap-2">
-                                <input type="number" step="0.01" value="${item.valor}" onchange="alterarValorManual(${item.id}, this.value)" class="w-28 bg-slate-900 border border-slate-700/80 text-right px-2.5 py-1.5 rounded-xl text-xs font-bold text-emerald-400 focus:outline-none focus:border-emerald-500 shadow-inner" />
-                                <button onclick="solicitarExclusaoManual(${item.id})" class="text-slate-500 hover:text-rose-400 font-bold p-1.5 rounded-lg hover:bg-rose-500/10 transition" title="Excluir">✕</button>
+                if (gruposRecolhidos[tipo]) {
+                    container.classList.add('hidden');
+                    btn.innerText = '▼';
+                } else {
+                    container.classList.remove('hidden');
+                    btn.innerText = '▲';
+                }
+
+                container.innerHTML = '';
+                if (gruposMap[tipo].length > 0) {
+                    gruposMap[tipo].forEach(item => {
+                        let corBorda = tipo === 'entrada' ? 'border-emerald-500/30' :
+                                       tipo === 'fixo' ? 'border-rose-500/30' :
+                                       tipo === 'emprestimo' ? 'border-amber-500/30' : 'border-purple-500/30';
+
+                        let divItem = document.createElement('div');
+                        divItem.className = `flex flex-col gap-2 bg-slate-950/80 border ${corBorda} p-3.5 rounded-2xl text-xs shadow-inner`;
+                        divItem.innerHTML = `
+                            <div class="flex items-center justify-between gap-2">
+                                <span class="text-slate-100 font-bold text-sm tracking-wide break-words flex-1">${item.descricao}</span>
                             </div>
-                        </div>
-                    `;
-                    listaDiv.appendChild(divItem);
-                });
-            } else {
-                listaDiv.innerHTML = `<p class="text-[11px] text-slate-500 text-center py-2 italic">Nenhum lançamento recorrente ativo para este mês.</p>`;
-            }
+                            <div class="flex items-center justify-between pt-1 border-t border-slate-900/80">
+                                <span class="text-slate-400 font-medium">Valor: R$</span>
+                                <div class="flex items-center gap-2">
+                                    <input type="number" step="0.01" value="${item.valor}" onchange="alterarValorManual(${item.id}, this.value)" class="w-28 bg-slate-900 border border-slate-700/80 text-right px-2.5 py-1.5 rounded-xl text-xs font-bold text-emerald-400 focus:outline-none focus:border-emerald-500 shadow-inner" />
+                                    <button onclick="solicitarExclusaoManual(${item.id})" class="text-slate-500 hover:text-rose-400 font-bold p-1.5 rounded-lg hover:bg-rose-500/10 transition" title="Excluir">✕</button>
+                                </div>
+                            </div>
+                        `;
+                        container.appendChild(divItem);
+                    });
+                } else {
+                    container.innerHTML = `<p class="text-[11px] text-slate-500 text-center py-2 italic">Nenhum lançamento neste grupo para este mês.</p>`;
+                }
+            });
 
             let saldoReal = totalEntradas - (totalFixosEmprestimos + valorFaturaMes);
 
@@ -673,6 +761,8 @@
             });
         }
 
+        // Executar inicialização do mês atual e carregar tela
+        inicializarMesAtual();
         renderizarTela();
     </script>
 </body>
