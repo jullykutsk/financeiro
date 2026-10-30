@@ -313,8 +313,6 @@
     <script>
         let db = JSON.parse(localStorage.getItem('mindcash_db_v1')) || { faturas: {}, recorrentes: [], metas: [], regrasCategorias: {}, regrasCartoes: {}, cartoesPersonalizados: [] };
         
-        let painelRecolhido = localStorage.getItem('mindcash_painel_recolhido') !== null ? localStorage.getItem('mindcash_painel_recolhido'] === 'true' : true;
-        let painelCartoesRecolhido = localStorage.getItem('mindcash_painel_cartoes_recolhido') !== null ? localStorage.getItem('mindcash_painel_cartoes_recolhido'] === 'true' : true;
         let gruposRecolhidos = JSON.parse(localStorage.getItem('mindcash_grupos_recolhidos')) || { entrada: true, fixo: true, emprestimo: true, assinatura: true };
         let itemParaExcluirIndex = null;
 
@@ -551,22 +549,28 @@
             }
         }
 
+        // Funções de Recolher / Expandir Diretas e Instantâneas
         function alternarPainelCartoes() {
-            painelCartoesRecolhido = !painelCartoesRecolhido;
-            localStorage.setItem('mindcash_painel_cartoes_recolhido', painelCartoesRecolhido);
-            renderizarTela();
+            let conteudo = document.getElementById('conteudoPainelCartoes');
+            let btn = document.getElementById('btnTogglePainelCartoes');
+            conteudo.classList.toggle('hidden');
+            btn.innerText = conteudo.classList.contains('hidden') ? '▼' : '▲';
         }
 
         function alternarPainelCategorias() {
-            painelRecolhido = !painelRecolhido;
-            localStorage.setItem('mindcash_painel_recolhido', painelRecolhido);
-            renderizarTela();
+            let conteudo = document.getElementById('conteudoPainelCategorias');
+            let btn = document.getElementById('btnTogglePainel');
+            conteudo.classList.toggle('hidden');
+            btn.innerText = conteudo.classList.contains('hidden') ? '▼' : '▲';
         }
 
         function alternarGrupo(tipo) {
-            gruposRecolhidos[tipo] = !gruposRecolhidos[tipo];
+            let container = document.getElementById(`conteudoGrupo${tipo}`);
+            let btn = document.getElementById(`btnGrupo${tipo}`);
+            container.classList.toggle('hidden');
+            btn.innerText = container.classList.contains('hidden') ? '▼' : '▲';
+            gruposRecolhidos[tipo] = container.classList.contains('hidden');
             localStorage.setItem('mindcash_grupos_recolhidos', JSON.stringify(gruposRecolhidos));
-            renderizarTela();
         }
 
         function adicionarLancamentoManual() {
@@ -917,18 +921,8 @@
             elSaldo.innerText = `R$ ${saldoReal.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
             elSaldo.className = `text-2xl font-black mt-2 ${saldoReal >= 0 ? 'text-[#93c5fd]' : 'text-[#d9777f]'}`;
 
-            // PAINEL DE CARTÕES (RECOLHER/EXPANDIR)
+            // SOMAS POR CARTÃO
             let containerCardsCartoes = document.getElementById('conteudoPainelCartoes');
-            let btnCartoes = document.getElementById('btnTogglePainelCartoes');
-            
-            if (painelCartoesRecolhido) {
-                containerCardsCartoes.classList.add('hidden');
-                btnCartoes.innerText = '▼';
-            } else {
-                containerCardsCartoes.classList.remove('hidden');
-                btnCartoes.innerText = '▲';
-            }
-
             let totaisCartao = {};
             cartoesDisponiveis.forEach(cart => totaisCartao[cart] = 0);
 
@@ -955,18 +949,8 @@
                 containerCardsCartoes.appendChild(card);
             });
 
-            // PAINEL DE CATEGORIAS (RECOLHER/EXPANDIR)
+            // SOMAS POR CATEGORIA
             let containerCardsCat = document.getElementById('conteudoPainelCategorias');
-            let btnCat = document.getElementById('btnTogglePainel');
-
-            if (painelRecolhido) {
-                containerCardsCat.classList.add('hidden');
-                btnCat.innerText = '▼';
-            } else {
-                containerCardsCat.classList.remove('hidden');
-                btnCat.innerText = '▲';
-            }
-
             let totaisCategoria = {};
             categoriasDisponiveis.forEach(cat => totaisCategoria[cat] = 0);
             
