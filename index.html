@@ -1,117 +1,557 @@
-import pandas as pd
-import streamlit as st
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FinControl Pro - Extensão & Projeção Contínua</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background-color: #0f172a; color: #f8fafc; }
+    </style>
+</head>
+<body class="font-sans antialiased min-h-screen pb-12">
 
-# Configuração da página
-st.set_page_config(
-    page_title="Painel Financeiro - Raio-X", page_icon="💰", layout="wide"
-)
-
-# Simulando uma base de dados inicial (substitua pela sua fonte real)
-if "dados_raio_x" not in st.session_state:
-  st.session_state.dados_raio_x = pd.DataFrame([
-      {
-          "id": 1,
-          "categoria": "Manutenção carro",
-          "parcela_atual": "08/12",
-          "valor_parcela": 129.38,
-          "nota": "",
-      },
-      {
-          "id": 2,
-          "categoria": "Pessoal",
-          "parcela_atual": "06/12",
-          "valor_parcela": 288.90,
-          "nota": "Tia Luciana",
-      },
-      {
-          "id": 3,
-          "categoria": "Manutenção carro",
-          "parcela_atual": "03/03",
-          "valor_parcela": 140.00,
-          "nota": "",
-      },
-      {
-          "id": 4,
-          "categoria": "Pessoal",
-          "parcela_atual": "02/02",
-          "valor_parcela": 30.96,
-          "nota": "",
-      },
-  ])
-
-st.title("📊 Painel de Controlo Financeiro")
-
-# ---------------------------------------------------------
-# CORREÇÃO 1: Cálculo dinâmico do Total de Gastos por Categoria
-# ---------------------------------------------------------
-st.subheader("TOTAL GASTOS POR CATEGORIA")
-
-df_atual = st.session_state.dados_raio_x
-
-# Agrupa e soma os valores do Raio-X por categoria automaticamente
-totais_por_categoria = (
-    df_atual.groupby("categoria")["valor_parcela"].sum().to_dict()
-)
-
-# Lista completa de categorias padrão do sistema
-categorias_padrao = [
-    "Pessoal",
-    "Mercado",
-    "Combustível",
-    "Saúde",
-    "Manutenção Casa",
-    "Manutenção carro",
-    "Estudo",
-    "Locomoção",
-    "Lazer",
-    "Presentes",
-]
-
-# Exibição em formato de grelha (cartões)
-cols = st.columns(2)
-for i, cat in enumerate(categorias_padrao):
-  valor_total = totais_por_categoria.get(cat, 0.0)
-  with cols[i % 2]:
-    st.markdown(
-        f"""
-            <div style="padding: 15px; border-radius: 8px; background-color: #1e1e2f; margin-bottom: 10px; border: 1px solid #333;">
-                <p style="color: #aaa; margin: 0; font-size: 14px;">{cat}</p>
-                <p style="color: #fff; margin: 0; font-size: 20px; font-weight: bold;">R$ {valor_total:,.2f}</p>
+    <div class="max-w-5xl mx-auto p-4 md:p-6">
+        
+        <!-- Cabeçalho -->
+        <header class="flex justify-between items-center mb-6 bg-slate-800/80 p-4 rounded-2xl border border-slate-700/50 backdrop-blur">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-emerald-500/20 text-emerald-400 rounded-xl flex items-center justify-center font-bold text-xl border border-emerald-500/30">
+                    💳
+                </div>
+                <div>
+                    <h1 class="font-bold text-lg text-white leading-tight">FinControl <span class="text-xs bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-500/30">Pro</span></h1>
+                    <p class="text-xs text-slate-400">Projeção de Meses Futuros & Parcelas</p>
+                </div>
             </div>
-            """,
-        unsafe_allow_html=True,
-    )
+            <div class="flex items-center gap-2">
+                <input type="month" id="seletorMes" class="bg-slate-900 border border-slate-700 text-xs text-slate-200 px-3 py-2 rounded-xl focus:outline-none focus:border-emerald-500" value="2026-10" onchange="renderizarTela()">
+            </div>
+        </header>
 
-st.markdown("---")
+        <!-- Resumo de Caixa (Aba 1) -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-3 mb-6">
+            <div class="bg-slate-800/60 p-4 rounded-2xl border border-slate-700/40">
+                <span class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Total Entradas</span>
+                <h2 id="totalEntradas" class="text-xl font-bold text-emerald-400 mt-1">R$ 0,00</h2>
+            </div>
+            <div class="bg-slate-800/60 p-4 rounded-2xl border border-slate-700/40">
+                <span class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">(-) Fixos, Empréstimos & Assinaturas</span>
+                <h2 id="totalFixosEmprestimos" class="text-xl font-bold text-amber-400 mt-1">R$ 0,00</h2>
+            </div>
+            <div class="bg-slate-800/60 p-4 rounded-2xl border border-slate-700/40">
+                <span class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">(-) Cartão (Fatura/Parcelas)</span>
+                <h2 id="totalFaturaCartao" class="text-xl font-bold text-rose-400 mt-1">R$ 0,00</h2>
+            </div>
+            <div class="bg-slate-800/60 p-4 rounded-2xl border border-slate-700/40 border-emerald-500/30 bg-emerald-950/10">
+                <span class="text-[10px] font-semibold text-emerald-400 uppercase tracking-wider">(=) Saldo Líquido Previsto</span>
+                <h2 id="saldoLiquidoReal" class="text-xl font-bold text-blue-400 mt-1">R$ 0,00</h2>
+            </div>
+        </div>
 
-# ---------------------------------------------------------
-# CORREÇÃO 2: Funcionalidade de Excluir Itens do Raio-X
-# ---------------------------------------------------------
-st.subheader("Raio-X de Compras e Parcelas Ativas")
-st.write("Somente compras reais e parcelas projetadas para este mês.")
+        <!-- Adicionar Entradas, Custos Fixos, Empréstimos ou Assinaturas -->
+        <div class="bg-slate-800/60 p-4 rounded-2xl border border-slate-700/40 mb-6 space-y-3">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300">💰 Gestão de Entradas, Fixos e Empréstimos:</h3>
+            
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+                <label class="flex items-center gap-2 bg-slate-900/60 p-2.5 rounded-xl border border-slate-700/50 cursor-pointer">
+                    <input type="radio" name="tipoLancamento" value="entrada" checked class="text-emerald-500">
+                    <span class="text-emerald-400 font-medium">Entrada</span>
+                </label>
+                <label class="flex items-center gap-2 bg-slate-900/60 p-2.5 rounded-xl border border-slate-700/50 cursor-pointer">
+                    <input type="radio" name="tipoLancamento" value="fixo" class="text-rose-500">
+                    <span class="text-rose-400 font-medium">Custo Fixo</span>
+                </label>
+                <label class="flex items-center gap-2 bg-slate-900/60 p-2.5 rounded-xl border border-slate-700/50 cursor-pointer">
+                    <input type="radio" name="tipoLancamento" value="emprestimo" class="text-amber-500">
+                    <span class="text-amber-400 font-medium">Empréstimo</span>
+                </label>
+                <label class="flex items-center gap-2 bg-slate-900/60 p-2.5 rounded-xl border border-slate-700/50 cursor-pointer">
+                    <input type="radio" name="tipoLancamento" value="assinatura" class="text-purple-500">
+                    <span class="text-purple-400 font-medium">Assinatura</span>
+                </label>
+            </div>
 
-if df_atual.empty:
-  st.info("Não existem itens ativos no Raio-X.")
-else:
-  # Criar uma interface interativa para gerir e excluir linhas
-  for index, row in df_atual.iterrows():
-    col_cat, col_parc, col_val, col_nota, col_acao = st.columns(
-        [2, 1, 1, 2, 1]
-    )
+            <div class="space-y-2">
+                <div class="flex flex-col sm:flex-row gap-2">
+                    <input type="text" id="descLancamento" placeholder="Descrição (Ex: Salário, Aluguel, Netflix...)" class="flex-1 bg-slate-900 border border-slate-700 text-xs text-slate-200 px-3 py-2.5 rounded-xl focus:outline-none focus:border-emerald-500">
+                    <input type="number" step="0.01" id="valorLancamento" placeholder="Valor R$" class="w-full sm:w-36 bg-slate-900 border border-slate-700 text-xs text-slate-200 px-3 py-2.5 rounded-xl focus:outline-none focus:border-emerald-500">
+                </div>
+                <button onclick="adicionarLancamentoManual()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold p-3 rounded-xl text-xs transition shadow-lg shadow-emerald-500/10">Adicionar Lançamento Contínuo</button>
+            </div>
 
-    with col_cat:
-      st.text(row["categoria"])
-    with col_parc:
-      st.text(row["parcela_atual"])
-    with col_val:
-      st.text(f"R$ {row['valor_parcela']:,.2f}")
-    with col_nota:
-      st.text(row["nota"] if row["nota"] else "-")
-    with col_acao:
-      # Botão de exclusão único para cada linha baseado no ID
-      if st.button("🗑️ Excluir", key=f"del_{row['id']}"):
-        st.session_state.dados_raio_x = df_atual.drop(index).reset_index(
-            drop=True
-        )
-        st.success(f"Item da categoria '{row['categoria']}' excluído!")
-        st.rerun()
+            <div id="listaLancamentosManuais" class="space-y-1.5 pt-2"></div>
+        </div>
+
+        <!-- Botão de Colar Texto da Fatura -->
+        <div class="bg-slate-800/60 p-4 rounded-2xl border border-slate-700/40 mb-6 space-y-3">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300">⚡ Lançar Fatura do Cartão (Raio-X):</h3>
+            <div>
+                <button onclick="abrirModalTexto()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-semibold p-3 rounded-xl transition text-xs flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/10">
+                    📋 Colar Texto da Fatura do Mês
+                </button>
+            </div>
+        </div>
+
+        <!-- Painel de Gastos Por Categoria -->
+        <div class="bg-slate-800/60 p-4 rounded-2xl border border-slate-700/40 mb-6">
+            <div class="flex justify-between items-center cursor-pointer select-none" onclick="alternarPainelCategorias()">
+                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300">📊 Total Gastos por Categoria</h3>
+                <button id="btnTogglePainel" class="text-xs bg-slate-700/60 hover:bg-slate-700 text-slate-300 px-3 py-1 rounded-lg transition">
+                    [ Recolher ▲ ]
+                </button>
+            </div>
+            <div id="conteudoPainelCategorias" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 mt-3 transition-all duration-300"></div>
+        </div>
+
+        <!-- Tabela do Raio-X -->
+        <div class="bg-slate-800/60 rounded-2xl border border-slate-700/40 overflow-hidden backdrop-blur">
+            <div class="p-4 border-b border-slate-700/40 flex justify-between items-center">
+                <div>
+                    <h3 class="font-bold text-sm text-slate-200">Raio-X de Compras e Parcelas Ativas</h3>
+                    <p class="text-[11px] text-slate-400">Somente compras reais e parcelas projetadas para este mês.</p>
+                </div>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse text-xs">
+                    <thead>
+                        <tr class="bg-slate-900/50 text-slate-400 text-[10px] uppercase tracking-wider border-b border-slate-700/40">
+                            <th class="p-3">Descrição da Compra</th>
+                            <th class="p-3">Categoria</th>
+                            <th class="p-3 text-center">Parcela Atual</th>
+                            <th class="p-3 text-right">Valor Parcela</th>
+                            <th class="p-3 text-left min-w-[150px]">Nota / Observação</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabelaRaioX" class="divide-y divide-slate-700/30">
+                        <tr>
+                            <td colspan="5" class="p-6 text-center text-slate-500">Nenhuma fatura importada. Use o botão acima para colar os dados.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Modal Colar Texto -->
+    <div id="modalTexto" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50">
+        <div class="bg-slate-800 p-5 rounded-2xl border border-slate-700 max-w-lg w-full space-y-4">
+            <h3 class="font-bold text-sm text-white">Copie e cole o texto da fatura abaixo:</h3>
+            <textarea id="textoFatura" rows="10" class="w-full bg-slate-900 border border-slate-700 text-xs text-slate-200 p-3 rounded-xl focus:outline-none focus:border-emerald-500" placeholder="Selecione tudo no PDF do seu celular, copie e cole aqui..."></textarea>
+            <div class="flex justify-end gap-2">
+                <button onclick="fecharModalTexto()" class="bg-slate-700 hover:bg-slate-600 px-4 py-2 rounded-xl text-xs">Cancelar</button>
+                <button onclick="processarTextoBruto()" class="bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold px-4 py-2 rounded-xl text-xs">Processar Fatura</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmação de Exclusão de Recorrentes -->
+    <div id="modalExclusao" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50">
+        <div class="bg-slate-800 p-5 rounded-2xl border border-slate-700 max-w-sm w-full space-y-4">
+            <h3 class="font-bold text-sm text-white">Excluir Lançamento</h3>
+            <p class="text-xs text-slate-300">Como você deseja remover este lançamento?</p>
+            <div class="space-y-2 pt-2">
+                <button onclick="confirmarExclusao('apenas_este')" class="w-full bg-slate-700 hover:bg-slate-600 text-white font-medium p-2.5 rounded-xl text-xs">Excluir SOMENTE deste mês</button>
+                <button onclick="confirmarExclusao('este_e_futuros')" class="w-full bg-rose-500 hover:bg-rose-600 text-white font-bold p-2.5 rounded-xl text-xs">Excluir deste mês E DOS PRÓXIMOS</button>
+                <button onclick="fecharModalExclusao()" class="w-full bg-transparent text-slate-400 p-2 text-xs">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let db = JSON.parse(localStorage.getItem('fincontrol_db_v11')) || { faturas: {}, recorrentes: [] };
+        let painelRecolhido = localStorage.getItem('fincontrol_painel_recolhido') === 'true';
+        let itemParaExcluirIndex = null;
+
+        const termosIgnorar = [
+            'total da fatura', 'limite de compras', 'limite de saque', 'recomendado pagamento',
+            'pagamento minimo', 'pagamento maximo', 'rotativo', 'saque parcelado', 'proximas faturas',
+            'compras parceladas', 'parcelamento fatura', 'encargos', 'protecao financeira',
+            'anuidade', 'saldo anterior', 'pagamentos/creditos', 'subtotal', 'total para',
+            'pagto. por deb', 'creditos/pagamentos', 'compras/debitos', 'cet do', 'taxa ao',
+            'valor total financiado', 'total a financiar', 'valor do iof', 'valor total a pagar',
+            'pagamento de contas', 'saque a vista', 'crediario', 'com juros', 'ultrapassem o limite',
+            'será devolvida em fatura', 'de acordo com a legislação', 'caso o pagamento realizado',
+            '1ª ela de', '1a ela de', '(=)total', '(-) creditos', '(+)compras', 'total para gilberto'
+        ];
+
+        const categoriasDisponiveis = [
+            "Pessoal", "Mercado", "Combustível", "Saúde", "Manutenção Casa",
+            "Manutenção carro", "Estudo", "Locomoção", "Lazer", "Presentes"
+        ];
+
+        function normalizarTexto(txt) {
+            return txt.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+        }
+
+        function abrirModalTexto() { document.getElementById('modalTexto').classList.remove('hidden'); }
+        function fecharModalTexto() { document.getElementById('modalTexto').classList.add('hidden'); }
+
+        function alternarPainelCategorias() {
+            painelRecolhido = !painelRecolhido;
+            localStorage.setItem('fincontrol_painel_recolhido', painelRecolhido);
+            atualizarEstadoPainel();
+        }
+
+        function atualizarEstadoPainel() {
+            let conteudo = document.getElementById('conteudoPainelCategorias');
+            let btn = document.getElementById('btnTogglePainel');
+            if (painelRecolhido) {
+                conteudo.classList.add('hidden');
+                btn.innerText = '[ Expandir ▼ ]';
+            } else {
+                conteudo.classList.remove('hidden');
+                btn.innerText = '[ Recolher ▲ ]';
+            }
+        }
+
+        function adicionarLancamentoManual() {
+            let tipo = document.querySelector('input[name="tipoLancamento"]:checked').value;
+            let descricao = document.getElementById('descLancamento').value.trim();
+            let valor = parseFloat(document.getElementById('valorLancamento').value);
+            let mesInicio = document.getElementById('seletorMes').value;
+
+            if (!descricao || isNaN(valor) || valor <= 0) {
+                alert("Preencha a descrição e um valor válido.");
+                return;
+            }
+
+            if (!db.recorrentes) db.recorrentes = [];
+
+            db.recorrentes.push({
+                id: Date.now(),
+                tipo,
+                descricao,
+                valor,
+                mesInicio,
+                mesFimExclusao: null,
+                exclusoesMês: []
+            });
+
+            localStorage.setItem('fincontrol_db_v11', JSON.stringify(db));
+
+            document.getElementById('descLancamento').value = '';
+            document.getElementById('valorLancamento').value = '';
+            renderizarTela();
+        }
+
+        function solicitarExclusaoManual(id) {
+            itemParaExcluirIndex = id;
+            document.getElementById('modalExclusao').classList.remove('hidden');
+        }
+
+        function fecharModalExclusao() {
+            itemParaExcluirIndex = null;
+            document.getElementById('modalExclusao').classList.add('hidden');
+        }
+
+        function confirmarExclusao(modo) {
+            let mesAtual = document.getElementById('seletorMes').value;
+            let item = db.recorrentes.find(r => r.id === itemParaExcluirIndex);
+
+            if (item) {
+                if (modo === 'apenas_este') {
+                    if (!item.exclusoesMês) item.exclusoesMês = [];
+                    item.exclusoesMês.push(mesAtual);
+                } else if (modo === 'este_e_futuros') {
+                    item.mesFimExclusao = mesAtual;
+                }
+                localStorage.setItem('fincontrol_db_v11', JSON.stringify(db));
+            }
+
+            fecharModalExclusao();
+            renderizarTela();
+        }
+
+        function alterarValorManual(id, novoValor) {
+            let val = parseFloat(novoValor);
+            if (isNaN(val) || val <= 0) return;
+            let item = db.recorrentes.find(r => r.id === id);
+            if (item) {
+                item.valor = val;
+                localStorage.setItem('fincontrol_db_v11', JSON.stringify(db));
+                renderizarTela();
+            }
+        }
+
+        function processarTextoBruto() {
+            const texto = document.getElementById('textoFatura').value;
+            if (!texto) return;
+            let linhas = texto.split('\n');
+            extrairDadosFatura(linhas);
+            fecharModalTexto();
+        }
+
+        function extrairDadosFatura(linhas) {
+            let mesChave = document.getElementById('seletorMes').value;
+            let compras = [];
+            let valorFaturaFechada = 0;
+
+            linhas.forEach(linha => {
+                let linhaNorm = normalizarTexto(linha);
+
+                if (linhaNorm.includes("total da fatura") || linhaNorm.includes("(=)total") || linhaNorm.includes("total em real")) {
+                    let matchTotal = linha.match(/R?\$?\s*(\d{1,3}(?:\.\d{3})*,\d{2})/);
+                    if (matchTotal) {
+                        let valTot = parseFloat(matchTotal[1].replace(/\./g, '').replace(',', '.'));
+                        if (valTot > valorFaturaFechada) valorFaturaFechada = valTot;
+                    }
+                }
+
+                if (termosIgnorar.some(termo => linhaNorm.includes(termo)) || linha.includes('%')) return;
+
+                let matchValor = linha.match(/R?\$?\s*(\d{1,3}(?:\.\d{3})*,\d{2})/);
+                if (!matchValor) return;
+
+                let valor = parseFloat(matchValor[1].replace(/\./g, '').replace(',', '.'));
+                if (isNaN(valor) || valor <= 0) return;
+
+                let parcela = "À vista";
+                let regexParcela = /(\d{1,2})\/(\d{1,2})/g;
+                let matches = [...linha.matchAll(regexParcela)];
+
+                matches.forEach(m => {
+                    let numAtual = parseInt(m[1], 10);
+                    let numTotal = parseInt(m[2], 10);
+                    if (numAtual <= numTotal && numTotal > 1 && numTotal <= 48 && numTotal !== 26) {
+                        parcela = `${String(numAtual).padStart(2, '0')}/${String(numTotal).padStart(2, '0')}`;
+                    }
+                });
+
+                let nome = linha
+                    .replace(/R?\$?\s*\d{1,3}(?:\.\d{3})*,\d{2}/g, '')
+                    .replace(/\d{1,2}\/\d{1,2}/g, '')
+                    .replace(/PARC/gi, '')
+                    .replace(/^\d+\s+/, '')
+                    .replace(/[\.\*\%]/g, ' ')
+                    .replace(/SERÁ DEVOLVIDA EM FATURA.*/gi, '')
+                    .trim();
+
+                if (nome.length < 3 || nome === "/2026" || nome === "2026") return;
+
+                let categoria = "Pessoal";
+                let nLower = nome.toLowerCase();
+
+                if (nLower.includes("posto") || nLower.includes("combustivel") || nLower.includes("auto posto")) categoria = "Combustível";
+                else if (nLower.includes("mercado") || nLower.includes("jacomar") || nLower.includes("bonato") || nLower.includes("condor")) categoria = "Mercado";
+                else if (nLower.includes("farmacia") || nLower.includes("saude") || nLower.includes("medprev")) categoria = "Saúde";
+                else if (nLower.includes("materiais") || nLower.includes("toka") || nLower.includes("madeira")) categoria = "Manutenção Casa";
+                else if (nLower.includes("oficina") || nLower.includes("autopecas") || nLower.includes("pneu") || nLower.includes("mecanica") || nLower.includes("renesto")) categoria = "Manutenção carro";
+
+                compras.push({ descricao: nome.toUpperCase(), categoria, parcela, valor, nota: "" });
+            });
+
+            if (valorFaturaFechada === 0) valorFaturaFechada = compras.reduce((acc, c) => acc + c.valor, 0);
+
+            if (!db.faturas) db.faturas = {};
+            db.faturas[mesChave] = { faturaFechada: valorFaturaFechada, compras: compras };
+
+            localStorage.setItem('fincontrol_db_v11', JSON.stringify(db));
+            renderizarTela();
+        }
+
+        function obterComprasEParcelasDoMes(mesAlvoStr) {
+            let resultado = [];
+
+            if (db.faturas && db.faturas[mesAlvoStr] && db.faturas[mesAlvoStr].compras) {
+                // Retorna cópia para permitir exclusão sem corromper a base original de outros meses
+                return JSON.parse(JSON.stringify(db.faturas[mesAlvoStr].compras));
+            }
+
+            let [anoAlvo, mesAlvo] = mesAlvoStr.split('-').map(Number);
+
+            if (db.faturas) {
+                Object.keys(db.faturas).forEach(mOrigemKey => {
+                    let [anoOrigem, mesOrigem] = mOrigemKey.split('-').map(Number);
+                    let diffMeses = (anoAlvo - anoOrigem) * 12 + (mesAlvo - mesOrigem);
+
+                    if (diffMeses > 0 && db.faturas[mOrigemKey].compras) {
+                        db.faturas[mOrigemKey].compras.forEach(item => {
+                            if (item.parcela && item.parcela !== "À vista") {
+                                let partes = item.parcela.split('/');
+                                let parcAtualOrigem = parseInt(partes[0], 10);
+                                let parcTotal = parseInt(partes[1], 10);
+
+                                let novaParcelaAtual = parcAtualOrigem + diffMeses;
+
+                                if (novaParcelaAtual <= parcTotal) {
+                                    resultado.push({
+                                        descricao: item.descricao,
+                                        categoria: item.categoria,
+                                        parcela: `${String(novaParcelaAtual).padStart(2, '0')}/${String(parcTotal).padStart(2, '0')}`,
+                                        valor: item.valor,
+                                        nota: item.nota || ""
+                                    });
+                                }
+                            }
+                        });
+                    }
+                });
+            }
+
+            return resultado;
+        }
+
+        function alterarCategoria(index, novaCategoria) {
+            let mesChave = document.getElementById('seletorMes').value;
+            if (db.faturas && db.faturas[mesChave] && db.faturas[mesChave].compras[index]) {
+                db.faturas[mesChave].compras[index].categoria = novaCategoria;
+                localStorage.setItem('fincontrol_db_v11', JSON.stringify(db));
+                renderizarTela();
+            }
+        }
+
+        function alterarNota(index, novaNota) {
+            let mesChave = document.getElementById('seletorMes').value;
+            if (db.faturas && db.faturas[mesChave] && db.faturas[mesChave].compras[index]) {
+                db.faturas[mesChave].compras[index].nota = novaNota;
+                localStorage.setItem('fincontrol_db_v11', JSON.stringify(db));
+            }
+        }
+
+        function excluirItemRaioX(index) {
+            let mesChave = document.getElementById('seletorMes').value;
+            if (db.faturas && db.faturas[mesChave] && db.faturas[mesChave].compras) {
+                db.faturas[mesChave].compras.splice(index, 1);
+                // Atualiza o valor da fatura fechada do mês com base nas compras restantes
+                db.faturas[mesChave].faturaFechada = db.faturas[mesChave].compras.reduce((acc, c) => acc + c.valor, 0);
+                localStorage.setItem('fincontrol_db_v11', JSON.stringify(db));
+                renderizarTela();
+            }
+        }
+
+        function renderizarTela() {
+            let mesChave = document.getElementById('seletorMes').value;
+            
+            let comprasMes = obterComprasEParcelasDoMes(mesChave);
+            let valorFaturaMes = (db.faturas && db.faturas[mesChave]) 
+                ? db.faturas[mesChave].faturaFechada 
+                : comprasMes.reduce((acc, c) => acc + c.valor, 0);
+
+            let totalEntradas = 0;
+            let totalFixosEmprestimos = 0;
+
+            let listaDiv = document.getElementById('listaLancamentosManuais');
+            listaDiv.innerHTML = '';
+
+            let manuaisAtivos = (db.recorrentes || []).filter(item => {
+                if (item.mesInicio > mesChave) return false;
+                if (item.mesFimExclusao && mesChave >= item.mesFimExclusao) return false;
+                if (item.exclusoesMês && item.exclusoesMês.includes(mesChave)) return false;
+                return true;
+            });
+
+            if (manuaisAtivos.length > 0) {
+                manuaisAtivos.forEach(item => {
+                    if (item.tipo === 'entrada') totalEntradas += item.valor;
+                    else totalFixosEmprestimos += item.valor;
+
+                    let corBorda = item.tipo === 'entrada' ? 'border-emerald-500/30 text-emerald-400' :
+                                   item.tipo === 'fixo' ? 'border-rose-500/30 text-rose-400' :
+                                   item.tipo === 'emprestimo' ? 'border-amber-500/30 text-amber-400' : 'border-purple-500/30 text-purple-400';
+
+                    let badgeTexto = item.tipo === 'entrada' ? 'Entrada' :
+                                     item.tipo === 'fixo' ? 'Custo Fixo' :
+                                     item.tipo === 'emprestimo' ? 'Empréstimo' : 'Assinatura';
+
+                    let divItem = document.createElement('div');
+                    divItem.className = `flex justify-between items-center bg-slate-900/80 border ${corBorda} p-2.5 rounded-xl text-xs`;
+                    divItem.innerHTML = `
+                        <div class="flex items-center gap-2">
+                            <span class="text-[10px] px-2 py-0.5 rounded bg-slate-800 font-semibold uppercase">${badgeTexto}</span>
+                            <span class="text-slate-200 font-medium">${item.descricao}</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-slate-400">R$</span>
+                            <input type="number" step="0.01" value="${item.valor}" onchange="alterarValorManual(${item.id}, this.value)" class="w-20 bg-slate-950 border border-slate-700 text-right px-1.5 py-0.5 rounded text-xs font-bold text-slate-100 focus:outline-none focus:border-emerald-500" />
+                            <button onclick="solicitarExclusaoManual(${item.id})" class="text-slate-500 hover:text-rose-400 font-bold ml-1">✕</button>
+                        </div>
+                    `;
+                    listaDiv.appendChild(divItem);
+                });
+            } else {
+                listaDiv.innerHTML = `<p class="text-[11px] text-slate-500 text-center py-1">Nenhum lançamento recorrente ativo para este mês.</p>`;
+            }
+
+            let saldoReal = totalEntradas - (totalFixosEmprestimos + valorFaturaMes);
+
+            document.getElementById('totalEntradas').innerText = `R$ ${totalEntradas.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+            document.getElementById('totalFixosEmprestimos').innerText = `R$ ${totalFixosEmprestimos.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+            document.getElementById('totalFaturaCartao').innerText = `R$ ${valorFaturaMes.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+            
+            let elSaldo = document.getElementById('saldoLiquidoReal');
+            elSaldo.innerText = `R$ ${saldoReal.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+            elSaldo.className = `text-xl font-bold mt-1 ${saldoReal >= 0 ? 'text-blue-400' : 'text-rose-400'}`;
+
+            // Totais por Categoria (Normalizando para evitar incompatibilidade com acentuação/maiúsculas)
+            let totaisCategoria = {};
+            categoriasDisponiveis.forEach(cat => totaisCategoria[cat] = 0);
+            
+            comprasMes.forEach(item => {
+                let catEncontrada = categoriasDisponiveis.find(c => c.toLowerCase() === item.categoria.toLowerCase());
+                if (catEncontrada) {
+                    totaisCategoria[catEncontrada] += item.valor;
+                } else {
+                    totaisCategoria["Pessoal"] += item.valor;
+                }
+            });
+
+            let containerCards = document.getElementById('conteudoPainelCategorias');
+            containerCards.innerHTML = '';
+            categoriasDisponiveis.forEach(cat => {
+                let valor = totaisCategoria[cat];
+                let card = document.createElement('div');
+                card.className = `p-2.5 rounded-xl border text-left ${valor > 0 ? 'bg-slate-900/80 border-slate-700/80' : 'bg-slate-900/30 border-slate-800 text-slate-500'}`;
+                card.innerHTML = `
+                    <p class="text-[10px] font-medium text-slate-400 truncate">${cat}</p>
+                    <p class="text-xs font-bold mt-0.5 ${valor > 0 ? 'text-amber-400' : 'text-slate-600'}">R$ ${valor.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</p>
+                `;
+                containerCards.appendChild(card);
+            });
+
+            atualizarEstadoPainel();
+
+            let tbody = document.getElementById('tabelaRaioX');
+            tbody.innerHTML = '';
+
+            if (comprasMes.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-slate-500">Nenhuma fatura importada ou parcela projetada para este mês.</td></tr>`;
+                return;
+            }
+
+            comprasMes.forEach((item, index) => {
+                let tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-700/20 transition";
+                
+                let badgeParcela = item.parcela !== "À vista" 
+                    ? `<span class="bg-amber-500/10 text-amber-400 border border-amber-500/20 px-2 py-0.5 rounded-md font-semibold text-[10px]">${item.parcela}</span>`
+                    : `<span class="bg-slate-700/40 text-slate-400 px-2 py-0.5 rounded-md text-[10px]">${item.parcela}</span>`;
+
+                let optionsCategoria = categoriasDisponiveis.map(cat => 
+                    `<option value="${cat}" ${cat.toLowerCase() === item.categoria.toLowerCase() ? 'selected' : ''}>${cat}</option>`
+                ).join('');
+
+                tr.innerHTML = `
+                    <td class="p-3 font-medium text-slate-200">${item.descricao}</td>
+                    <td class="p-3">
+                        <select onchange="alterarCategoria(${index}, this.value)" class="bg-slate-900 border border-slate-700/80 text-slate-300 px-2 py-1 rounded-md text-[11px] focus:outline-none focus:border-emerald-500">
+                            ${optionsCategoria}
+                        </select>
+                    </td>
+                    <td class="p-3 text-center">${badgeParcela}</td>
+                    <td class="p-3 text-right font-semibold text-slate-200">R$ ${item.valor.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+                    <td class="p-3 flex items-center justify-between gap-2">
+                        <input type="text" value="${item.nota || ''}" placeholder="Adicionar nota..." onchange="alterarNota(${index}, this.value)" class="w-full bg-slate-900/60 border border-slate-700/50 text-slate-300 text-[11px] px-2 py-1 rounded-md focus:outline-none focus:border-emerald-500 placeholder:text-slate-600" />
+                        <button onclick="excluirItemRaioX(${index})" class="text-slate-500 hover:text-rose-400 font-bold px-1.5 py-0.5 text-xs transition" title="Excluir item">✕</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        renderizarTela();
+    </script>
+</body>
+</html>
