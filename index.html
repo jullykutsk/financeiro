@@ -15,7 +15,7 @@
 </head>
 <body class="font-sans antialiased min-h-screen pb-12 selection:bg-emerald-500 selection:text-slate-950">
 
-    <div class="max-w-5xl mx-auto p-4 md:p-6 space-y-6">
+    <div class="max-w-6xl mx-auto p-4 md:p-6 space-y-6">
         
         <!-- Cabeçalho Moderno & Fluído -->
         <header class="bg-gradient-to-br from-slate-900/90 to-slate-800/80 p-5 rounded-3xl border border-slate-700/60 shadow-xl shadow-black/40 backdrop-blur-xl flex flex-col md:flex-row justify-between items-center gap-4">
@@ -29,7 +29,7 @@
                         <h1 class="font-black text-xl text-white tracking-tight">FinControl</h1>
                         <span class="text-[10px] uppercase font-extrabold bg-emerald-500 text-slate-950 px-2 py-0.5 rounded-full shadow-sm shadow-emerald-500/50">Pro</span>
                     </div>
-                    <p class="text-xs text-slate-400 font-medium">Projeção Contínua & Memória de Categorias</p>
+                    <p class="text-xs text-slate-400 font-medium">Projeção Contínua & Múltiplos Cartões</p>
                 </div>
             </div>
             
@@ -43,7 +43,6 @@
                     💾 <span class="hidden sm:inline">Backup</span>
                 </button>
 
-                <!-- Alterado accept="*" para desbloquear todos os ficheiros no telemóvel -->
                 <button onclick="document.getElementById('fileBackupInput').click()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700/80 px-3.5 py-2.5 rounded-2xl text-xs font-semibold transition flex items-center gap-1.5 shadow-md active:scale-95" title="Carregar Backup">
                     📂 <span class="hidden sm:inline">Restaurar</span>
                 </button>
@@ -62,7 +61,7 @@
                 <h2 id="totalFixosEmprestimos" class="text-2xl font-black text-amber-400 mt-2">R$ 0,00</h2>
             </div>
             <div class="bg-slate-900/60 p-4 rounded-3xl border border-slate-800 shadow-lg backdrop-blur flex flex-col justify-between">
-                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">(-) Cartão (Fatura/Parcelas)</span>
+                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">(-) Cartões (Faturas/Parcelas)</span>
                 <h2 id="totalFaturaCartao" class="text-2xl font-black text-rose-400 mt-2">R$ 0,00</h2>
             </div>
             <div class="bg-gradient-to-br from-emerald-950/40 to-slate-900/80 p-4 rounded-3xl border border-emerald-500/30 shadow-lg backdrop-blur flex flex-col justify-between">
@@ -106,7 +105,7 @@
                 </button>
             </div>
 
-            <div id="listaLancamentosManuais" class="space-y-2 pt-1"></div>
+            <div id="listaLancamentosManuais" class="space-y-2.5 pt-1"></div>
         </div>
 
         <!-- Botão de Colar Texto da Fatura -->
@@ -125,10 +124,10 @@
         <div class="bg-slate-900/60 p-5 rounded-3xl border border-slate-800 shadow-lg backdrop-blur">
             <div class="flex justify-between items-center cursor-pointer select-none" onclick="alternarPainelCategorias()">
                 <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-2">
-                    <span>📊</span> Total Gastos por Categoria
+                    <span>📊</span> TOTAL GASTOS POR CATEGORIA
                 </h3>
-                <button id="btnTogglePainel" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-1.5 rounded-xl transition border border-slate-700">
-                    [ Recolher ▲ ]
+                <button id="btnTogglePainel" class="text-sm bg-slate-800 hover:bg-slate-700 text-slate-300 px-3.5 py-1.5 rounded-xl transition border border-slate-700 font-bold">
+                    ▲
                 </button>
             </div>
             <div id="conteudoPainelCategorias" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2.5 mt-4 transition-all duration-300"></div>
@@ -148,6 +147,7 @@
                     <thead>
                         <tr class="bg-slate-950/60 text-slate-400 text-[10px] uppercase tracking-wider border-b border-slate-800">
                             <th class="p-3.5">Descrição da Compra</th>
+                            <th class="p-3.5">Cartão</th>
                             <th class="p-3.5">Categoria</th>
                             <th class="p-3.5 text-center">Parcela Atual</th>
                             <th class="p-3.5 text-right">Valor Parcela</th>
@@ -156,7 +156,7 @@
                     </thead>
                     <tbody id="tabelaRaioX" class="divide-y divide-slate-800/60">
                         <tr>
-                            <td colspan="5" class="p-8 text-center text-slate-500">Nenhuma fatura importada. Use o botão acima para colar os dados.</td>
+                            <td colspan="6" class="p-8 text-center text-slate-500">Nenhuma fatura importada. Use o botão acima para colar os dados.</td>
                         </tr>
                     </tbody>
                 </table>
@@ -191,7 +191,7 @@
     </div>
 
     <script>
-        let db = JSON.parse(localStorage.getItem('fincontrol_db_v13')) || { faturas: {}, recorrentes: [], regrasCategorias: {} };
+        let db = JSON.parse(localStorage.getItem('fincontrol_db_v14')) || { faturas: {}, recorrentes: [], regrasCategorias: {}, regrasCartoes: {} };
         let painelRecolhido = localStorage.getItem('fincontrol_painel_recolhido') === 'true';
         let itemParaExcluirIndex = null;
 
@@ -210,6 +210,10 @@
         const categoriasDisponiveis = [
             "Pessoal", "Mercado", "Combustível", "Saúde", "Manutenção Casa",
             "Manutenção carro", "Estudo", "Locomoção", "Lazer", "Presentes"
+        ];
+
+        const cartoesDisponiveis = [
+            "Bradesco", "Caixa", "Nubank", "Itaú", "Inter", "Santander", "Outro"
         ];
 
         function normalizarTexto(txt) {
@@ -233,14 +237,14 @@
             reader.onload = function(e) {
                 try {
                     let conteudo = JSON.parse(e.target.result);
-                    // Validação flexível para aceitar o backup
                     if (conteudo) {
                         db = {
                             faturas: conteudo.faturas || {},
                             recorrentes: conteudo.recorrentes || [],
-                            regrasCategorias: conteudo.regrasCategorias || {}
+                            regrasCategorias: conteudo.regrasCategorias || {},
+                            regrasCartoes: conteudo.regrasCartoes || {}
                         };
-                        localStorage.setItem('fincontrol_db_v13', JSON.stringify(db));
+                        localStorage.setItem('fincontrol_db_v14', JSON.stringify(db));
                         renderizarTela();
                         alert("Backup carregado com sucesso!");
                     } else {
@@ -267,10 +271,10 @@
             let btn = document.getElementById('btnTogglePainel');
             if (painelRecolhido) {
                 conteudo.classList.add('hidden');
-                btn.innerText = '[ Expandir ▼ ]';
+                btn.innerText = '▼';
             } else {
                 conteudo.classList.remove('hidden');
-                btn.innerText = '[ Recolher ▲ ]';
+                btn.innerText = '▲';
             }
         }
 
@@ -297,7 +301,7 @@
                 exclusoesMês: []
             });
 
-            localStorage.setItem('fincontrol_db_v13', JSON.stringify(db));
+            localStorage.setItem('fincontrol_db_v14', JSON.stringify(db));
 
             document.getElementById('descLancamento').value = '';
             document.getElementById('valorLancamento').value = '';
@@ -325,7 +329,7 @@
                 } else if (modo === 'este_e_futuros') {
                     item.mesFimExclusao = mesAtual;
                 }
-                localStorage.setItem('fincontrol_db_v13', JSON.stringify(db));
+                localStorage.setItem('fincontrol_db_v14', JSON.stringify(db));
             }
 
             fecharModalExclusao();
@@ -338,7 +342,7 @@
             let item = db.recorrentes.find(r => r.id === id);
             if (item) {
                 item.valor = val;
-                localStorage.setItem('fincontrol_db_v13', JSON.stringify(db));
+                localStorage.setItem('fincontrol_db_v14', JSON.stringify(db));
                 renderizarTela();
             }
         }
@@ -357,6 +361,7 @@
             let valorFaturaFechada = 0;
 
             if (!db.regrasCategorias) db.regrasCategorias = {};
+            if (!db.regrasCartoes) db.regrasCartoes = {};
 
             linhas.forEach(linha => {
                 let linhaNorm = normalizarTexto(linha);
@@ -401,6 +406,7 @@
                 if (nome.length < 3 || nome === "/2026" || nome === "2026") return;
                 let nomeUpper = nome.toUpperCase();
 
+                // Categoria
                 let categoria = "Pessoal";
                 if (db.regrasCategorias[nomeUpper]) {
                     categoria = db.regrasCategorias[nomeUpper];
@@ -413,7 +419,10 @@
                     else if (nLower.includes("oficina") || nLower.includes("autopecas") || nLower.includes("pneu") || nLower.includes("mecanica") || nLower.includes("renesto")) categoria = "Manutenção carro";
                 }
 
-                compras.push({ descricao: nomeUpper, categoria, parcela, valor, nota: "" });
+                // Cartão
+                let cartao = db.regrasCartoes[nomeUpper] || "Bradesco";
+
+                compras.push({ descricao: nomeUpper, cartao, categoria, parcela, valor, nota: "" });
             });
 
             if (valorFaturaFechada === 0) valorFaturaFechada = compras.reduce((acc, c) => acc + c.valor, 0);
@@ -421,7 +430,7 @@
             if (!db.faturas) db.faturas = {};
             db.faturas[mesChave] = { faturaFechada: valorFaturaFechada, compras: compras };
 
-            localStorage.setItem('fincontrol_db_v13', JSON.stringify(db));
+            localStorage.setItem('fincontrol_db_v14', JSON.stringify(db));
             renderizarTela();
         }
 
@@ -451,6 +460,7 @@
                                 if (novaParcelaAtual <= parcTotal) {
                                     resultado.push({
                                         descricao: item.descricao,
+                                        cartao: item.cartao || "Bradesco",
                                         categoria: item.categoria,
                                         parcela: `${String(novaParcelaAtual).padStart(2, '0')}/${String(parcTotal).padStart(2, '0')}`,
                                         valor: item.valor,
@@ -464,6 +474,26 @@
             }
 
             return resultado;
+        }
+
+        function alterarCartao(index, novoCartao) {
+            let mesChave = document.getElementById('seletorMes').value;
+            let comprasMes = obterComprasEParcelasDoMes(mesChave);
+            
+            if (comprasMes[index]) {
+                let itemModificado = comprasMes[index];
+                itemModificado.cartao = novoCartao;
+
+                if (!db.regrasCartoes) db.regrasCartoes = {};
+                db.regrasCartoes[itemModificado.descricao] = novoCartao;
+
+                if (db.faturas && db.faturas[mesChave] && db.faturas[mesChave].compras[index]) {
+                    db.faturas[mesChave].compras[index].cartao = novoCartao;
+                }
+
+                localStorage.setItem('fincontrol_db_v14', JSON.stringify(db));
+                renderizarTela();
+            }
         }
 
         function alterarCategoria(index, novaCategoria) {
@@ -481,7 +511,7 @@
                     db.faturas[mesChave].compras[index].categoria = novaCategoria;
                 }
 
-                localStorage.setItem('fincontrol_db_v13', JSON.stringify(db));
+                localStorage.setItem('fincontrol_db_v14', JSON.stringify(db));
                 renderizarTela();
             }
         }
@@ -490,7 +520,7 @@
             let mesChave = document.getElementById('seletorMes').value;
             if (db.faturas && db.faturas[mesChave] && db.faturas[mesChave].compras[index]) {
                 db.faturas[mesChave].compras[index].nota = novaNota;
-                localStorage.setItem('fincontrol_db_v13', JSON.stringify(db));
+                localStorage.setItem('fincontrol_db_v14', JSON.stringify(db));
             }
         }
 
@@ -499,7 +529,7 @@
             if (db.faturas && db.faturas[mesChave] && db.faturas[mesChave].compras) {
                 db.faturas[mesChave].compras.splice(index, 1);
                 db.faturas[mesChave].faturaFechada = db.faturas[mesChave].compras.reduce((acc, c) => acc + c.valor, 0);
-                localStorage.setItem('fincontrol_db_v13', JSON.stringify(db));
+                localStorage.setItem('fincontrol_db_v14', JSON.stringify(db));
                 renderizarTela();
             }
         }
@@ -539,16 +569,18 @@
                                      item.tipo === 'emprestimo' ? 'Empréstimo' : 'Assinatura';
 
                     let divItem = document.createElement('div');
-                    divItem.className = `flex justify-between items-center bg-slate-950/80 border ${corBorda} p-3 rounded-2xl text-xs shadow-inner`;
+                    divItem.className = `flex flex-col gap-2 bg-slate-950/80 border ${corBorda} p-3.5 rounded-2xl text-xs shadow-inner`;
                     divItem.innerHTML = `
-                        <div class="flex items-center gap-2">
+                        <div class="flex items-center justify-between gap-2">
                             <span class="text-[10px] px-2 py-0.5 rounded-lg bg-slate-900 font-bold uppercase tracking-wider">${badgeTexto}</span>
-                            <span class="text-slate-200 font-semibold">${item.descricao}</span>
+                            <span class="text-slate-100 font-bold text-sm tracking-wide text-right break-words flex-1">${item.descricao}</span>
                         </div>
-                        <div class="flex items-center gap-2.5">
-                            <span class="text-slate-400 font-medium">R$</span>
-                            <input type="number" step="0.01" value="${item.valor}" onchange="alterarValorManual(${item.id}, this.value)" class="w-24 bg-slate-900 border border-slate-700/80 text-right px-2 py-1 rounded-xl text-xs font-bold text-slate-100 focus:outline-none focus:border-emerald-500 shadow-inner" />
-                            <button onclick="solicitarExclusaoManual(${item.id})" class="text-slate-500 hover:text-rose-400 font-bold p-1 transition" title="Excluir">✕</button>
+                        <div class="flex items-center justify-between pt-1 border-t border-slate-900/80">
+                            <span class="text-slate-400 font-medium">Valor: R$</span>
+                            <div class="flex items-center gap-2">
+                                <input type="number" step="0.01" value="${item.valor}" onchange="alterarValorManual(${item.id}, this.value)" class="w-28 bg-slate-900 border border-slate-700/80 text-right px-2.5 py-1.5 rounded-xl text-xs font-bold text-emerald-400 focus:outline-none focus:border-emerald-500 shadow-inner" />
+                                <button onclick="solicitarExclusaoManual(${item.id})" class="text-slate-500 hover:text-rose-400 font-bold p-1.5 rounded-lg hover:bg-rose-500/10 transition" title="Excluir">✕</button>
+                            </div>
                         </div>
                     `;
                     listaDiv.appendChild(divItem);
@@ -598,7 +630,7 @@
             tbody.innerHTML = '';
 
             if (comprasMes.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" class="p-8 text-center text-slate-500 italic">Nenhuma fatura importada ou parcela projetada para este mês.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-slate-500 italic">Nenhuma fatura importada ou parcela projetada para este mês.</td></tr>`;
                 return;
             }
 
@@ -610,12 +642,21 @@
                     ? `<span class="bg-amber-500/10 text-amber-400 border border-amber-500/20 px-2 py-1 rounded-lg font-bold text-[10px]">${item.parcela}</span>`
                     : `<span class="bg-slate-800/40 text-slate-400 px-2 py-1 rounded-lg text-[10px]">${item.parcela}</span>`;
 
+                let optionsCartao = cartoesDisponiveis.map(cart => 
+                    `<option value="${cart}" ${cart.toLowerCase() === (item.cartao || "bradesco").toLowerCase() ? 'selected' : ''}>${cart}</option>`
+                ).join('');
+
                 let optionsCategoria = categoriasDisponiveis.map(cat => 
                     `<option value="${cat}" ${cat.toLowerCase() === item.categoria.toLowerCase() ? 'selected' : ''}>${cat}</option>`
                 ).join('');
 
                 tr.innerHTML = `
                     <td class="p-3.5 font-semibold text-slate-200">${item.descricao}</td>
+                    <td class="p-3.5">
+                        <select onchange="alterarCartao(${index}, this.value)" class="bg-slate-950 border border-slate-700/80 text-emerald-400 px-2.5 py-1.5 rounded-xl text-[11px] font-bold focus:outline-none focus:border-emerald-500 shadow-inner">
+                            ${optionsCartao}
+                        </select>
+                    </td>
                     <td class="p-3.5">
                         <select onchange="alterarCategoria(${index}, this.value)" class="bg-slate-950 border border-slate-700/80 text-slate-300 px-2.5 py-1.5 rounded-xl text-[11px] font-medium focus:outline-none focus:border-emerald-500 shadow-inner">
                             ${optionsCategoria}
