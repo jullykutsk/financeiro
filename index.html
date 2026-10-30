@@ -197,11 +197,11 @@
                 <table class="w-full text-left border-collapse text-xs">
                     <thead>
                         <tr class="bg-slate-950/60 text-slate-400 text-[10px] uppercase tracking-wider border-b border-slate-800">
-                            <th class="p-3.5">Descrição da Compra</th>
+                            <th class="p-3.5">Descrição</th>
                             <th class="p-3.5">Cartão</th>
                             <th class="p-3.5">Categoria</th>
-                            <th class="p-3.5 text-center">Parcela Atual</th>
-                            <th class="p-3.5 text-right">Valor Parcela</th>
+                            <th class="p-3.5 text-center">Parcela</th>
+                            <th class="p-3.5 text-right">Valor</th>
                             <th class="p-3.5 text-left min-w-[160px]">Nota / Observação</th>
                         </tr>
                     </thead>
@@ -247,7 +247,6 @@
         let gruposRecolhidos = JSON.parse(localStorage.getItem('fincontrol_grupos_recolhidos')) || { entrada: false, fixo: false, emprestimo: false, assinatura: false };
         let itemParaExcluirIndex = null;
 
-        // Definir o mês atual automaticamente ao iniciar
         function inicializarMesAtual() {
             let seletor = document.getElementById('seletorMes');
             if (!seletor.value) {
@@ -761,7 +760,6 @@
             });
         }
 
-        // Executar inicialização do mês atual e carregar tela
         inicializarMesAtual();
         renderizarTela();
     </script>
