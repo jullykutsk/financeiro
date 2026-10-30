@@ -183,11 +183,11 @@
                 </div>
             </div>
 
-            <!-- PAINEL DE GASTOS SEPARADOS POR CARTÃO (RECOLHÍVEL) -->
+            <!-- PAINEL DE GASTOS SEPARADOS POR CARTÃO (RECOLHÍVEL) COM OPÇÃO DE APAGAR -->
             <div class="bg-[#22272c]/80 p-5 rounded-3xl border border-[#3b434a] shadow-lg backdrop-blur">
                 <div class="flex justify-between items-center cursor-pointer select-none" onclick="alternarPainelCartoes()">
                     <h3 class="text-xs font-bold uppercase tracking-wider text-[#c5cbd3] flex items-center gap-2">
-                        <span>💳</span> TOTAL GASTOS POR CARTÃO
+                        <span>💳</span> TOTAL GASTOS POR CARTÃO (Toque no ✕ para apagar personalizados)
                     </h3>
                     <button id="btnTogglePainelCartoes" type="button" class="nao-imprimir text-sm bg-[#1a1e23] hover:bg-[#2d333b] text-[#c5cbd3] px-3.5 py-1.5 rounded-xl transition border border-[#3b434a] font-bold">
                         ▼
@@ -326,6 +326,37 @@
                 }
             });
             return combinados;
+        }
+
+        function apagarCartaoPersonalizado(nomeCartao) {
+            let basePadrao = ["Bradesco", "Caixa", "Nubank", "Itaú", "Inter", "Santander"];
+            if (basePadrao.some(b => b.toLowerCase() === nomeCartao.toLowerCase())) {
+                alert("Não é possível apagar os cartões padrão do sistema.");
+                return;
+            }
+
+            if (confirm(`Tem certeza que deseja apagar o cartão "${nomeCartao}"? As compras associadas passarão para o Bradesco.`)) {
+                // Remove dos cartões personalizados
+                if (db.cartoesPersonalizados) {
+                    db.cartoesPersonalizados = db.cartoesPersonalizados.filter(c => c.toLowerCase() !== nomeCartao.toLowerCase());
+                }
+
+                // Atualiza compras existentes para Bradesco caso estivessem neste cartão
+                if (db.faturas) {
+                    Object.keys(db.faturas).forEach(mes => {
+                        if (db.faturas[mes].compras) {
+                            db.faturas[mes].compras.forEach(compra => {
+                                if (compra.cartao && compra.cartao.toLowerCase() === nomeCartao.toLowerCase()) {
+                                    compra.cartao = "Bradesco";
+                                }
+                            });
+                        }
+                    });
+                }
+
+                localStorage.setItem('mindcash_db_v1', JSON.stringify(db));
+                renderizarTela();
+            }
         }
 
         function mudarAba(aba) {
@@ -549,7 +580,6 @@
             }
         }
 
-        // Funções de Recolher / Expandir Diretas e Instantâneas
         function alternarPainelCartoes() {
             let conteudo = document.getElementById('conteudoPainelCartoes');
             let btn = document.getElementById('btnTogglePainelCartoes');
@@ -921,7 +951,7 @@
             elSaldo.innerText = `R$ ${saldoReal.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
             elSaldo.className = `text-2xl font-black mt-2 ${saldoReal >= 0 ? 'text-[#93c5fd]' : 'text-[#d9777f]'}`;
 
-            // SOMAS POR CARTÃO
+            // SOMAS POR CARTÃO (COM BOTÃO DE APAGAR SE FOR PERSONALIZADO)
             let containerCardsCartoes = document.getElementById('conteudoPainelCartoes');
             let totaisCartao = {};
             cartoesDisponiveis.forEach(cart => totaisCartao[cart] = 0);
@@ -937,14 +967,26 @@
                 }
             });
 
+            let basePadrao = ["Bradesco", "Caixa", "Nubank", "Itaú", "Inter", "Santander"];
             containerCardsCartoes.innerHTML = '';
+            
             Object.keys(totaisCartao).forEach(cart => {
                 let valor = totaisCartao[cart];
+                let éPersonalizado = !basePadrao.some(b => b.toLowerCase() === cart.toLowerCase());
+
                 let card = document.createElement('div');
-                card.className = `p-3 rounded-2xl border text-left shadow-sm transition ${valor > 0 ? 'bg-[#22272c] border-[#3b434a]' : 'bg-[#1a1e23]/50 border-[#2d333b] text-[#9fa8b0]'}`;
+                card.className = `p-3 rounded-2xl border text-left shadow-sm transition relative flex flex-col justify-between ${valor > 0 ? 'bg-[#22272c] border-[#3b434a]' : 'bg-[#1a1e23]/50 border-[#2d333b] text-[#9fa8b0]'}`;
+                
+                let botaoApagarHtml = éPersonalizado 
+                    ? `<button onclick="apagarCartaoPersonalizado('${cart}')" class="absolute top-2 right-2 text-[#9fa8b0] hover:text-[#d9777f] font-bold text-xs bg-[#1a1e23] px-1.5 py-0.5 rounded-lg border border-[#3b434a]" title="Apagar cartão">✕</button>` 
+                    : '';
+
                 card.innerHTML = `
-                    <p class="text-[10px] font-bold text-[#9fa8b0] uppercase tracking-tight truncate">${cart}</p>
-                    <p class="text-xs font-black mt-1 ${valor > 0 ? 'text-[#d9777f]' : 'text-[#9fa8b0]/50'}">R$ ${valor.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</p>
+                    ${botaoApagarHtml}
+                    <div>
+                        <p class="text-[10px] font-bold text-[#9fa8b0] uppercase tracking-tight truncate pr-4">${cart}</p>
+                        <p class="text-xs font-black mt-1 ${valor > 0 ? 'text-[#d9777f]' : 'text-[#9fa8b0]/50'}">R$ ${valor.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</p>
+                    </div>
                 `;
                 containerCardsCartoes.appendChild(card);
             });
