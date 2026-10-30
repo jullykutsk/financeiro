@@ -183,17 +183,27 @@
                 </div>
             </div>
 
-            <!-- PAINEL DE GASTOS SEPARADOS POR CARTÃO (RECOLHÍVEL) COM OPÇÃO DE APAGAR -->
-            <div class="bg-[#22272c]/80 p-5 rounded-3xl border border-[#3b434a] shadow-lg backdrop-blur">
+            <!-- PAINEL DE GASTOS SEPARADOS POR CARTÃO (RECOLHÍVEL) COM BOTÃO DE APAGAR -->
+            <div class="bg-[#22272c]/80 p-5 rounded-3xl border border-[#3b434a] shadow-lg backdrop-blur space-y-4">
                 <div class="flex justify-between items-center cursor-pointer select-none" onclick="alternarPainelCartoes()">
                     <h3 class="text-xs font-bold uppercase tracking-wider text-[#c5cbd3] flex items-center gap-2">
-                        <span>💳</span> TOTAL GASTOS POR CARTÃO (Toque no ✕ para apagar personalizados)
+                        <span>💳</span> TOTAL GASTOS POR CARTÃO (Gerir / Apagar)
                     </h3>
                     <button id="btnTogglePainelCartoes" type="button" class="nao-imprimir text-sm bg-[#1a1e23] hover:bg-[#2d333b] text-[#c5cbd3] px-3.5 py-1.5 rounded-xl transition border border-[#3b434a] font-bold">
                         ▼
                     </button>
                 </div>
-                <div id="conteudoPainelCartoes" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5 mt-4 transition-all duration-300 hidden"></div>
+                
+                <!-- Conteúdo dos Cartões -->
+                <div id="conteudoPainelCartoes" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5 transition-all duration-300 hidden"></div>
+                
+                <!-- Secção extra de gestão para apagar cartões personalizados facilmente -->
+                <div id="painelGerirCartoes" class="pt-3 border-t border-[#3b434a]/50 hidden">
+                    <p class="text-[11px] text-[#9fa8b0] mb-2 font-semibold">Cartões personalizados criados:</p>
+                    <div id="listaCartoesPersonalizados" class="flex flex-wrap gap-2">
+                        <!-- Preenchido via JS -->
+                    </div>
+                </div>
             </div>
 
             <!-- Painel de Gastos Por Categoria -->
@@ -336,12 +346,10 @@
             }
 
             if (confirm(`Tem certeza que deseja apagar o cartão "${nomeCartao}"? As compras associadas passarão para o Bradesco.`)) {
-                // Remove dos cartões personalizados
                 if (db.cartoesPersonalizados) {
                     db.cartoesPersonalizados = db.cartoesPersonalizados.filter(c => c.toLowerCase() !== nomeCartao.toLowerCase());
                 }
 
-                // Atualiza compras existentes para Bradesco caso estivessem neste cartão
                 if (db.faturas) {
                     Object.keys(db.faturas).forEach(mes => {
                         if (db.faturas[mes].compras) {
@@ -582,8 +590,11 @@
 
         function alternarPainelCartoes() {
             let conteudo = document.getElementById('conteudoPainelCartoes');
+            let painelGerir = document.getElementById('painelGerirCartoes');
             let btn = document.getElementById('btnTogglePainelCartoes');
+            
             conteudo.classList.toggle('hidden');
+            painelGerir.classList.toggle('hidden');
             btn.innerText = conteudo.classList.contains('hidden') ? '▼' : '▲';
         }
 
@@ -951,7 +962,7 @@
             elSaldo.innerText = `R$ ${saldoReal.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
             elSaldo.className = `text-2xl font-black mt-2 ${saldoReal >= 0 ? 'text-[#93c5fd]' : 'text-[#d9777f]'}`;
 
-            // SOMAS POR CARTÃO (COM BOTÃO DE APAGAR SE FOR PERSONALIZADO)
+            // SOMAS POR CARTÃO
             let containerCardsCartoes = document.getElementById('conteudoPainelCartoes');
             let totaisCartao = {};
             cartoesDisponiveis.forEach(cart => totaisCartao[cart] = 0);
@@ -967,29 +978,32 @@
                 }
             });
 
-            let basePadrao = ["Bradesco", "Caixa", "Nubank", "Itaú", "Inter", "Santander"];
             containerCardsCartoes.innerHTML = '';
-            
             Object.keys(totaisCartao).forEach(cart => {
                 let valor = totaisCartao[cart];
-                let éPersonalizado = !basePadrao.some(b => b.toLowerCase() === cart.toLowerCase());
-
                 let card = document.createElement('div');
-                card.className = `p-3 rounded-2xl border text-left shadow-sm transition relative flex flex-col justify-between ${valor > 0 ? 'bg-[#22272c] border-[#3b434a]' : 'bg-[#1a1e23]/50 border-[#2d333b] text-[#9fa8b0]'}`;
-                
-                let botaoApagarHtml = éPersonalizado 
-                    ? `<button onclick="apagarCartaoPersonalizado('${cart}')" class="absolute top-2 right-2 text-[#9fa8b0] hover:text-[#d9777f] font-bold text-xs bg-[#1a1e23] px-1.5 py-0.5 rounded-lg border border-[#3b434a]" title="Apagar cartão">✕</button>` 
-                    : '';
-
+                card.className = `p-3 rounded-2xl border text-left shadow-sm transition ${valor > 0 ? 'bg-[#22272c] border-[#3b434a]' : 'bg-[#1a1e23]/50 border-[#2d333b] text-[#9fa8b0]'}`;
                 card.innerHTML = `
-                    ${botaoApagarHtml}
-                    <div>
-                        <p class="text-[10px] font-bold text-[#9fa8b0] uppercase tracking-tight truncate pr-4">${cart}</p>
-                        <p class="text-xs font-black mt-1 ${valor > 0 ? 'text-[#d9777f]' : 'text-[#9fa8b0]/50'}">R$ ${valor.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</p>
-                    </div>
+                    <p class="text-[10px] font-bold text-[#9fa8b0] uppercase tracking-tight truncate">${cart}</p>
+                    <p class="text-xs font-black mt-1 ${valor > 0 ? 'text-[#d9777f]' : 'text-[#9fa8b0]/50'}">R$ ${valor.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</p>
                 `;
                 containerCardsCartoes.appendChild(card);
             });
+
+            // LISTA DE CARTÕES PERSONALIZADOS PARA APAGAR FÁCIL
+            let listaGerir = document.getElementById('listaCartoesPersonalizados');
+            let extras = db.cartoesPersonalizados || [];
+            listaGerir.innerHTML = '';
+            if (extras.length === 0) {
+                listaGerir.innerHTML = `<span class="text-[11px] text-[#9fa8b0] italic">Nenhum cartão personalizado criado ainda.</span>`;
+            } else {
+                extras.forEach(cart => {
+                    let badge = document.createElement('div');
+                    badge.className = "flex items-center gap-1.5 bg-[#1a1e23] border border-[#3b434a] px-3 py-1.5 rounded-xl text-xs text-[#f4f1ea]";
+                    badge.innerHTML = `<span>💳 ${cart}</span> <button onclick="apagarCartaoPersonalizado('${cart}')" class="text-[#d9777f] font-bold ml-1 hover:scale-110 transition" title="Apagar">✕</button>`;
+                    listaGerir.appendChild(badge);
+                });
+            }
 
             // SOMAS POR CATEGORIA
             let containerCardsCat = document.getElementById('conteudoPainelCategorias');
