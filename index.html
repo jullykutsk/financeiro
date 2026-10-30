@@ -302,12 +302,24 @@
     </div>
 
     <script>
-        let db = JSON.parse(localStorage.getItem('mindcash_db_v1')) || { faturas: {}, recorrentes: [], metas: [], regrasCategorias: {}, regrasCartoes: {} };
+        let db = JSON.parse(localStorage.getItem('mindcash_db_v1')) || { faturas: {}, recorrentes: [], metas: [], regrasCategorias: {}, regrasCartoes: {}, cartoesPersonalizados: [] };
         
-        let painelRecolhido = localStorage.getItem('mindcash_painel_recolhido') !== null ? localStorage.getItem('mindcash_painel_recolhido') === 'true' : true;
-        let painelCartoesRecolhido = localStorage.getItem('mindcash_painel_cartoes_recolhido') !== null ? localStorage.getItem('mindcash_painel_cartoes_recolhido') === 'true' : true;
+        let painelRecolhido = localStorage.getItem('mindcash_painel_recolhido') !== null ? localStorage.getItem('mindcash_painel_recolhido'] === 'true' : true;
+        let painelCartoesRecolhido = localStorage.getItem('mindcash_painel_cartoes_recolhido') !== null ? localStorage.getItem('mindcash_painel_cartoes_recolhido'] === 'true' : true;
         let gruposRecolhidos = JSON.parse(localStorage.getItem('mindcash_grupos_recolhidos')) || { entrada: true, fixo: true, emprestimo: true, assinatura: true };
         let itemParaExcluirIndex = null;
+
+        function obterListaCartoes() {
+            let base = ["Bradesco", "Caixa", "Nubank", "Itaú", "Inter", "Santander"];
+            let extras = db.cartoesPersonalizados || [];
+            let combinados = [...base];
+            extras.forEach(c => {
+                if (!combinados.some(item => item.toLowerCase() === c.toLowerCase())) {
+                    combinados.push(c);
+                }
+            });
+            return combinados;
+        }
 
         function mudarAba(aba) {
             let secDash = document.getElementById('secaoDashboard');
@@ -458,10 +470,6 @@
             "Manutenção carro", "Estudo", "Locomoção", "Lazer", "Presentes"
         ];
 
-        const cartoesDisponiveis = [
-            "Bradesco", "Caixa", "Nubank", "Itaú", "Inter", "Santander", "Outro"
-        ];
-
         function normalizarTexto(txt) {
             return txt.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
         }
@@ -489,7 +497,8 @@
                             recorrentes: conteudo.recorrentes || [],
                             metas: conteudo.metas || [],
                             regrasCategorias: conteudo.regrasCategorias || {},
-                            regrasCartoes: conteudo.regrasCartoes || {}
+                            regrasCartoes: conteudo.regrasCartoes || {},
+                            cartoesPersonalizados: conteudo.cartoesPersonalizados || []
                         };
                         localStorage.setItem('mindcash_db_v1', JSON.stringify(db));
                         renderizarTela();
@@ -745,6 +754,21 @@
         function alterarCartao(index, novoCartao) {
             let mesChave = document.getElementById('seletorMes').value;
             let comprasMes = obterComprasEParcelasDoMes(mesChave);
+
+            if (novoCartao === "OUTRO_NOVO") {
+                let nomeNovo = prompt("Digite o nome do novo cartão:");
+                if (nomeNovo && nomeNovo.trim() !== "") {
+                    nomeNovo = nomeNovo.trim();
+                    if (!db.cartoesPersonalizados) db.cartoesPersonalizados = [];
+                    if (!db.cartoesPersonalizados.some(c => c.toLowerCase() === nomeNovo.toLowerCase())) {
+                        db.cartoesPersonalizados.push(nomeNovo);
+                    }
+                    novoCartao = nomeNovo;
+                } else {
+                    renderizarTela();
+                    return;
+                }
+            }
             
             if (comprasMes[index]) {
                 let itemModificado = comprasMes[index];
@@ -802,6 +826,7 @@
 
         function renderizarTela() {
             let mesChave = document.getElementById('seletorMes').value;
+            let cartoesDisponiveis = obterListaCartoes();
             
             let comprasMes = obterComprasEParcelasDoMes(mesChave);
             let valorFaturaMes = (db.faturas && db.faturas[mesChave]) 
@@ -895,13 +920,15 @@
                 if (cartEncontrado) {
                     totaisCartao[cartEncontrado] += item.valor;
                 } else {
-                    totaisCartao["Outro"] += item.valor;
+                    let cartOutro = item.cartao || "Outro";
+                    if (!totaisCartao[cartOutro]) totaisCartao[cartOutro] = 0;
+                    totaisCartao[cartOutro] += item.valor;
                 }
             });
 
             let containerCardsCartoes = document.getElementById('conteudoPainelCartoes');
             containerCardsCartoes.innerHTML = '';
-            cartoesDisponiveis.forEach(cart => {
+            Object.keys(totaisCartao).forEach(cart => {
                 let valor = totaisCartao[cart];
                 let card = document.createElement('div');
                 card.className = `p-3 rounded-2xl border text-left shadow-sm transition ${valor > 0 ? 'bg-[#22272c] border-[#3b434a]' : 'bg-[#1a1e23]/50 border-[#2d333b] text-[#9fa8b0]'}`;
@@ -961,6 +988,7 @@
                 let optionsCartao = cartoesDisponiveis.map(cart => 
                     `<option value="${cart}" ${cart.toLowerCase() === (item.cartao || "bradesco").toLowerCase() ? 'selected' : ''}>${cart}</option>`
                 ).join('');
+                optionsCartao += `<option value="OUTRO_NOVO">+ Adicionar Novo Cartão...</option>`;
 
                 let optionsCategoria = categoriasDisponiveis.map(cat => 
                     `<option value="${cat}" ${cat.toLowerCase() === item.categoria.toLowerCase() ? 'selected' : ''}>${cat}</option>`
