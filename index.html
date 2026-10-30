@@ -183,7 +183,7 @@
                 </div>
             </div>
 
-            <!-- PAINEL DE GASTOS SEPARADOS POR CARTÃO (RECOLHÍVEL) COM BOTÃO DE APAGAR -->
+            <!-- PAINEL DE GASTOS SEPARADOS POR CARTÃO (RECOLHÍVEL) -->
             <div class="bg-[#22272c]/80 p-5 rounded-3xl border border-[#3b434a] shadow-lg backdrop-blur space-y-4">
                 <div class="flex justify-between items-center cursor-pointer select-none" onclick="alternarPainelCartoes()">
                     <h3 class="text-xs font-bold uppercase tracking-wider text-[#c5cbd3] flex items-center gap-2">
@@ -194,29 +194,38 @@
                     </button>
                 </div>
                 
-                <!-- Conteúdo dos Cartões -->
                 <div id="conteudoPainelCartoes" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5 transition-all duration-300 hidden"></div>
                 
-                <!-- Secção extra de gestão para apagar cartões personalizados facilmente -->
                 <div id="painelGerirCartoes" class="pt-3 border-t border-[#3b434a]/50 hidden">
-                    <p class="text-[11px] text-[#9fa8b0] mb-2 font-semibold">Cartões personalizados criados:</p>
-                    <div id="listaCartoesPersonalizados" class="flex flex-wrap gap-2">
-                        <!-- Preenchido via JS -->
-                    </div>
+                    <p class="text-[11px] text-[#9fa8b0] mb-2 font-semibold">Cartões criados:</p>
+                    <div id="listaCartoesPersonalizados" class="flex flex-wrap gap-2"></div>
                 </div>
             </div>
 
-            <!-- Painel de Gastos Por Categoria -->
-            <div class="bg-[#22272c]/80 p-5 rounded-3xl border border-[#3b434a] shadow-lg backdrop-blur">
+            <!-- PAINEL DE GASTOS POR CATEGORIA (COM GESTÃO / ADICIONAR / APAGAR) -->
+            <div class="bg-[#22272c]/80 p-5 rounded-3xl border border-[#3b434a] shadow-lg backdrop-blur space-y-4">
                 <div class="flex justify-between items-center cursor-pointer select-none" onclick="alternarPainelCategorias()">
                     <h3 class="text-xs font-bold uppercase tracking-wider text-[#c5cbd3] flex items-center gap-2">
-                        <span>📊</span> TOTAL GASTOS POR CATEGORIA
+                        <span>📊</span> TOTAL GASTOS POR CATEGORIA (Gerir / Criar)
                     </h3>
                     <button id="btnTogglePainel" type="button" class="nao-imprimir text-sm bg-[#1a1e23] hover:bg-[#2d333b] text-[#c5cbd3] px-3.5 py-1.5 rounded-xl transition border border-[#3b434a] font-bold">
                         ▼
                     </button>
                 </div>
-                <div id="conteudoPainelCategorias" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2.5 mt-4 transition-all duration-300 hidden"></div>
+                
+                <div id="conteudoPainelCategorias" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2.5 transition-all duration-300 hidden"></div>
+
+                <!-- Secção para gerir e criar novas categorias -->
+                <div id="painelGerirCategorias" class="pt-3 border-t border-[#3b434a]/50 hidden space-y-3">
+                    <div class="flex gap-2">
+                        <input type="text" id="novaCategoriaInput" placeholder="Nome da nova categoria..." class="flex-1 bg-[#1a1e23] border border-[#3b434a] text-xs text-[#f4f1ea] px-3 py-2 rounded-xl focus:outline-none focus:border-[#4a777a]">
+                        <button onclick="adicionarNovaCategoria()" class="bg-[#4a777a] hover:bg-[#3b6063] text-[#f4f1ea] px-4 py-2 rounded-xl text-xs font-bold transition">Adicionar</button>
+                    </div>
+                    <div>
+                        <p class="text-[11px] text-[#9fa8b0] mb-2 font-semibold">Categorias atuais (Padrão e Criadas - toque no ✕ para apagar):</p>
+                        <div id="listaCategoriasGerir" class="flex flex-wrap gap-2"></div>
+                    </div>
+                </div>
             </div>
 
             <!-- Tabela do Raio-X -->
@@ -279,9 +288,7 @@
 
             <div class="space-y-4">
                 <h3 class="text-xs font-bold uppercase tracking-wider text-[#9fa8b0] px-1">Suas Metas e Ideias Ativas:</h3>
-                <div id="listaMetas" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <!-- Preenchido via JavaScript -->
-                </div>
+                <div id="listaMetas" class="grid grid-cols-1 sm:grid-cols-2 gap-4"></div>
             </div>
         </div>
 
@@ -295,7 +302,6 @@
             <div class="space-y-1">
                 <label class="text-[11px] font-bold text-[#9fa8b0] uppercase">Cartão Destino da Fatura:</label>
                 <select id="modalSelectCartao" class="w-full bg-[#1a1e23] border border-[#3b434a] text-xs text-[#c5cbd3] p-3 rounded-2xl focus:outline-none focus:border-[#4a777a]" onchange="verificarNovoCartaoModal(this.value)">
-                    <!-- Preenchido dinamicamente via JS -->
                 </select>
             </div>
 
@@ -321,31 +327,78 @@
     </div>
 
     <script>
-        let db = JSON.parse(localStorage.getItem('mindcash_db_v1')) || { faturas: {}, recorrentes: [], metas: [], regrasCategorias: {}, regrasCartoes: {}, cartoesPersonalizados: [] };
+        let db = JSON.parse(localStorage.getItem('mindcash_db_v1')) || { 
+            faturas: {}, 
+            recorrentes: [], 
+            metas: [], 
+            regrasCategorias: {}, 
+            regrasCartoes: {}, 
+            cartoesPersonalizados: [],
+            categoriasPersonalizadas: ["Pessoal", "Mercado", "Combustível", "Saúde", "Manutenção Casa", "Manutenção carro", "Estudo", "Locomoção", "Lazer", "Presentes"]
+        };
         
         let gruposRecolhidos = JSON.parse(localStorage.getItem('mindcash_grupos_recolhidos')) || { entrada: true, fixo: true, emprestimo: true, assinatura: true };
         let itemParaExcluirIndex = null;
 
         function obterListaCartoes() {
-            let base = ["Bradesco", "Caixa", "Nubank", "Itaú", "Inter", "Santander"];
             let extras = db.cartoesPersonalizados || [];
-            let combinados = [...base];
-            extras.forEach(c => {
-                if (!combinados.some(item => item.toLowerCase() === c.toLowerCase())) {
-                    combinados.push(c);
-                }
-            });
-            return combinados;
+            return [...extras];
         }
 
-        function apagarCartaoPersonalizado(nomeCartao) {
-            let basePadrao = ["Bradesco", "Caixa", "Nubank", "Itaú", "Inter", "Santander"];
-            if (basePadrao.some(b => b.toLowerCase() === nomeCartao.toLowerCase())) {
-                alert("Não é possível apagar os cartões padrão do sistema.");
+        function obterListaCategorias() {
+            if (!db.categoriasPersonalizadas || db.categoriasPersonalizadas.length === 0) {
+                db.categoriasPersonalizadas = ["Pessoal", "Mercado", "Combustível", "Saúde", "Manutenção Casa", "Manutenção carro", "Estudo", "Locomoção", "Lazer", "Presentes"];
+            }
+            return db.categoriasPersonalizadas;
+        }
+
+        function adicionarNovaCategoria() {
+            let input = document.getElementById('novaCategoriaInput');
+            let nome = input.value.trim();
+            if (!nome) return;
+
+            let cats = obterListaCategorias();
+            if (!cats.some(c => c.toLowerCase() === nome.toLowerCase())) {
+                cats.push(nome);
+                db.categoriasPersonalizadas = cats;
+                localStorage.setItem('mindcash_db_v1', JSON.stringify(db));
+                input.value = '';
+                renderizarTela();
+            } else {
+                alert("Esta categoria já existe.");
+            }
+        }
+
+        function apagarCategoria(nomeCat) {
+            let cats = obterListaCategorias();
+            if (cats.length <= 1) {
+                alert("Deve manter pelo menos uma categoria.");
                 return;
             }
 
-            if (confirm(`Tem certeza que deseja apagar o cartão "${nomeCartao}"? As compras associadas passarão para o Bradesco.`)) {
+            if (confirm(`Tem certeza que deseja apagar a categoria "${nomeCat}"? As compras associadas passarão para a primeira categoria disponível.`)) {
+                db.categoriasPersonalizadas = cats.filter(c => c.toLowerCase() !== nomeCat.toLowerCase());
+                let novaPadrao = db.categoriasPersonalizadas[0] || "Pessoal";
+
+                if (db.faturas) {
+                    Object.keys(db.faturas).forEach(mes => {
+                        if (db.faturas[mes].compras) {
+                            db.faturas[mes].compras.forEach(compra => {
+                                if (compra.categoria && compra.categoria.toLowerCase() === nomeCat.toLowerCase()) {
+                                    compra.categoria = novaPadrao;
+                                }
+                            });
+                        }
+                    });
+                }
+
+                localStorage.setItem('mindcash_db_v1', JSON.stringify(db));
+                renderizarTela();
+            }
+        }
+
+        function apagarCartaoPersonalizado(nomeCartao) {
+            if (confirm(`Tem certeza que deseja apagar o cartão "${nomeCartao}"? As compras associadas passarão para o primeiro cartão disponível.`)) {
                 if (db.cartoesPersonalizados) {
                     db.cartoesPersonalizados = db.cartoesPersonalizados.filter(c => c.toLowerCase() !== nomeCartao.toLowerCase());
                 }
@@ -355,7 +408,7 @@
                         if (db.faturas[mes].compras) {
                             db.faturas[mes].compras.forEach(compra => {
                                 if (compra.cartao && compra.cartao.toLowerCase() === nomeCartao.toLowerCase()) {
-                                    compra.cartao = "Bradesco";
+                                    compra.cartao = db.cartoesPersonalizados[0] || "";
                                 }
                             });
                         }
@@ -511,11 +564,6 @@
             '1ª ela de', '1a ela de', '(=)total', '(-) creditos', '(+)compras', 'total para gilberto'
         ];
 
-        const categoriasDisponiveis = [
-            "Pessoal", "Mercado", "Combustível", "Saúde", "Manutenção Casa",
-            "Manutenção carro", "Estudo", "Locomoção", "Lazer", "Presentes"
-        ];
-
         function normalizarTexto(txt) {
             return txt.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
         }
@@ -544,7 +592,8 @@
                             metas: conteudo.metas || [],
                             regrasCategorias: conteudo.regrasCategorias || {},
                             regrasCartoes: conteudo.regrasCartoes || {},
-                            cartoesPersonalizados: conteudo.cartoesPersonalizados || []
+                            cartoesPersonalizados: conteudo.cartoesPersonalizados || [],
+                            categoriasPersonalizadas: conteudo.categoriasPersonalizadas || ["Pessoal", "Mercado", "Combustível", "Saúde", "Manutenção Casa", "Manutenção carro", "Estudo", "Locomoção", "Lazer", "Presentes"]
                         };
                         localStorage.setItem('mindcash_db_v1', JSON.stringify(db));
                         renderizarTela();
@@ -562,7 +611,12 @@
         function abrirModalTexto() {
             let selectModal = document.getElementById('modalSelectCartao');
             let cartoes = obterListaCartoes();
-            selectModal.innerHTML = cartoes.map(c => `<option value="${c}">${c}</option>`).join('');
+            
+            if (cartoes.length === 0) {
+                selectModal.innerHTML = `<option value="" disabled selected>Nenhum cartão criado. Adicione abaixo...</option>`;
+            } else {
+                selectModal.innerHTML = cartoes.map(c => `<option value="${c}">${c}</option>`).join('');
+            }
             selectModal.innerHTML += `<option value="OUTRO_NOVO">+ Adicionar Novo Cartão...</option>`;
             
             document.getElementById('modalTexto').classList.remove('hidden');
@@ -583,7 +637,8 @@
                     abrirModalTexto();
                     document.getElementById('modalSelectCartao').value = nomeNovo;
                 } else {
-                    document.getElementById('modalSelectCartao').value = obterListaCartoes()[0];
+                    let cartoes = obterListaCartoes();
+                    document.getElementById('modalSelectCartao').value = cartoes[0] || "";
                 }
             }
         }
@@ -600,8 +655,11 @@
 
         function alternarPainelCategorias() {
             let conteudo = document.getElementById('conteudoPainelCategorias');
+            let painelGerir = document.getElementById('painelGerirCategorias');
             let btn = document.getElementById('btnTogglePainel');
+            
             conteudo.classList.toggle('hidden');
+            painelGerir.classList.toggle('hidden');
             btn.innerText = conteudo.classList.contains('hidden') ? '▼' : '▲';
         }
 
@@ -686,7 +744,10 @@
         function processarTextoBruto() {
             const texto = document.getElementById('textoFatura').value;
             let cartaoSelecionado = document.getElementById('modalSelectCartao').value;
-            if (!texto) return;
+            if (!texto || !cartaoSelecionado) {
+                alert("Por favor, selecione ou crie um cartão antes de processar.");
+                return;
+            }
             let linhas = texto.split('\n');
             extrairDadosFatura(linhas, cartaoSelecionado);
             fecharModalTexto();
@@ -699,6 +760,7 @@
             let somaValoresNovos = 0;
 
             if (!db.regrasCategorias) db.regrasCategorias = {};
+            let primeiraCat = obterListaCategorias()[0] || "Pessoal";
 
             linhas.forEach(linha => {
                 let linhaNorm = normalizarTexto(linha);
@@ -735,16 +797,23 @@
                 if (nome.length < 3 || nome === "/2026" || nome === "2026") return;
                 let nomeUpper = nome.toUpperCase();
 
-                let categoria = "Pessoal";
+                let categoria = primeiraCat;
                 if (db.regrasCategorias[nomeUpper]) {
                     categoria = db.regrasCategorias[nomeUpper];
                 } else {
                     let nLower = nome.toLowerCase();
-                    if (nLower.includes("posto") || nLower.includes("combustivel") || nLower.includes("auto posto")) categoria = "Combustível";
-                    else if (nLower.includes("mercado") || nLower.includes("jacomar") || nLower.includes("bonato") || nLower.includes("condor")) categoria = "Mercado";
-                    else if (nLower.includes("farmacia") || nLower.includes("saude") || nLower.includes("medprev")) categoria = "Saúde";
-                    else if (nLower.includes("materiais") || nLower.includes("toka") || nLower.includes("madeira")) categoria = "Manutenção Casa";
-                    else if (nLower.includes("oficina") || nLower.includes("autopecas") || nLower.includes("pneu") || nLower.includes("mecanica") || nLower.includes("renesto")) categoria = "Manutenção carro";
+                    let catsDisponiveis = obterListaCategorias();
+                    
+                    if (nLower.includes("posto") || nLower.includes("combustivel") || nLower.includes("auto posto")) {
+                        let c = catsDisponiveis.find(x => x.toLowerCase() === "combustível");
+                        if (c) categoria = c;
+                    } else if (nLower.includes("mercado") || nLower.includes("jacomar") || nLower.includes("bonato") || nLower.includes("condor")) {
+                        let c = catsDisponiveis.find(x => x.toLowerCase() === "mercado");
+                        if (c) categoria = c;
+                    } else if (nLower.includes("farmacia") || nLower.includes("saude") || nLower.includes("medprev")) {
+                        let c = catsDisponiveis.find(x => x.toLowerCase() === "saúde");
+                        if (c) categoria = c;
+                    }
                 }
 
                 novasCompras.push({ descricao: nomeUpper, cartao: cartaoSelecionado, categoria, parcela, valor, nota: "" });
@@ -789,7 +858,7 @@
                                 if (novaParcelaAtual <= parcTotal) {
                                     resultado.push({
                                         descricao: item.descricao,
-                                        cartao: item.cartao || "Bradesco",
+                                        cartao: item.cartao || "",
                                         categoria: item.categoria,
                                         parcela: `${String(novaParcelaAtual).padStart(2, '0')}/${String(parcTotal).padStart(2, '0')}`,
                                         valor: item.valor,
@@ -878,6 +947,7 @@
         function renderizarTela() {
             let mesChave = document.getElementById('seletorMes').value;
             let cartoesDisponiveis = obterListaCartoes();
+            let categoriasDisponiveis = obterListaCategorias();
             
             let comprasMes = obterComprasEParcelasDoMes(mesChave);
             let valorFaturaMes = (db.faturas && db.faturas[mesChave]) 
@@ -968,40 +1038,42 @@
             cartoesDisponiveis.forEach(cart => totaisCartao[cart] = 0);
 
             comprasMes.forEach(item => {
-                let cartEncontrado = cartoesDisponiveis.find(c => c.toLowerCase() === (item.cartao || "Bradesco").toLowerCase());
+                let cartEncontrado = cartoesDisponiveis.find(c => c.toLowerCase() === (item.cartao || "").toLowerCase());
                 if (cartEncontrado) {
                     totaisCartao[cartEncontrado] += item.valor;
-                } else {
-                    let cartOutro = item.cartao || "Outro";
-                    if (!totaisCartao[cartOutro]) totaisCartao[cartOutro] = 0;
-                    totaisCartao[cartOutro] += item.valor;
+                } else if (item.cartao) {
+                    totaisCartao[item.cartao] = (totaisCartao[item.cartao] || 0) + item.valor;
                 }
             });
 
             containerCardsCartoes.innerHTML = '';
-            Object.keys(totaisCartao).forEach(cart => {
-                let valor = totaisCartao[cart];
-                let card = document.createElement('div');
-                card.className = `p-3 rounded-2xl border text-left shadow-sm transition ${valor > 0 ? 'bg-[#22272c] border-[#3b434a]' : 'bg-[#1a1e23]/50 border-[#2d333b] text-[#9fa8b0]'}`;
-                card.innerHTML = `
-                    <p class="text-[10px] font-bold text-[#9fa8b0] uppercase tracking-tight truncate">${cart}</p>
-                    <p class="text-xs font-black mt-1 ${valor > 0 ? 'text-[#d9777f]' : 'text-[#9fa8b0]/50'}">R$ ${valor.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</p>
-                `;
-                containerCardsCartoes.appendChild(card);
-            });
+            if (cartoesDisponiveis.length === 0) {
+                containerCardsCartoes.innerHTML = `<p class="text-xs text-[#9fa8b0] italic col-span-full text-center py-2">Nenhum cartão cadastrado.</p>`;
+            } else {
+                Object.keys(totaisCartao).forEach(cart => {
+                    let valor = totaisCartao[cart];
+                    let card = document.createElement('div');
+                    card.className = `p-3 rounded-2xl border text-left shadow-sm transition ${valor > 0 ? 'bg-[#22272c] border-[#3b434a]' : 'bg-[#1a1e23]/50 border-[#2d333b] text-[#9fa8b0]'}`;
+                    card.innerHTML = `
+                        <p class="text-[10px] font-bold text-[#9fa8b0] uppercase tracking-tight truncate">${cart}</p>
+                        <p class="text-xs font-black mt-1 ${valor > 0 ? 'text-[#d9777f]': 'text-[#9fa8b0]/50'}">R$ ${valor.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</p>
+                    `;
+                    containerCardsCartoes.appendChild(card);
+                });
+            }
 
-            // LISTA DE CARTÕES PERSONALIZADOS PARA APAGAR FÁCIL
-            let listaGerir = document.getElementById('listaCartoesPersonalizados');
+            // LISTA DE CARTÕES PARA APAGAR
+            let listaGerirCartoes = document.getElementById('listaCartoesPersonalizados');
             let extras = db.cartoesPersonalizados || [];
-            listaGerir.innerHTML = '';
+            listaGerirCartoes.innerHTML = '';
             if (extras.length === 0) {
-                listaGerir.innerHTML = `<span class="text-[11px] text-[#9fa8b0] italic">Nenhum cartão personalizado criado ainda.</span>`;
+                listaGerirCartoes.innerHTML = `<span class="text-[11px] text-[#9fa8b0] italic">Nenhum cartão criado ainda.</span>`;
             } else {
                 extras.forEach(cart => {
                     let badge = document.createElement('div');
                     badge.className = "flex items-center gap-1.5 bg-[#1a1e23] border border-[#3b434a] px-3 py-1.5 rounded-xl text-xs text-[#f4f1ea]";
                     badge.innerHTML = `<span>💳 ${cart}</span> <button onclick="apagarCartaoPersonalizado('${cart}')" class="text-[#d9777f] font-bold ml-1 hover:scale-110 transition" title="Apagar">✕</button>`;
-                    listaGerir.appendChild(badge);
+                    listaGerirCartoes.appendChild(badge);
                 });
             }
 
@@ -1015,7 +1087,8 @@
                 if (catEncontrada) {
                     totaisCategoria[catEncontrada] += item.valor;
                 } else {
-                    totaisCategoria["Pessoal"] += item.valor;
+                    let primeira = categoriasDisponiveis[0] || "Pessoal";
+                    totaisCategoria[primeira] = (totaisCategoria[primeira] || 0) + item.valor;
                 }
             });
 
@@ -1029,6 +1102,16 @@
                     <p class="text-xs font-black mt-1 ${valor > 0 ? 'text-[#d4a373]' : 'text-[#9fa8b0]/50'}">R$ ${valor.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</p>
                 `;
                 containerCardsCat.appendChild(card);
+            });
+
+            // GESTÃO DE CATEGORIAS (APAGAR)
+            let listaGerirCats = document.getElementById('listaCategoriasGerir');
+            listaGerirCats.innerHTML = '';
+            categoriasDisponiveis.forEach(cat => {
+                let badge = document.createElement('div');
+                badge.className = "flex items-center gap-1.5 bg-[#1a1e23] border border-[#3b434a] px-3 py-1.5 rounded-xl text-xs text-[#f4f1ea]";
+                badge.innerHTML = `<span>📊 ${cat}</span> <button onclick="apagarCategoria('${cat}')" class="text-[#d9777f] font-bold ml-1 hover:scale-110 transition" title="Apagar">✕</button>`;
+                listaGerirCats.appendChild(badge);
             });
 
             let tbody = document.getElementById('tabelaRaioX');
@@ -1048,7 +1131,7 @@
                     : `<span class="bg-[#2d333b] text-[#9fa8b0] px-2 py-1 rounded-lg text-[10px]">${item.parcela}</span>`;
 
                 let optionsCartao = cartoesDisponiveis.map(cart => 
-                    `<option value="${cart}" ${cart.toLowerCase() === (item.cartao || "bradesco").toLowerCase() ? 'selected' : ''}>${cart}</option>`
+                    `<option value="${cart}" ${cart.toLowerCase() === (item.cartao || "").toLowerCase() ? 'selected' : ''}>${cart}</option>`
                 ).join('');
                 optionsCartao += `<option value="OUTRO_NOVO">+ Adicionar Novo Cartão...</option>`;
 
