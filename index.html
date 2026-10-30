@@ -25,7 +25,7 @@
     <div id="conteudoPDF" class="max-w-6xl mx-auto p-4 md:p-6 space-y-6">
         
         <!-- Cabeçalho MindCash - UP -->
-        <header class="bg-[#22272c]/90 p-5 md:p-6 rounded-3xl border border-[#4a777a]/30 shadow-2xl backdrop-blur-xl flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mind-glow">
+        <header class="bg-[#22272c]/90 p-4 md:p-6 rounded-3xl border border-[#4a777a]/30 shadow-2xl backdrop-blur-xl flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mind-glow">
             
             <div class="flex items-center gap-4 w-full lg:w-auto">
                 <div>
@@ -36,31 +36,31 @@
                 </div>
             </div>
             
-            <!-- Navegação de Abas e Ações -->
-            <div class="flex flex-wrap items-center gap-2.5 w-full lg:w-auto justify-start lg:justify-end z-10">
+            <!-- Navegação de Abas e Ações Alinhadas e Reduzidas -->
+            <div class="flex flex-wrap items-center gap-2 w-full lg:w-auto justify-start lg:justify-end z-10">
                 
                 <!-- Botões de Alternância de Abas -->
                 <div class="bg-[#1a1e23] p-1 rounded-2xl border border-[#3b434a] flex items-center gap-1">
-                    <button onclick="mudarAba('dashboard')" id="abaBtnDashboard" class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition bg-[#4a777a] text-[#f4f1ea]">Dashboard</button>
-                    <button onclick="mudarAba('metas')" id="abaBtnMetas" class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition text-[#9fa8b0] hover:text-[#f4f1ea]">Metas & Ideias</button>
+                    <button onclick="mudarAba('dashboard')" id="abaBtnDashboard" class="px-3 py-1.5 rounded-xl text-xs font-bold transition bg-[#4a777a] text-[#f4f1ea]">Dashboard</button>
+                    <button onclick="mudarAba('metas')" id="abaBtnMetas" class="px-3 py-1.5 rounded-xl text-xs font-bold transition text-[#9fa8b0] hover:text-[#f4f1ea]">Metas & Ideias</button>
                 </div>
 
-                <div id="controlesDashboard" class="flex items-center gap-2.5">
-                    <div class="relative bg-[#1a1e23] border border-[#3b434a] rounded-2xl px-3 py-2 flex items-center shadow-inner shrink-0">
-                        <input type="month" id="seletorMes" class="bg-transparent text-xs font-bold text-[#829c95] focus:outline-none cursor-pointer w-36" onchange="renderizarTela()">
+                <div id="controlesDashboard" class="flex items-center gap-2">
+                    <div class="relative bg-[#1a1e23] border border-[#3b434a] rounded-xl px-2.5 py-1.5 flex items-center shadow-inner shrink-0">
+                        <input type="month" id="seletorMes" class="bg-transparent text-[11px] font-bold text-[#829c95] focus:outline-none cursor-pointer w-32" onchange="renderizarTela()">
                     </div>
                     
-                    <button onclick="gerarPDF()" class="bg-[#4a777a] hover:bg-[#3b6063] text-[#f4f1ea] border border-[#4a777a]/50 px-3.5 py-2 rounded-2xl text-xs font-bold transition flex items-center gap-1.5 shadow-md active:scale-95" title="Baixar PDF do Mês">
-                        📄 <span class="hidden sm:inline">PDF</span>
+                    <button onclick="gerarPDF()" class="bg-[#4a777a] hover:bg-[#3b6063] text-[#f4f1ea] border border-[#4a777a]/50 p-2 rounded-xl text-xs font-bold transition flex items-center justify-center shadow-md active:scale-95" title="Baixar PDF do Mês">
+                        📄
                     </button>
                 </div>
                 
-                <button onclick="exportarDados()" class="bg-[#2d333b] hover:bg-[#38404a] text-[#c5cbd3] border border-[#3b434a] px-3.5 py-2 rounded-2xl text-xs font-semibold transition flex items-center gap-1.5 shadow-md active:scale-95" title="Salvar Backup">
-                    💾 <span class="hidden sm:inline">Backup</span>
+                <button onclick="exportarDados()" class="bg-[#2d333b] hover:bg-[#38404a] text-[#c5cbd3] border border-[#3b434a] p-2 rounded-xl text-xs font-semibold transition flex items-center justify-center shadow-md active:scale-95" title="Salvar Backup">
+                    💾
                 </button>
 
-                <button onclick="document.getElementById('fileBackupInput').click()" class="bg-[#2d333b] hover:bg-[#38404a] text-[#c5cbd3] border border-[#3b434a] px-3.5 py-2 rounded-2xl text-xs font-semibold transition flex items-center gap-1.5 shadow-md active:scale-95" title="Carregar Backup">
-                    📂 <span class="hidden sm:inline">Restaurar</span>
+                <button onclick="document.getElementById('fileBackupInput').click()" class="bg-[#2d333b] hover:bg-[#38404a] text-[#c5cbd3] border border-[#3b434a] p-2 rounded-xl text-xs font-semibold transition flex items-center justify-center shadow-md active:scale-95" title="Carregar Backup">
+                    📂
                 </button>
                 <input type="file" id="fileBackupInput" accept="*" class="hidden" onchange="importarDados(event)">
             </div>
@@ -291,7 +291,7 @@
     <script>
         let db = JSON.parse(localStorage.getItem('mindcash_db_v1')) || { faturas: {}, recorrentes: [], metas: [], regrasCategorias: {}, regrasCartoes: {} };
         
-        let painelRecolhido = localStorage.getItem('mindcash_painel_recolhido') !== null ? localStorage.getItem('mindcash_painel_recolhido') === 'true' : true;
+        let painelRecolhido = localStorage.getItem('mindcash_painel_recolhido') !== null ? localStorage.getItem('mindcash_painel_recolhido'] === 'true' : true;
         let gruposRecolhidos = JSON.parse(localStorage.getItem('mindcash_grupos_recolhidos')) || { entrada: true, fixo: true, emprestimo: true, assinatura: true };
         let itemParaExcluirIndex = null;
 
@@ -306,14 +306,14 @@
                 secDash.classList.remove('hidden');
                 secMetas.classList.add('hidden');
                 controlesDash.classList.remove('hidden');
-                btnDash.className = "px-3.5 py-1.5 rounded-xl text-xs font-bold transition bg-[#4a777a] text-[#f4f1ea]";
-                btnMetas.className = "px-3.5 py-1.5 rounded-xl text-xs font-bold transition text-[#9fa8b0] hover:text-[#f4f1ea]";
+                btnDash.className = "px-3 py-1.5 rounded-xl text-xs font-bold transition bg-[#4a777a] text-[#f4f1ea]";
+                btnMetas.className = "px-3 py-1.5 rounded-xl text-xs font-bold transition text-[#9fa8b0] hover:text-[#f4f1ea]";
             } else {
                 secDash.classList.add('hidden');
                 secMetas.classList.remove('hidden');
                 controlesDash.classList.add('hidden');
-                btnMetas.className = "px-3.5 py-1.5 rounded-xl text-xs font-bold transition bg-[#4a777a] text-[#f4f1ea]";
-                btnDash.className = "px-3.5 py-1.5 rounded-xl text-xs font-bold transition text-[#9fa8b0] hover:text-[#f4f1ea]";
+                btnMetas.className = "px-3 py-1.5 rounded-xl text-xs font-bold transition bg-[#4a777a] text-[#f4f1ea]";
+                btnDash.className = "px-3 py-1.5 rounded-xl text-xs font-bold transition text-[#9fa8b0] hover:text-[#f4f1ea]";
                 renderizarMetas();
             }
         }
