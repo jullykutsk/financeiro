@@ -11,7 +11,7 @@
 </head>
 <body class="font-sans antialiased min-h-screen pb-12">
 
-    <div class="max-w-4xl mx-auto p-4 md:p-6">
+    <div class="max-w-5xl mx-auto p-4 md:p-6">
         
         <!-- Cabeçalho -->
         <header class="flex justify-between items-center mb-6 bg-slate-800/80 p-4 rounded-2xl border border-slate-700/50 backdrop-blur">
@@ -72,11 +72,12 @@
                             <th class="p-3">Categoria</th>
                             <th class="p-3 text-center">Parcela Atual</th>
                             <th class="p-3 text-right">Valor Parcela</th>
+                            <th class="p-3 text-left min-w-[150px]">Nota / Observação</th>
                         </tr>
                     </thead>
                     <tbody id="tabelaRaioX" class="divide-y divide-slate-700/30">
                         <tr>
-                            <td colspan="4" class="p-6 text-center text-slate-500">Nenhuma fatura importada. Use o botão acima para colar os dados.</td>
+                            <td colspan="5" class="p-6 text-center text-slate-500">Nenhuma fatura importada. Use o botão acima para colar os dados.</td>
                         </tr>
                     </tbody>
                 </table>
@@ -98,7 +99,7 @@
     </div>
 
     <script>
-        let db = JSON.parse(localStorage.getItem('fincontrol_db_v5')) || {};
+        let db = JSON.parse(localStorage.getItem('fincontrol_db_v6')) || {};
 
         const termosIgnorar = [
             'total da fatura', 'limite de compras', 'limite de saque', 'recomendado pagamento',
@@ -110,6 +111,14 @@
             'pagamento de contas', 'saque a vista', 'crediario', 'com juros', 'ultrapassem o limite',
             'será devolvida em fatura', 'de acordo com a legislação', 'caso o pagamento realizado',
             '1ª ela de', '1a ela de', '(=)total', '(-) creditos', '(+)compras', 'total para gilberto'
+        ];
+
+        const categoriasDisponiveis = [
+            "Pessoal",
+            "Mercado",
+            "Combustível",
+            "Saúde",
+            "Manutenção Casa"
         ];
 
         function normalizarTexto(txt) {
@@ -199,7 +208,8 @@
                     descricao: nome.toUpperCase(),
                     categoria: categoria,
                     parcela: parcela,
-                    valor: valor
+                    valor: valor,
+                    nota: "" // Campo nota inicializado
                 });
             });
 
@@ -212,8 +222,24 @@
                 compras: compras
             };
 
-            localStorage.setItem('fincontrol_db_v5', JSON.stringify(db));
+            localStorage.setItem('fincontrol_db_v6', JSON.stringify(db));
             renderizarTela();
+        }
+
+        function alterarCategoria(index, novaCategoria) {
+            let mesChave = document.getElementById('seletorMes').value;
+            if (db[mesChave] && db[mesChave].compras[index]) {
+                db[mesChave].compras[index].categoria = novaCategoria;
+                localStorage.setItem('fincontrol_db_v6', JSON.stringify(db));
+            }
+        }
+
+        function alterarNota(index, novaNota) {
+            let mesChave = document.getElementById('seletorMes').value;
+            if (db[mesChave] && db[mesChave].compras[index]) {
+                db[mesChave].compras[index].nota = novaNota;
+                localStorage.setItem('fincontrol_db_v6', JSON.stringify(db));
+            }
         }
 
         function renderizarTela() {
@@ -227,11 +253,11 @@
             tbody.innerHTML = '';
 
             if (dadosMes.compras.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="4" class="p-6 text-center text-slate-500">Nenhuma fatura importada. Use o botão acima para colar os dados.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-slate-500">Nenhuma fatura importada. Use o botão acima para colar os dados.</td></tr>`;
                 return;
             }
 
-            dadosMes.compras.forEach(item => {
+            dadosMes.compras.forEach((item, index) => {
                 let tr = document.createElement('tr');
                 tr.className = "hover:bg-slate-700/20 transition";
                 
@@ -239,11 +265,23 @@
                     ? `<span class="bg-amber-500/10 text-amber-400 border border-amber-500/20 px-2 py-0.5 rounded-md font-semibold text-[10px]">${item.parcela}</span>`
                     : `<span class="bg-slate-700/40 text-slate-400 px-2 py-0.5 rounded-md text-[10px]">${item.parcela}</span>`;
 
+                // Gerar opções do Select de Categoria
+                let optionsCategoria = categoriasDisponiveis.map(cat => 
+                    `<option value="${cat}" ${cat === item.categoria ? 'selected' : ''}>${cat}</option>`
+                ).join('');
+
                 tr.innerHTML = `
                     <td class="p-3 font-medium text-slate-200">${item.descricao}</td>
-                    <td class="p-3"><span class="bg-slate-700/50 text-slate-300 px-2 py-0.5 rounded-md text-[10px]">${item.categoria}</span></td>
+                    <td class="p-3">
+                        <select onchange="alterarCategoria(${index}, this.value)" class="bg-slate-900 border border-slate-700/80 text-slate-300 px-2 py-1 rounded-md text-[11px] focus:outline-none focus:border-emerald-500">
+                            ${optionsCategoria}
+                        </select>
+                    </td>
                     <td class="p-3 text-center">${badgeParcela}</td>
                     <td class="p-3 text-right font-semibold text-slate-200">R$ ${item.valor.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+                    <td class="p-3">
+                        <input type="text" value="${item.nota || ''}" placeholder="Adicionar nota..." onchange="alterarNota(${index}, this.value)" class="w-full bg-slate-900/60 border border-slate-700/50 text-slate-300 text-[11px] px-2 py-1 rounded-md focus:outline-none focus:border-emerald-500 placeholder:text-slate-600" />
+                    </td>
                 `;
                 tbody.appendChild(tr);
             });
