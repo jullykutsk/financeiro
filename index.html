@@ -5,59 +5,52 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MindCash-Up | Paz Financeira & Saúde Emocional</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Biblioteca para gerar PDF de alta qualidade -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         body { 
-            background: radial-gradient(circle at top, #0f172a 0%, #07090e 100%); 
-            color: #f8fafc; 
+            background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%); 
+            color: #1e293b; 
         }
         input[type="month"]::-webkit-calendar-picker-indicator {
-            filter: invert(1);
             cursor: pointer;
         }
         .mind-glow {
-            box-shadow: 0 0 25px -5px rgba(16, 185, 129, 0.08);
+            box-shadow: 0 10px 30px -10px rgba(16, 185, 129, 0.15);
         }
     </style>
 </head>
-<body class="font-sans antialiased min-h-screen pb-12 selection:bg-emerald-500 selection:text-slate-950">
+<body class="font-sans antialiased min-h-screen pb-12 selection:bg-emerald-500 selection:text-white">
 
-    <!-- Elemento wrapper que será transformado em PDF -->
     <div id="conteudoPDF" class="max-w-6xl mx-auto p-4 md:p-6 space-y-6">
         
-        <!-- Cabeçalho Alinhado à Marca -->
-        <header class="bg-gradient-to-br from-slate-900/95 via-slate-900/80 to-slate-950/90 p-5 md:p-6 rounded-3xl border border-emerald-500/20 shadow-2xl shadow-emerald-950/20 backdrop-blur-xl flex flex-col md:flex-row justify-between items-center gap-4 mind-glow">
+        <!-- Cabeçalho Elegante & Claro (Sem o MC) -->
+        <header class="bg-white/90 p-5 md:p-6 rounded-3xl border border-slate-200/80 shadow-xl backdrop-blur-xl flex flex-col md:flex-row justify-between items-center gap-4 mind-glow">
             
             <div class="flex items-center gap-4 w-full md:w-auto">
-                <div class="w-14 h-14 bg-gradient-to-br from-emerald-400 to-teal-600 text-slate-950 rounded-2xl flex items-center justify-center text-xl font-black shadow-lg shadow-emerald-500/20 tracking-tighter">
-                    MC
-                </div>
                 <div>
                     <div class="flex items-center gap-2">
-                        <h1 class="font-black text-2xl text-white tracking-tight">MindCash</h1>
-                        <span class="text-[10px] uppercase font-black bg-emerald-400 text-slate-950 px-2.5 py-0.5 rounded-full shadow-md shadow-emerald-500/40">Up</span>
+                        <h1 class="font-black text-2xl text-slate-900 tracking-tight">MindCash</h1>
+                        <span class="text-[10px] uppercase font-black bg-emerald-500 text-white px-2.5 py-0.5 rounded-full shadow-sm">Up</span>
                     </div>
-                    <p class="text-xs text-emerald-400/80 font-medium tracking-wide">Clareza Mental & Evolução Financeira</p>
+                    <p class="text-xs text-emerald-600 font-semibold tracking-wide">Clareza Mental & Evolução Financeira</p>
                 </div>
             </div>
             
             <div class="flex items-center gap-2.5 w-full md:w-auto justify-end overflow-x-auto pb-1 md:pb-0">
-                <div class="relative bg-slate-950/90 border border-slate-700/60 rounded-2xl px-3.5 py-2 flex items-center gap-2 shadow-inner">
-                    <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">MÊS:</span>
-                    <input type="month" id="seletorMes" class="bg-transparent text-xs font-bold text-emerald-400 focus:outline-none cursor-pointer" onchange="renderizarTela()">
+                <div class="relative bg-slate-100 border border-slate-200 rounded-2xl px-3.5 py-2 flex items-center gap-2 shadow-inner">
+                    <span class="text-[10px] uppercase font-bold text-slate-500 tracking-wider">MÊS:</span>
+                    <input type="month" id="seletorMes" class="bg-transparent text-xs font-bold text-emerald-700 focus:outline-none cursor-pointer" onchange="renderizarTela()">
                 </div>
                 
-                <!-- Botão Gerar PDF -->
-                <button onclick="gerarPDF()" class="bg-emerald-600 hover:bg-emerald-500 text-white border border-emerald-500/40 px-3.5 py-2.5 rounded-2xl text-xs font-bold transition flex items-center gap-1.5 shadow-md active:scale-95" title="Baixar PDF do Mês">
+                <button onclick="gerarPDF()" class="bg-emerald-600 hover:bg-emerald-700 text-white border border-emerald-500 px-3.5 py-2.5 rounded-2xl text-xs font-bold transition flex items-center gap-1.5 shadow-md active:scale-95" title="Baixar PDF do Mês">
                     📄 <span class="hidden sm:inline">PDF</span>
                 </button>
                 
-                <button onclick="exportarDados()" class="bg-slate-800/80 hover:bg-slate-700 text-slate-200 border border-slate-700/60 px-3.5 py-2.5 rounded-2xl text-xs font-semibold transition flex items-center gap-1.5 shadow-md active:scale-95" title="Salvar Backup">
+                <button onclick="exportarDados()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 border border-slate-300 px-3.5 py-2.5 rounded-2xl text-xs font-semibold transition flex items-center gap-1.5 shadow-md active:scale-95" title="Salvar Backup">
                     💾 <span class="hidden sm:inline">Backup</span>
                 </button>
 
-                <button onclick="document.getElementById('fileBackupInput').click()" class="bg-slate-800/80 hover:bg-slate-700 text-slate-200 border border-slate-700/60 px-3.5 py-2.5 rounded-2xl text-xs font-semibold transition flex items-center gap-1.5 shadow-md active:scale-95" title="Carregar Backup">
+                <button onclick="document.getElementById('fileBackupInput').click()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 border border-slate-300 px-3.5 py-2.5 rounded-2xl text-xs font-semibold transition flex items-center gap-1.5 shadow-md active:scale-95" title="Carregar Backup">
                     📂 <span class="hidden sm:inline">Restaurar</span>
                 </button>
                 <input type="file" id="fileBackupInput" accept="*" class="hidden" onchange="importarDados(event)">
@@ -66,55 +59,55 @@
 
         <!-- Resumo de Caixa -->
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3.5">
-            <div class="bg-slate-900/60 p-4 rounded-3xl border border-slate-800/80 shadow-lg backdrop-blur flex flex-col justify-between">
-                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Total Entradas</span>
-                <h2 id="totalEntradas" class="text-2xl font-black text-emerald-400 mt-2">R$ 0,00</h2>
+            <div class="bg-white/80 p-4 rounded-3xl border border-slate-200 shadow-lg shadow-slate-200/50 backdrop-blur flex flex-col justify-between">
+                <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Total Entradas</span>
+                <h2 id="totalEntradas" class="text-2xl font-black text-emerald-600 mt-2">R$ 0,00</h2>
             </div>
-            <div class="bg-slate-900/60 p-4 rounded-3xl border border-slate-800/80 shadow-lg backdrop-blur flex flex-col justify-between">
-                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">(-) Fixos & Assinaturas</span>
-                <h2 id="totalFixosEmprestimos" class="text-2xl font-black text-amber-400 mt-2">R$ 0,00</h2>
+            <div class="bg-white/80 p-4 rounded-3xl border border-slate-200 shadow-lg shadow-slate-200/50 backdrop-blur flex flex-col justify-between">
+                <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">(-) Fixos & Assinaturas</span>
+                <h2 id="totalFixosEmprestimos" class="text-2xl font-black text-amber-600 mt-2">R$ 0,00</h2>
             </div>
-            <div class="bg-slate-900/60 p-4 rounded-3xl border border-slate-800/80 shadow-lg backdrop-blur flex flex-col justify-between">
-                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">(-) Cartões (Faturas/Parcelas)</span>
-                <h2 id="totalFaturaCartao" class="text-2xl font-black text-rose-400 mt-2">R$ 0,00</h2>
+            <div class="bg-white/80 p-4 rounded-3xl border border-slate-200 shadow-lg shadow-slate-200/50 backdrop-blur flex flex-col justify-between">
+                <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">(-) Cartões (Faturas/Parcelas)</span>
+                <h2 id="totalFaturaCartao" class="text-2xl font-black text-rose-600 mt-2">R$ 0,00</h2>
             </div>
-            <div class="bg-gradient-to-br from-emerald-950/40 via-slate-900/80 to-slate-900 p-4 rounded-3xl border border-emerald-500/30 shadow-lg backdrop-blur flex flex-col justify-between">
-                <span class="text-[10px] font-bold text-emerald-400 uppercase tracking-widest">(=) Saldo Líquido Previsto</span>
-                <h2 id="saldoLiquidoReal" class="text-2xl font-black text-blue-400 mt-2">R$ 0,00</h2>
+            <div class="bg-gradient-to-br from-emerald-50 to-teal-50 p-4 rounded-3xl border border-emerald-200 shadow-lg shadow-slate-200/50 backdrop-blur flex flex-col justify-between">
+                <span class="text-[10px] font-bold text-emerald-700 uppercase tracking-widest">(=) Saldo Líquido Previsto</span>
+                <h2 id="saldoLiquidoReal" class="text-2xl font-black text-blue-700 mt-2">R$ 0,00</h2>
             </div>
         </div>
 
-        <!-- Adicionar Lançamento Manual (Ocultado automaticamente ao gerar PDF se desejar, ou impresso) -->
-        <div id="blocoAdicionar" class="bg-slate-900/60 p-5 rounded-3xl border border-slate-800/80 shadow-lg backdrop-blur space-y-4">
-            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-2">
+        <!-- Adicionar Lançamento Manual -->
+        <div id="blocoAdicionar" class="bg-white/80 p-5 rounded-3xl border border-slate-200 shadow-lg shadow-slate-200/50 backdrop-blur space-y-4">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-2">
                 <span>➕</span> Adicionar Novo Lançamento:
             </h3>
             
             <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
-                <label class="flex items-center gap-2 bg-slate-950/60 p-3 rounded-2xl border border-slate-800 cursor-pointer hover:border-slate-700 transition">
-                    <input type="radio" name="tipoLancamento" value="entrada" checked class="text-emerald-500 focus:ring-0">
-                    <span class="text-emerald-400 font-semibold">Entrada</span>
+                <label class="flex items-center gap-2 bg-slate-50 p-3 rounded-2xl border border-slate-200 cursor-pointer hover:border-slate-300 transition">
+                    <input type="radio" name="tipoLancamento" value="entrada" checked class="text-emerald-600 focus:ring-0">
+                    <span class="text-emerald-700 font-semibold">Entrada</span>
                 </label>
-                <label class="flex items-center gap-2 bg-slate-950/60 p-3 rounded-2xl border border-slate-800 cursor-pointer hover:border-slate-700 transition">
-                    <input type="radio" name="tipoLancamento" value="fixo" class="text-rose-500 focus:ring-0">
-                    <span class="text-rose-400 font-semibold">Custo Fixo</span>
+                <label class="flex items-center gap-2 bg-slate-50 p-3 rounded-2xl border border-slate-200 cursor-pointer hover:border-slate-300 transition">
+                    <input type="radio" name="tipoLancamento" value="fixo" class="text-rose-600 focus:ring-0">
+                    <span class="text-rose-700 font-semibold">Custo Fixo</span>
                 </label>
-                <label class="flex items-center gap-2 bg-slate-950/60 p-3 rounded-2xl border border-slate-800 cursor-pointer hover:border-slate-700 transition">
-                    <input type="radio" name="tipoLancamento" value="emprestimo" class="text-amber-500 focus:ring-0">
-                    <span class="text-amber-400 font-semibold">Empréstimo</span>
+                <label class="flex items-center gap-2 bg-slate-50 p-3 rounded-2xl border border-slate-200 cursor-pointer hover:border-slate-300 transition">
+                    <input type="radio" name="tipoLancamento" value="emprestimo" class="text-amber-600 focus:ring-0">
+                    <span class="text-amber-700 font-semibold">Empréstimo</span>
                 </label>
-                <label class="flex items-center gap-2 bg-slate-950/60 p-3 rounded-2xl border border-slate-800 cursor-pointer hover:border-slate-700 transition">
-                    <input type="radio" name="tipoLancamento" value="assinatura" class="text-purple-500 focus:ring-0">
-                    <span class="text-purple-400 font-semibold">Assinatura</span>
+                <label class="flex items-center gap-2 bg-slate-50 p-3 rounded-2xl border border-slate-200 cursor-pointer hover:border-slate-300 transition">
+                    <input type="radio" name="tipoLancamento" value="assinatura" class="text-purple-600 focus:ring-0">
+                    <span class="text-purple-700 font-semibold">Assinatura</span>
                 </label>
             </div>
 
             <div class="space-y-2.5">
                 <div class="flex flex-col sm:flex-row gap-2.5">
-                    <input type="text" id="descLancamento" placeholder="Descrição (Ex: Salário, Aluguel, Netflix...)" class="flex-1 bg-slate-950 border border-slate-800 text-xs text-slate-200 px-3.5 py-3 rounded-2xl focus:outline-none focus:border-emerald-500 transition shadow-inner">
-                    <input type="number" step="0.01" id="valorLancamento" placeholder="Valor R$" class="w-full sm:w-40 bg-slate-950 border border-slate-800 text-xs text-slate-200 px-3.5 py-3 rounded-2xl focus:outline-none focus:border-emerald-500 transition shadow-inner">
+                    <input type="text" id="descLancamento" placeholder="Descrição (Ex: Salário, Aluguel, Netflix...)" class="flex-1 bg-slate-50 border border-slate-200 text-xs text-slate-800 px-3.5 py-3 rounded-2xl focus:outline-none focus:border-emerald-500 transition shadow-inner">
+                    <input type="number" step="0.01" id="valorLancamento" placeholder="Valor R$" class="w-full sm:w-40 bg-slate-50 border border-slate-200 text-xs text-slate-800 px-3.5 py-3 rounded-2xl focus:outline-none focus:border-emerald-500 transition shadow-inner">
                 </div>
-                <button onclick="adicionarLancamentoManual()" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold p-3.5 rounded-2xl text-xs transition shadow-lg shadow-emerald-500/20 active:scale-[0.99]">
+                <button onclick="adicionarLancamentoManual()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold p-3.5 rounded-2xl text-xs transition shadow-lg shadow-emerald-600/20 active:scale-[0.99]">
                     + Adicionar Lançamento Contínuo
                 </button>
             </div>
@@ -124,74 +117,74 @@
         <div class="space-y-4">
             
             <!-- 1. GRUPO: ENTRADAS -->
-            <div class="bg-slate-900/60 rounded-3xl border border-emerald-500/20 shadow-lg backdrop-blur overflow-hidden">
-                <div class="p-4 flex justify-between items-center cursor-pointer select-none bg-emerald-950/20" onclick="alternarGrupo('entrada')">
+            <div class="bg-white/80 rounded-3xl border border-emerald-200 shadow-lg shadow-slate-200/50 backdrop-blur overflow-hidden">
+                <div class="p-4 flex justify-between items-center cursor-pointer select-none bg-emerald-50/60" onclick="alternarGrupo('entrada')">
                     <div class="flex items-center gap-2.5">
-                        <span class="text-xs bg-emerald-500 text-slate-950 font-black px-2 py-0.5 rounded-lg uppercase">Entradas</span>
-                        <span id="somaEntrada" class="text-xs font-bold text-emerald-400">R$ 0,00</span>
+                        <span class="text-xs bg-emerald-600 text-white font-black px-2.5 py-1 rounded-lg uppercase">Entradas</span>
+                        <span id="somaEntrada" class="text-xs font-bold text-emerald-700">R$ 0,00</span>
                     </div>
-                    <button id="btnGrupoentrada" class="nao-imprimir text-sm bg-slate-800 hover:bg-slate-700 text-slate-300 px-3.5 py-1.5 rounded-xl transition border border-slate-700 font-bold">▲</button>
+                    <button id="btnGrupoentrada" class="nao-imprimir text-sm bg-slate-100 hover:bg-slate-200 text-slate-700 px-3.5 py-1.5 rounded-xl transition border border-slate-200 font-bold">▲</button>
                 </div>
-                <div id="conteudoGrupoentrada" class="p-4 space-y-2.5 border-t border-slate-800/60"></div>
+                <div id="conteudoGrupoentrada" class="p-4 space-y-2.5 border-t border-slate-100"></div>
             </div>
 
             <!-- 2. GRUPO: CUSTOS FIXOS -->
-            <div class="bg-slate-900/60 rounded-3xl border border-rose-500/20 shadow-lg backdrop-blur overflow-hidden">
-                <div class="p-4 flex justify-between items-center cursor-pointer select-none bg-rose-950/20" onclick="alternarGrupo('fixo')">
+            <div class="bg-white/80 rounded-3xl border border-rose-200 shadow-lg shadow-slate-200/50 backdrop-blur overflow-hidden">
+                <div class="p-4 flex justify-between items-center cursor-pointer select-none bg-rose-50/60" onclick="alternarGrupo('fixo')">
                     <div class="flex items-center gap-2.5">
-                        <span class="text-xs bg-rose-500 text-slate-950 font-black px-2 py-0.5 rounded-lg uppercase">Custos Fixos</span>
-                        <span id="somaFixo" class="text-xs font-bold text-rose-400">R$ 0,00</span>
+                        <span class="text-xs bg-rose-600 text-white font-black px-2.5 py-1 rounded-lg uppercase">Custos Fixos</span>
+                        <span id="somaFixo" class="text-xs font-bold text-rose-700">R$ 0,00</span>
                     </div>
-                    <button id="btnGrupofixo" class="nao-imprimir text-sm bg-slate-800 hover:bg-slate-700 text-slate-300 px-3.5 py-1.5 rounded-xl transition border border-slate-700 font-bold">▲</button>
+                    <button id="btnGrupofixo" class="nao-imprimir text-sm bg-slate-100 hover:bg-slate-200 text-slate-700 px-3.5 py-1.5 rounded-xl transition border border-slate-200 font-bold">▲</button>
                 </div>
-                <div id="conteudoGrupofixo" class="p-4 space-y-2.5 border-t border-slate-800/60"></div>
+                <div id="conteudoGrupofixo" class="p-4 space-y-2.5 border-t border-slate-100"></div>
             </div>
 
             <!-- 3. GRUPO: EMPRÉSTIMOS -->
-            <div class="bg-slate-900/60 rounded-3xl border border-amber-500/20 shadow-lg backdrop-blur overflow-hidden">
-                <div class="p-4 flex justify-between items-center cursor-pointer select-none bg-amber-950/20" onclick="alternarGrupo('emprestimo')">
+            <div class="bg-white/80 rounded-3xl border border-amber-200 shadow-lg shadow-slate-200/50 backdrop-blur overflow-hidden">
+                <div class="p-4 flex justify-between items-center cursor-pointer select-none bg-amber-50/60" onclick="alternarGrupo('emprestimo')">
                     <div class="flex items-center gap-2.5">
-                        <span class="text-xs bg-amber-500 text-slate-950 font-black px-2 py-0.5 rounded-lg uppercase">Empréstimos</span>
-                        <span id="somaEmprestimo" class="text-xs font-bold text-amber-400">R$ 0,00</span>
+                        <span class="text-xs bg-amber-600 text-white font-black px-2.5 py-1 rounded-lg uppercase">Empréstimos</span>
+                        <span id="somaEmprestimo" class="text-xs font-bold text-amber-700">R$ 0,00</span>
                     </div>
-                    <button id="btnGrupoemprestimo" class="nao-imprimir text-sm bg-slate-800 hover:bg-slate-700 text-slate-300 px-3.5 py-1.5 rounded-xl transition border border-slate-700 font-bold">▲</button>
+                    <button id="btnGrupoemprestimo" class="nao-imprimir text-sm bg-slate-100 hover:bg-slate-200 text-slate-700 px-3.5 py-1.5 rounded-xl transition border border-slate-200 font-bold">▲</button>
                 </div>
-                <div id="conteudoGrupoemprestimo" class="p-4 space-y-2.5 border-t border-slate-800/60"></div>
+                <div id="conteudoGrupoemprestimo" class="p-4 space-y-2.5 border-t border-slate-100"></div>
             </div>
 
             <!-- 4. GRUPO: ASSINATURAS -->
-            <div class="bg-slate-900/60 rounded-3xl border border-purple-500/20 shadow-lg backdrop-blur overflow-hidden">
-                <div class="p-4 flex justify-between items-center cursor-pointer select-none bg-purple-950/20" onclick="alternarGrupo('assinatura')">
+            <div class="bg-white/80 rounded-3xl border border-purple-200 shadow-lg shadow-slate-200/50 backdrop-blur overflow-hidden">
+                <div class="p-4 flex justify-between items-center cursor-pointer select-none bg-purple-50/60" onclick="alternarGrupo('assinatura')">
                     <div class="flex items-center gap-2.5">
-                        <span class="text-xs bg-purple-500 text-slate-950 font-black px-2 py-0.5 rounded-lg uppercase">Assinaturas</span>
-                        <span id="somaAssinatura" class="text-xs font-bold text-purple-400">R$ 0,00</span>
+                        <span class="text-xs bg-purple-600 text-white font-black px-2.5 py-1 rounded-lg uppercase">Assinaturas</span>
+                        <span id="somaAssinatura" class="text-xs font-bold text-purple-700">R$ 0,00</span>
                     </div>
-                    <button id="btnGrupoassinatura" class="nao-imprimir text-sm bg-slate-800 hover:bg-slate-700 text-slate-300 px-3.5 py-1.5 rounded-xl transition border border-slate-700 font-bold">▲</button>
+                    <button id="btnGrupoassinatura" class="nao-imprimir text-sm bg-slate-100 hover:bg-slate-200 text-slate-700 px-3.5 py-1.5 rounded-xl transition border border-slate-200 font-bold">▲</button>
                 </div>
-                <div id="conteudoGrupoassinatura" class="p-4 space-y-2.5 border-t border-slate-800/60"></div>
+                <div id="conteudoGrupoassinatura" class="p-4 space-y-2.5 border-t border-slate-100"></div>
             </div>
 
         </div>
 
         <!-- Botão de Colar Texto da Fatura -->
-        <div id="blocoFaturaBtn" class="bg-slate-900/60 p-5 rounded-3xl border border-slate-800/80 shadow-lg backdrop-blur space-y-3">
-            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-2">
+        <div id="blocoFaturaBtn" class="bg-white/80 p-5 rounded-3xl border border-slate-200 shadow-lg shadow-slate-200/50 backdrop-blur space-y-3">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-2">
                 <span>⚡</span> Lançar Fatura do Cartão (Raio-X):
             </h3>
             <div>
-                <button onclick="abrirModalTexto()" class="w-full bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-extrabold p-3.5 rounded-2xl transition text-xs flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20 active:scale-[0.99]">
+                <button onclick="abrirModalTexto()" class="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-extrabold p-3.5 rounded-2xl transition text-xs flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/20 active:scale-[0.99]">
                     📋 Colar Texto da Fatura do Mês
                 </button>
             </div>
         </div>
 
         <!-- Painel de Gastos Por Categoria -->
-        <div class="bg-slate-900/60 p-5 rounded-3xl border border-slate-800/80 shadow-lg backdrop-blur">
+        <div class="bg-white/80 p-5 rounded-3xl border border-slate-200 shadow-lg shadow-slate-200/50 backdrop-blur">
             <div class="flex justify-between items-center cursor-pointer select-none" onclick="alternarPainelCategorias()">
-                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-2">
+                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-2">
                     <span>📊</span> TOTAL GASTOS POR CATEGORIA
                 </h3>
-                <button id="btnTogglePainel" class="nao-imprimir text-sm bg-slate-800 hover:bg-slate-700 text-slate-300 px-3.5 py-1.5 rounded-xl transition border border-slate-700 font-bold">
+                <button id="btnTogglePainel" class="nao-imprimir text-sm bg-slate-100 hover:bg-slate-200 text-slate-700 px-3.5 py-1.5 rounded-xl transition border border-slate-200 font-bold">
                     ▲
                 </button>
             </div>
@@ -199,18 +192,18 @@
         </div>
 
         <!-- Tabela do Raio-X -->
-        <div class="bg-slate-900/60 rounded-3xl border border-slate-800/80 shadow-lg overflow-hidden backdrop-blur">
-            <div class="p-5 border-b border-slate-800 flex justify-between items-center">
+        <div class="bg-white/80 rounded-3xl border border-slate-200 shadow-lg shadow-slate-200/50 overflow-hidden backdrop-blur">
+            <div class="p-5 border-b border-slate-200 flex justify-between items-center">
                 <div>
-                    <h3 class="font-bold text-sm text-slate-200">Raio-X de Compras e Parcelas Ativas</h3>
-                    <p class="text-[11px] text-slate-400">Somente compras reais e parcelas projetadas para este mês.</p>
+                    <h3 class="font-bold text-sm text-slate-900">Raio-X de Compras e Parcelas Ativas</h3>
+                    <p class="text-[11px] text-slate-500">Somente compras reais e parcelas projetadas para este mês.</p>
                 </div>
             </div>
 
             <div class="overflow-x-auto">
                 <table class="w-full text-left border-collapse text-xs">
                     <thead>
-                        <tr class="bg-slate-950/60 text-slate-400 text-[10px] uppercase tracking-wider border-b border-slate-800">
+                        <tr class="bg-slate-100 text-slate-600 text-[10px] uppercase tracking-wider border-b border-slate-200">
                             <th class="p-3.5">Descrição</th>
                             <th class="p-3.5">Cartão</th>
                             <th class="p-3.5">Categoria</th>
@@ -219,9 +212,9 @@
                             <th class="p-3.5 text-left min-w-[160px]">Nota / Observação</th>
                         </tr>
                     </thead>
-                    <tbody id="tabelaRaioX" class="divide-y divide-slate-800/60">
+                    <tbody id="tabelaRaioX" class="divide-y divide-slate-100">
                         <tr>
-                            <td colspan="6" class="p-8 text-center text-slate-500">Nenhuma fatura importada. Use o botão acima para colar os dados.</td>
+                            <td colspan="6" class="p-8 text-center text-slate-400">Nenhuma fatura importada. Use o botão acima para colar os dados.</td>
                         </tr>
                     </tbody>
                 </table>
@@ -231,26 +224,26 @@
     </div>
 
     <!-- Modal Colar Texto -->
-    <div id="modalTexto" class="hidden fixed inset-0 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4 z-50">
-        <div class="bg-slate-900 p-6 rounded-3xl border border-slate-700 max-w-lg w-full space-y-4 shadow-2xl">
-            <h3 class="font-bold text-sm text-white flex items-center gap-2"><span>📋</span> Copie e cole o texto da fatura abaixo:</h3>
-            <textarea id="textoFatura" rows="10" class="w-full bg-slate-950 border border-slate-800 text-xs text-slate-200 p-3.5 rounded-2xl focus:outline-none focus:border-emerald-500 shadow-inner" placeholder="Selecione tudo no PDF do seu celular, copie e cole aqui..."></textarea>
+    <div id="modalTexto" class="hidden fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+        <div class="bg-white p-6 rounded-3xl border border-slate-200 max-w-lg w-full space-y-4 shadow-2xl">
+            <h3 class="font-bold text-sm text-slate-900 flex items-center gap-2"><span>📋</span> Copie e cole o texto da fatura abaixo:</h3>
+            <textarea id="textoFatura" rows="10" class="w-full bg-slate-50 border border-slate-200 text-xs text-slate-800 p-3.5 rounded-2xl focus:outline-none focus:border-emerald-500 shadow-inner" placeholder="Selecione tudo no PDF do seu celular, copie e cole aqui..."></textarea>
             <div class="flex justify-end gap-2.5 pt-2">
-                <button onclick="fecharModalTexto()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 px-4 py-2.5 rounded-2xl text-xs font-semibold transition">Cancelar</button>
-                <button onclick="processarTextoBruto()" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold px-5 py-2.5 rounded-2xl text-xs transition shadow-lg shadow-emerald-500/20">Processar Fatura</button>
+                <button onclick="fecharModalTexto()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 px-4 py-2.5 rounded-2xl text-xs font-semibold transition">Cancelar</button>
+                <button onclick="processarTextoBruto()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold px-5 py-2.5 rounded-2xl text-xs transition shadow-lg shadow-emerald-600/20">Processar Fatura</button>
             </div>
         </div>
     </div>
 
     <!-- Modal de Confirmação de Exclusão -->
-    <div id="modalExclusao" class="hidden fixed inset-0 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4 z-50">
-        <div class="bg-slate-900 p-6 rounded-3xl border border-slate-700 max-w-sm w-full space-y-4 shadow-2xl">
-            <h3 class="font-bold text-sm text-white">Excluir Lançamento</h3>
-            <p class="text-xs text-slate-300">Como você deseja remover este lançamento?</p>
+    <div id="modalExclusao" class="hidden fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+        <div class="bg-white p-6 rounded-3xl border border-slate-200 max-w-sm w-full space-y-4 shadow-2xl">
+            <h3 class="font-bold text-sm text-slate-900">Excluir Lançamento</h3>
+            <p class="text-xs text-slate-600">Como você deseja remover este lançamento?</p>
             <div class="space-y-2.5 pt-2">
-                <button onclick="confirmarExclusao('apenas_este')" class="w-full bg-slate-800 hover:bg-slate-700 text-white font-medium p-3 rounded-2xl text-xs transition border border-slate-700">Excluir SOMENTE deste mês</button>
-                <button onclick="confirmarExclusao('este_e_futuros')" class="w-full bg-rose-600 hover:bg-rose-500 text-white font-bold p-3 rounded-2xl text-xs transition shadow-lg shadow-rose-600/20">Excluir deste mês E DOS PRÓXIMOS</button>
-                <button onclick="fecharModalExclusao()" class="w-full bg-transparent text-slate-400 p-2 text-xs font-medium hover:text-slate-200">Cancelar</button>
+                <button onclick="confirmarExclusao('apenas_este')" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-800 font-medium p-3 rounded-2xl text-xs transition border border-slate-200">Excluir SOMENTE deste mês</button>
+                <button onclick="confirmarExclusao('este_e_futuros')" class="w-full bg-rose-600 hover:bg-rose-700 text-white font-bold p-3 rounded-2xl text-xs transition shadow-lg shadow-rose-600/20">Excluir deste mês E DOS PRÓXIMOS</button>
+                <button onclick="fecharModalExclusao()" class="w-full bg-transparent text-slate-500 p-2 text-xs font-medium hover:text-slate-800">Cancelar</button>
             </div>
         </div>
     </div>
@@ -275,7 +268,6 @@
             let elemento = document.getElementById('conteudoPDF');
             let mesAtual = document.getElementById('seletorMes').value;
             
-            // Oculta temporariamente elementos interativos (botões de adicionar, fechar, inputs de edição rápida) para o PDF ficar limpo
             let blocoAdd = document.getElementById('blocoAdicionar');
             let blocoFat = document.getElementById('blocoFaturaBtn');
             blocoAdd.style.display = 'none';
@@ -285,12 +277,11 @@
                 margin:       [10, 10, 10, 10],
                 filename:     `MindCash_Relatorio_${mesAtual}.pdf`,
                 image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { scale: 2, useCORS: true, backgroundColor: '#07090e' },
+                html2canvas:  { scale: 2, useCORS: true, backgroundColor: '#f8fafc' },
                 jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
             };
 
             html2pdf().from(elemento).set(opt).save().then(() => {
-                // Restaura os blocos na tela após gerar o PDF
                 blocoAdd.style.display = 'block';
                 blocoFat.style.display = 'block';
             });
@@ -690,28 +681,28 @@
                 container.innerHTML = '';
                 if (gruposMap[tipo].length > 0) {
                     gruposMap[tipo].forEach(item => {
-                        let corBorda = tipo === 'entrada' ? 'border-emerald-500/30' :
-                                       tipo === 'fixo' ? 'border-rose-500/30' :
-                                       tipo === 'emprestimo' ? 'border-amber-500/30' : 'border-purple-500/30';
+                        let corBorda = tipo === 'entrada' ? 'border-emerald-200' :
+                                       tipo === 'fixo' ? 'border-rose-200' :
+                                       tipo === 'emprestimo' ? 'border-amber-200' : 'border-purple-200';
 
                         let divItem = document.createElement('div');
-                        divItem.className = `flex flex-col gap-2 bg-slate-950/80 border ${corBorda} p-3.5 rounded-2xl text-xs shadow-inner`;
+                        divItem.className = `flex flex-col gap-2 bg-white border ${corBorda} p-3.5 rounded-2xl text-xs shadow-sm`;
                         divItem.innerHTML = `
                             <div class="flex items-center justify-between gap-2">
-                                <span class="text-slate-100 font-bold text-sm tracking-wide break-words flex-1">${item.descricao}</span>
+                                <span class="text-slate-800 font-bold text-sm tracking-wide break-words flex-1">${item.descricao}</span>
                             </div>
-                            <div class="flex items-center justify-between pt-1 border-t border-slate-900/80">
-                                <span class="text-slate-400 font-medium">Valor: R$</span>
+                            <div class="flex items-center justify-between pt-1 border-t border-slate-100">
+                                <span class="text-slate-500 font-medium">Valor: R$</span>
                                 <div class="flex items-center gap-2">
-                                    <input type="number" step="0.01" value="${item.valor}" onchange="alterarValorManual(${item.id}, this.value)" class="w-28 bg-slate-900 border border-slate-700/80 text-right px-2.5 py-1.5 rounded-xl text-xs font-bold text-emerald-400 focus:outline-none focus:border-emerald-500 shadow-inner" />
-                                    <button onclick="solicitarExclusaoManual(${item.id})" class="nao-imprimir text-slate-500 hover:text-rose-400 font-bold p-1.5 rounded-lg hover:bg-rose-500/10 transition" title="Excluir">✕</button>
+                                    <input type="number" step="0.01" value="${item.valor}" onchange="alterarValorManual(${item.id}, this.value)" class="w-28 bg-slate-50 border border-slate-200 text-right px-2.5 py-1.5 rounded-xl text-xs font-bold text-emerald-700 focus:outline-none focus:border-emerald-500 shadow-inner" />
+                                    <button onclick="solicitarExclusaoManual(${item.id})" class="nao-imprimir text-slate-400 hover:text-rose-600 font-bold p-1.5 rounded-lg hover:bg-rose-50 transition" title="Excluir">✕</button>
                                 </div>
                             </div>
                         `;
                         container.appendChild(divItem);
                     });
                 } else {
-                    container.innerHTML = `<p class="text-[11px] text-slate-500 text-center py-2 italic">Nenhum lançamento neste grupo para este mês.</p>`;
+                    container.innerHTML = `<p class="text-[11px] text-slate-400 text-center py-2 italic">Nenhum lançamento neste grupo para este mês.</p>`;
                 }
             });
 
@@ -723,7 +714,7 @@
             
             let elSaldo = document.getElementById('saldoLiquidoReal');
             elSaldo.innerText = `R$ ${saldoReal.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
-            elSaldo.className = `text-2xl font-black mt-2 ${saldoReal >= 0 ? 'text-blue-400' : 'text-rose-400'}`;
+            elSaldo.className = `text-2xl font-black mt-2 ${saldoReal >= 0 ? 'text-blue-600' : 'text-rose-600'}`;
 
             let totaisCategoria = {};
             categoriasDisponiveis.forEach(cat => totaisCategoria[cat] = 0);
@@ -742,10 +733,10 @@
             categoriasDisponiveis.forEach(cat => {
                 let valor = totaisCategoria[cat];
                 let card = document.createElement('div');
-                card.className = `p-3 rounded-2xl border text-left shadow-sm transition ${valor > 0 ? 'bg-slate-950/80 border-slate-700/60' : 'bg-slate-950/30 border-slate-900/50 text-slate-600'}`;
+                card.className = `p-3 rounded-2xl border text-left shadow-sm transition ${valor > 0 ? 'bg-white border-slate-200' : 'bg-slate-50/50 border-slate-100 text-slate-400'}`;
                 card.innerHTML = `
-                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-tight truncate">${cat}</p>
-                    <p class="text-xs font-black mt-1 ${valor > 0 ? 'text-amber-400' : 'text-slate-600'}">R$ ${valor.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</p>
+                    <p class="text-[10px] font-bold text-slate-500 uppercase tracking-tight truncate">${cat}</p>
+                    <p class="text-xs font-black mt-1 ${valor > 0 ? 'text-amber-600' : 'text-slate-400'}">R$ ${valor.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</p>
                 `;
                 containerCards.appendChild(card);
             });
@@ -756,17 +747,17 @@
             tbody.innerHTML = '';
 
             if (comprasMes.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-slate-500 italic">Nenhuma fatura importada ou parcela projetada para este mês.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-slate-400 italic">Nenhuma fatura importada ou parcela projetada para este mês.</td></tr>`;
                 return;
             }
 
             comprasMes.forEach((item, index) => {
                 let tr = document.createElement('tr');
-                tr.className = "hover:bg-slate-800/30 transition";
+                tr.className = "hover:bg-slate-50 transition";
                 
                 let badgeParcela = item.parcela !== "À vista" 
-                    ? `<span class="bg-amber-500/10 text-amber-400 border border-amber-500/20 px-2 py-1 rounded-lg font-bold text-[10px]">${item.parcela}</span>`
-                    : `<span class="bg-slate-800/40 text-slate-400 px-2 py-1 rounded-lg text-[10px]">${item.parcela}</span>`;
+                    ? `<span class="bg-amber-100 text-amber-800 border border-amber-200 px-2 py-1 rounded-lg font-bold text-[10px]">${item.parcela}</span>`
+                    : `<span class="bg-slate-100 text-slate-600 px-2 py-1 rounded-lg text-[10px]">${item.parcela}</span>`;
 
                 let optionsCartao = cartoesDisponiveis.map(cart => 
                     `<option value="${cart}" ${cart.toLowerCase() === (item.cartao || "bradesco").toLowerCase() ? 'selected' : ''}>${cart}</option>`
@@ -777,22 +768,22 @@
                 ).join('');
 
                 tr.innerHTML = `
-                    <td class="p-3.5 font-semibold text-slate-200">${item.descricao}</td>
+                    <td class="p-3.5 font-semibold text-slate-800">${item.descricao}</td>
                     <td class="p-3.5">
-                        <select onchange="alterarCartao(${index}, this.value)" class="bg-slate-950 border border-slate-700/80 text-emerald-400 px-2.5 py-1.5 rounded-xl text-[11px] font-bold focus:outline-none focus:border-emerald-500 shadow-inner">
+                        <select onchange="alterarCartao(${index}, this.value)" class="bg-slate-50 border border-slate-200 text-emerald-700 px-2.5 py-1.5 rounded-xl text-[11px] font-bold focus:outline-none focus:border-emerald-500 shadow-inner">
                             ${optionsCartao}
                         </select>
                     </td>
                     <td class="p-3.5">
-                        <select onchange="alterarCategoria(${index}, this.value)" class="bg-slate-950 border border-slate-700/80 text-slate-300 px-2.5 py-1.5 rounded-xl text-[11px] font-medium focus:outline-none focus:border-emerald-500 shadow-inner">
+                        <select onchange="alterarCategoria(${index}, this.value)" class="bg-slate-50 border border-slate-200 text-slate-700 px-2.5 py-1.5 rounded-xl text-[11px] font-medium focus:outline-none focus:border-emerald-500 shadow-inner">
                             ${optionsCategoria}
                         </select>
                     </td>
                     <td class="p-3.5 text-center">${badgeParcela}</td>
-                    <td class="p-3.5 text-right font-black text-slate-200">R$ ${item.valor.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+                    <td class="p-3.5 text-right font-black text-slate-900">R$ ${item.valor.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
                     <td class="p-3.5 flex items-center justify-between gap-2">
-                        <input type="text" value="${item.nota || ''}" placeholder="Nota..." onchange="alterarNota(${index}, this.value)" class="w-full bg-slate-950 border border-slate-800 text-slate-300 text-[11px] px-2.5 py-1.5 rounded-xl focus:outline-none focus:border-emerald-500 placeholder:text-slate-600 shadow-inner" />
-                        <button onclick="excluirItemRaioX(${index})" class="nao-imprimir text-slate-500 hover:text-rose-400 font-bold p-1.5 rounded-lg hover:bg-rose-500/10 transition" title="Excluir item">✕</button>
+                        <input type="text" value="${item.nota || ''}" placeholder="Nota..." onchange="alterarNota(${index}, this.value)" class="w-full bg-slate-50 border border-slate-200 text-slate-700 text-[11px] px-2.5 py-1.5 rounded-xl focus:outline-none focus:border-emerald-500 placeholder:text-slate-400 shadow-inner" />
+                        <button onclick="excluirItemRaioX(${index})" class="nao-imprimir text-slate-400 hover:text-rose-600 font-bold p-1.5 rounded-lg hover:bg-rose-50 transition" title="Excluir item">✕</button>
                     </td>
                 `;
                 tbody.appendChild(tr);
