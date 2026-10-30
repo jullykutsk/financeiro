@@ -10,7 +10,7 @@
         body { 
             background: linear-gradient(135deg, #2b3036 0%, #1a1e23 100%); 
             color: #e5e9ec; 
-            font-size: 11px; /* Fonte levemente menor em todo o sistema */
+            font-size: 11px;
         }
         input[type="month"]::-webkit-calendar-picker-indicator {
             filter: invert(1);
@@ -42,8 +42,8 @@
                 
                 <!-- Botões de Alternância de Abas -->
                 <div class="bg-[#1a1e23] p-1 rounded-2xl border border-[#3b434a] flex items-center gap-1 z-10">
-                    <button type="button" onclick="mudarAba('dashboard')" id="abaBtnDashboard" class="px-3 py-1 rounded-xl text-[11px] font-bold transition bg-[#4a777a] text-[#f4f1ea] cursor-pointer">Dashboard</button>
-                    <button type="button" onclick="mudarAba('metas')" id="abaBtnMetas" class="px-3 py-1 rounded-xl text-[11px] font-bold transition text-[#9fa8b0] hover:text-[#f4f1ea] cursor-pointer">Metas</button>
+                    <button type="button" onclick="mudarAba('dashboard')" id="abaBtnDashboard" class="px-3 py-1 rounded-xl text-[11px] font-bold transition bg-[#4a777a] text-[#f4f1ea] cursor-pointer">Controle Geral</button>
+                    <button type="button" onclick="mudarAba('metas')" id="abaBtnMetas" class="px-3 py-1 rounded-xl text-[11px] font-bold transition text-[#9fa8b0] hover:text-[#f4f1ea] cursor-pointer">Metas & Projetos</button>
                 </div>
 
                 <div id="controlesDashboard" class="flex items-center gap-2">
@@ -67,7 +67,7 @@
             </div>
         </header>
 
-        <!-- ================= ABA 1: DASHBOARD FINANCEIRO ================= -->
+        <!-- ================= ABA 1: CONTROLE GERAL ================= -->
         <div id="secaoDashboard" class="space-y-5">
             <!-- Resumo de Caixa -->
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
@@ -228,15 +228,18 @@
                 </div>
             </div>
 
-            <!-- Tabela do Raio-X -->
+            <!-- Tabela do Raio-X (Recolhível) -->
             <div class="bg-[#22272c]/80 rounded-3xl border border-[#3b434a] shadow-lg overflow-hidden backdrop-blur">
-                <div class="p-4 border-b border-[#3b434a] flex justify-between items-center">
+                <div class="p-4 border-b border-[#3b434a] flex justify-between items-center cursor-pointer select-none" onclick="alternarPainelRaioX()">
                     <div>
                         <h3 class="font-bold text-[11px] text-[#f4f1ea]">Raio-X de Compras e Parcelas Ativas</h3>
                         <p class="text-[10px] text-[#9fa8b0]">Somente compras reais e parcelas projetadas para este mês.</p>
                     </div>
+                    <button id="btnToggleRaioX" type="button" class="nao-imprimir text-xs bg-[#1a1e23] hover:bg-[#2d333b] text-[#c5cbd3] px-2.5 py-1 rounded-xl transition border border-[#3b434a] font-bold">
+                        ▼
+                    </button>
                 </div>
-                <div class="overflow-x-auto">
+                <div id="conteudoPainelRaioX" class="overflow-x-auto hidden">
                     <table class="w-full text-left border-collapse text-[11px]">
                         <thead>
                             <tr class="bg-[#1a1e23] text-[#9fa8b0] text-[9px] uppercase tracking-wider border-b border-[#3b434a]">
@@ -258,11 +261,11 @@
             </div>
         </div>
 
-        <!-- ================= ABA 2: METAS PESSOAIS & IDEIAS ================= -->
+        <!-- ================= ABA 2: METAS & PROJETOS ================= -->
         <div id="secaoMetas" class="space-y-5 hidden">
             <div class="bg-[#22272c]/80 p-4 rounded-3xl border border-[#3b434a] shadow-lg backdrop-blur space-y-3">
                 <h3 class="text-[11px] font-bold uppercase tracking-wider text-[#c5cbd3]">
-                    Adicionar Nova Meta ou Ideia:
+                    Adicionar Nova Meta ou Projeto:
                 </h3>
                 
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-[11px]">
@@ -282,12 +285,12 @@
                 <textarea id="metaDescricao" rows="2" placeholder="Notas, ideias ou plano de ação..." class="w-full bg-[#1a1e23] border border-[#3b434a] text-[11px] text-[#f4f1ea] p-3 rounded-2xl focus:outline-none focus:border-[#4a777a] shadow-inner"></textarea>
 
                 <button onclick="adicionarMeta()" class="w-full bg-[#4a777a] hover:bg-[#3b6063] text-[#f4f1ea] font-extrabold p-3 rounded-2xl text-[11px] transition shadow-lg active:scale-[0.99]">
-                    + Salvar Meta ou Ideia
+                    + Salvar Meta ou Projeto
                 </button>
             </div>
 
             <div class="space-y-3">
-                <h3 class="text-[11px] font-bold uppercase tracking-wider text-[#9fa8b0] px-1">Suas Metas e Ideias Ativas:</h3>
+                <h3 class="text-[11px] font-bold uppercase tracking-wider text-[#9fa8b0] px-1">Suas Metas e Projetos Ativos:</h3>
                 <div id="listaMetas" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
             </div>
         </div>
@@ -450,7 +453,7 @@
             let descricao = document.getElementById('metaDescricao').value.trim();
 
             if (!titulo) {
-                alert("Por favor, preencha o título da meta ou ideia.");
+                alert("Por favor, preencha o título da meta ou projeto.");
                 return;
             }
 
@@ -493,7 +496,7 @@
             container.innerHTML = '';
 
             if (!db.metas || db.metas.length === 0) {
-                container.innerHTML = `<p class="text-[11px] text-[#9fa8b0] italic col-span-2 text-center py-6">Nenhuma meta cadastrada ainda. Adicione acima!</p>`;
+                container.innerHTML = `<p class="text-[11px] text-[#9fa8b0] italic col-span-2 text-center py-6">Nenhuma meta ou projeto cadastrado ainda. Adicione acima!</p>`;
                 return;
             }
 
@@ -660,6 +663,13 @@
             
             conteudo.classList.toggle('hidden');
             painelGerir.classList.toggle('hidden');
+            btn.innerText = conteudo.classList.contains('hidden') ? '▼' : '▲';
+        }
+
+        function alternarPainelRaioX() {
+            let conteudo = document.getElementById('conteudoPainelRaioX');
+            let btn = document.getElementById('btnToggleRaioX');
+            conteudo.classList.toggle('hidden');
             btn.innerText = conteudo.classList.contains('hidden') ? '▼' : '▲';
         }
 
