@@ -3,11 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MindCash-Up | Paz Financeira & Saúde Emocional</title>
+    <title>MindCash - UP | Paz Financeira & Saúde Emocional</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
-        /* Fundo cinzento-escuro elegante com base na paleta natural */
         body { 
             background: linear-gradient(135deg, #2b3036 0%, #1a1e23 100%); 
             color: #e5e9ec; 
@@ -25,23 +24,21 @@
 
     <div id="conteudoPDF" class="max-w-6xl mx-auto p-4 md:p-6 space-y-6">
         
-        <!-- Cabeçalho Corrigido (Sem cortes de texto) -->
+        <!-- Cabeçalho MindCash - UP -->
         <header class="bg-[#22272c]/90 p-5 md:p-6 rounded-3xl border border-[#4a777a]/30 shadow-2xl backdrop-blur-xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mind-glow">
             
             <div class="flex items-center gap-4 w-full md:w-auto">
                 <div>
                     <div class="flex items-center gap-2">
-                        <h1 class="font-black text-2xl text-[#f4f1ea] tracking-tight">MindCash</h1>
-                        <span class="text-[10px] uppercase font-black bg-[#4a777a] text-[#f4f1ea] px-2.5 py-0.5 rounded-full shadow-sm">Up</span>
+                        <h1 class="font-black text-2xl text-[#f4f1ea] tracking-tight">MindCash - UP</h1>
                     </div>
-                    <p class="text-xs text-[#829c95] font-semibold tracking-wide">Clareza Mental & Evolução Financeira</p>
+                    <p class="text-xs text-[#829c95] font-semibold tracking-wide">Clareza Mental & Paz Financeira</p>
                 </div>
             </div>
             
             <div class="flex flex-wrap items-center gap-2.5 w-full md:w-auto justify-start md:justify-end">
-                <!-- Campo de Mês Corrigido sem Corte -->
+                <!-- Seletor de mês sem a palavra Mês -->
                 <div class="relative bg-[#1a1e23] border border-[#3b434a] rounded-2xl px-4 py-2.5 flex items-center gap-2 shadow-inner shrink-0">
-                    <span class="text-[11px] font-bold text-[#9fa8b0] tracking-wider whitespace-nowrap">MÊS:</span>
                     <input type="month" id="seletorMes" class="bg-transparent text-xs font-bold text-[#829c95] focus:outline-none cursor-pointer" onchange="renderizarTela()">
                 </div>
                 
@@ -126,9 +123,9 @@
                         <span class="text-xs bg-[#4a777a] text-[#f4f1ea] font-black px-2.5 py-1 rounded-lg uppercase">Entradas</span>
                         <span id="somaEntrada" class="text-xs font-bold text-[#829c95]">R$ 0,00</span>
                     </div>
-                    <button id="btnGrupoentrada" class="nao-imprimir text-sm bg-[#1a1e23] hover:bg-[#2d333b] text-[#c5cbd3] px-3.5 py-1.5 rounded-xl transition border border-[#3b434a] font-bold">▲</button>
+                    <button id="btnGrupoentrada" class="nao-imprimir text-sm bg-[#1a1e23] hover:bg-[#2d333b] text-[#c5cbd3] px-3.5 py-1.5 rounded-xl transition border border-[#3b434a] font-bold">▼</button>
                 </div>
-                <div id="conteudoGrupoentrada" class="p-4 space-y-2.5 border-t border-[#3b434a]/40"></div>
+                <div id="conteudoGrupoentrada" class="p-4 space-y-2.5 border-t border-[#3b434a]/40 hidden"></div>
             </div>
 
             <!-- 2. GRUPO: CUSTOS FIXOS -->
@@ -138,9 +135,9 @@
                         <span class="text-xs bg-[#d9777f] text-[#22272c] font-black px-2.5 py-1 rounded-lg uppercase">Custos Fixos</span>
                         <span id="somaFixo" class="text-xs font-bold text-[#d9777f]">R$ 0,00</span>
                     </div>
-                    <button id="btnGrupofixo" class="nao-imprimir text-sm bg-[#1a1e23] hover:bg-[#2d333b] text-[#c5cbd3] px-3.5 py-1.5 rounded-xl transition border border-[#3b434a] font-bold">▲</button>
+                    <button id="btnGrupofixo" class="nao-imprimir text-sm bg-[#1a1e23] hover:bg-[#2d333b] text-[#c5cbd3] px-3.5 py-1.5 rounded-xl transition border border-[#3b434a] font-bold">▼</button>
                 </div>
-                <div id="conteudoGrupofixo" class="p-4 space-y-2.5 border-t border-[#3b434a]/40"></div>
+                <div id="conteudoGrupofixo" class="p-4 space-y-2.5 border-t border-[#3b434a]/40 hidden"></div>
             </div>
 
             <!-- 3. GRUPO: EMPRÉSTIMOS -->
@@ -150,9 +147,9 @@
                         <span class="text-xs bg-[#d4a373] text-[#22272c] font-black px-2.5 py-1 rounded-lg uppercase">Empréstimos</span>
                         <span id="somaEmprestimo" class="text-xs font-bold text-[#d4a373]">R$ 0,00</span>
                     </div>
-                    <button id="btnGrupoemprestimo" class="nao-imprimir text-sm bg-[#1a1e23] hover:bg-[#2d333b] text-[#c5cbd3] px-3.5 py-1.5 rounded-xl transition border border-[#3b434a] font-bold">▲</button>
+                    <button id="btnGrupoemprestimo" class="nao-imprimir text-sm bg-[#1a1e23] hover:bg-[#2d333b] text-[#c5cbd3] px-3.5 py-1.5 rounded-xl transition border border-[#3b434a] font-bold">▼</button>
                 </div>
-                <div id="conteudoGrupoemprestimo" class="p-4 space-y-2.5 border-t border-[#3b434a]/40"></div>
+                <div id="conteudoGrupoemprestimo" class="p-4 space-y-2.5 border-t border-[#3b434a]/40 hidden"></div>
             </div>
 
             <!-- 4. GRUPO: ASSINATURAS -->
@@ -162,9 +159,9 @@
                         <span class="text-xs bg-[#a78bfa] text-[#22272c] font-black px-2.5 py-1 rounded-lg uppercase">Assinaturas</span>
                         <span id="somaAssinatura" class="text-xs font-bold text-[#a78bfa]">R$ 0,00</span>
                     </div>
-                    <button id="btnGrupoassinatura" class="nao-imprimir text-sm bg-[#1a1e23] hover:bg-[#2d333b] text-[#c5cbd3] px-3.5 py-1.5 rounded-xl transition border border-[#3b434a] font-bold">▲</button>
+                    <button id="btnGrupoassinatura" class="nao-imprimir text-sm bg-[#1a1e23] hover:bg-[#2d333b] text-[#c5cbd3] px-3.5 py-1.5 rounded-xl transition border border-[#3b434a] font-bold">▼</button>
                 </div>
-                <div id="conteudoGrupoassinatura" class="p-4 space-y-2.5 border-t border-[#3b434a]/40"></div>
+                <div id="conteudoGrupoassinatura" class="p-4 space-y-2.5 border-t border-[#3b434a]/40 hidden"></div>
             </div>
 
         </div>
@@ -188,10 +185,10 @@
                     <span>📊</span> TOTAL GASTOS POR CATEGORIA
                 </h3>
                 <button id="btnTogglePainel" class="nao-imprimir text-sm bg-[#1a1e23] hover:bg-[#2d333b] text-[#c5cbd3] px-3.5 py-1.5 rounded-xl transition border border-[#3b434a] font-bold">
-                    ▲
+                    ▼
                 </button>
             </div>
-            <div id="conteudoPainelCategorias" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2.5 mt-4 transition-all duration-300"></div>
+            <div id="conteudoPainelCategorias" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2.5 mt-4 transition-all duration-300 hidden"></div>
         </div>
 
         <!-- Tabela do Raio-X -->
@@ -253,8 +250,11 @@
 
     <script>
         let db = JSON.parse(localStorage.getItem('mindcash_db_v1')) || { faturas: {}, recorrentes: [], regrasCategorias: {}, regrasCartoes: {} };
-        let painelRecolhido = localStorage.getItem('mindcash_painel_recolhido') === 'true';
-        let gruposRecolhidos = JSON.parse(localStorage.getItem('mindcash_grupos_recolhidos')) || { entrada: false, fixo: false, emprestimo: false, assinatura: false };
+        
+        // Inicializa configurando painel e grupos como recolhidos por padrão na primeira vez ou mantendo o estado
+        let painelRecolhido = localStorage.getItem('mindcash_painel_recolhido') !== null ? localStorage.getItem('mindcash_painel_recolhido') === 'true' : true;
+        let gruposRecolhidos = JSON.parse(localStorage.getItem('mindcash_grupos_recolhidos')) || { entrada: true, fixo: true, emprestimo: true, assinatura: true };
+        
         let itemParaExcluirIndex = null;
 
         function inicializarMesAtual() {
