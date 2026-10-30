@@ -14,18 +14,31 @@
     <div class="max-w-5xl mx-auto p-4 md:p-6">
         
         <!-- Cabeçalho -->
-        <header class="flex justify-between items-center mb-6 bg-slate-800/80 p-4 rounded-2xl border border-slate-700/50 backdrop-blur">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 bg-emerald-500/20 text-emerald-400 rounded-xl flex items-center justify-center font-bold text-xl border border-emerald-500/30">
-                    💳
-                </div>
-                <div>
-                    <h1 class="font-bold text-lg text-white leading-tight">FinControl <span class="text-xs bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-500/30">Pro</span></h1>
-                    <p class="text-xs text-slate-400">Projeção de Meses Futuros & Parcelas</p>
+        <header class="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6 bg-slate-800/80 p-4 rounded-2xl border border-slate-700/50 backdrop-blur">
+            <div class="flex items-center gap-3 w-full sm:w-auto justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-emerald-500/20 text-emerald-400 rounded-xl flex items-center justify-center font-bold text-xl border border-emerald-500/30">
+                        💳
+                    </div>
+                    <div>
+                        <h1 class="font-bold text-lg text-white leading-tight">FinControl <span class="text-xs bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-500/30">Pro</span></h1>
+                        <p class="text-xs text-slate-400">Projeção Contínua & Memória de Categorias</p>
+                    </div>
                 </div>
             </div>
-            <div class="flex items-center gap-2">
+            
+            <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto justify-end">
+                <!-- Seletor de Mês -->
                 <input type="month" id="seletorMes" class="bg-slate-900 border border-slate-700 text-xs text-slate-200 px-3 py-2 rounded-xl focus:outline-none focus:border-emerald-500" value="2026-10" onchange="renderizarTela()">
+                
+                <!-- Botões de Backup de Segurança -->
+                <button onclick="exportarDados()" class="bg-slate-700 hover:bg-slate-600 text-slate-200 px-3 py-2 rounded-xl text-xs font-semibold transition" title="Baixar arquivo de backup com todas as suas informações">
+                    💾 Salvar Backup
+                </button>
+                <button onclick="document.getElementById('fileBackupInput').click()" class="bg-slate-700 hover:bg-slate-600 text-slate-200 px-3 py-2 rounded-xl text-xs font-semibold transition" title="Restaurar dados de um arquivo salvo anteriormente">
+                    📂 Carregar Backup
+                </button>
+                <input type="file" id="fileBackupInput" accept=".json" class="hidden" onchange="importarDados(event)">
             </div>
         </header>
 
@@ -161,7 +174,7 @@
     </div>
 
     <script>
-        let db = JSON.parse(localStorage.getItem('fincontrol_db_v11')) || { faturas: {}, recorrentes: [] };
+        let db = JSON.parse(localStorage.getItem('fincontrol_db_v13')) || { faturas: {}, recorrentes: [], regrasCategorias: {} };
         let painelRecolhido = localStorage.getItem('fincontrol_painel_recolhido') === 'true';
         let itemParaExcluirIndex = null;
 
@@ -184,6 +197,39 @@
 
         function normalizarTexto(txt) {
             return txt.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+        }
+
+        function exportarDados() {
+            let dadosStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(db));
+            let downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dadosStr);
+            downloadAnchor.setAttribute("download", `fincontrol_backup_${new Date().toISOString().slice(0,10)}.json`);
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+        }
+
+        function importarDados(event) {
+            let file = event.target.files[0];
+            if (!file) return;
+            let reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    let conteudo = JSON.parse(e.target.result);
+                    if (conteudo && conteudo.faturas) {
+                        db = conteudo;
+                        if (!db.regrasCategorias) db.regrasCategorias = {};
+                        localStorage.setItem('fincontrol_db_v13', JSON.stringify(db));
+                        renderizarTela();
+                        alert("Backup carregado com sucesso!");
+                    } else {
+                        alert("O ficheiro selecionado não é um backup válido do FinControl.");
+                    }
+                } catch (err) {
+                    alert("Erro ao ler o ficheiro de backup.");
+                }
+            };
+            reader.readAsText(file);
         }
 
         function abrirModalTexto() { document.getElementById('modalTexto').classList.remove('hidden'); }
@@ -230,7 +276,7 @@
                 exclusoesMês: []
             });
 
-            localStorage.setItem('fincontrol_db_v11', JSON.stringify(db));
+            localStorage.setItem('fincontrol_db_v13', JSON.stringify(db));
 
             document.getElementById('descLancamento').value = '';
             document.getElementById('valorLancamento').value = '';
@@ -258,7 +304,7 @@
                 } else if (modo === 'este_e_futuros') {
                     item.mesFimExclusao = mesAtual;
                 }
-                localStorage.setItem('fincontrol_db_v11', JSON.stringify(db));
+                localStorage.setItem('fincontrol_db_v13', JSON.stringify(db));
             }
 
             fecharModalExclusao();
@@ -271,7 +317,7 @@
             let item = db.recorrentes.find(r => r.id === id);
             if (item) {
                 item.valor = val;
-                localStorage.setItem('fincontrol_db_v11', JSON.stringify(db));
+                localStorage.setItem('fincontrol_db_v13', JSON.stringify(db));
                 renderizarTela();
             }
         }
@@ -288,6 +334,8 @@
             let mesChave = document.getElementById('seletorMes').value;
             let compras = [];
             let valorFaturaFechada = 0;
+
+            if (!db.regrasCategorias) db.regrasCategorias = {};
 
             linhas.forEach(linha => {
                 let linhaNorm = normalizarTexto(linha);
@@ -330,17 +378,22 @@
                     .trim();
 
                 if (nome.length < 3 || nome === "/2026" || nome === "2026") return;
+                let nomeUpper = nome.toUpperCase();
 
+                // Verifica se já existe regra aprendida para este estabelecimento
                 let categoria = "Pessoal";
-                let nLower = nome.toLowerCase();
+                if (db.regrasCategorias[nomeUpper]) {
+                    categoria = db.regrasCategorias[nomeUpper];
+                } else {
+                    let nLower = nome.toLowerCase();
+                    if (nLower.includes("posto") || nLower.includes("combustivel") || nLower.includes("auto posto")) categoria = "Combustível";
+                    else if (nLower.includes("mercado") || nLower.includes("jacomar") || nLower.includes("bonato") || nLower.includes("condor")) categoria = "Mercado";
+                    else if (nLower.includes("farmacia") || nLower.includes("saude") || nLower.includes("medprev")) categoria = "Saúde";
+                    else if (nLower.includes("materiais") || nLower.includes("toka") || nLower.includes("madeira")) categoria = "Manutenção Casa";
+                    else if (nLower.includes("oficina") || nLower.includes("autopecas") || nLower.includes("pneu") || nLower.includes("mecanica") || nLower.includes("renesto")) categoria = "Manutenção carro";
+                }
 
-                if (nLower.includes("posto") || nLower.includes("combustivel") || nLower.includes("auto posto")) categoria = "Combustível";
-                else if (nLower.includes("mercado") || nLower.includes("jacomar") || nLower.includes("bonato") || nLower.includes("condor")) categoria = "Mercado";
-                else if (nLower.includes("farmacia") || nLower.includes("saude") || nLower.includes("medprev")) categoria = "Saúde";
-                else if (nLower.includes("materiais") || nLower.includes("toka") || nLower.includes("madeira")) categoria = "Manutenção Casa";
-                else if (nLower.includes("oficina") || nLower.includes("autopecas") || nLower.includes("pneu") || nLower.includes("mecanica") || nLower.includes("renesto")) categoria = "Manutenção carro";
-
-                compras.push({ descricao: nome.toUpperCase(), categoria, parcela, valor, nota: "" });
+                compras.push({ descricao: nomeUpper, categoria, parcela, valor, nota: "" });
             });
 
             if (valorFaturaFechada === 0) valorFaturaFechada = compras.reduce((acc, c) => acc + c.valor, 0);
@@ -348,7 +401,7 @@
             if (!db.faturas) db.faturas = {};
             db.faturas[mesChave] = { faturaFechada: valorFaturaFechada, compras: compras };
 
-            localStorage.setItem('fincontrol_db_v11', JSON.stringify(db));
+            localStorage.setItem('fincontrol_db_v13', JSON.stringify(db));
             renderizarTela();
         }
 
@@ -356,7 +409,6 @@
             let resultado = [];
 
             if (db.faturas && db.faturas[mesAlvoStr] && db.faturas[mesAlvoStr].compras) {
-                // Retorna cópia para permitir exclusão sem corromper a base original de outros meses
                 return JSON.parse(JSON.stringify(db.faturas[mesAlvoStr].compras));
             }
 
@@ -396,9 +448,22 @@
 
         function alterarCategoria(index, novaCategoria) {
             let mesChave = document.getElementById('seletorMes').value;
-            if (db.faturas && db.faturas[mesChave] && db.faturas[mesChave].compras[index]) {
-                db.faturas[mesChave].compras[index].categoria = novaCategoria;
-                localStorage.setItem('fincontrol_db_v11', JSON.stringify(db));
+            let comprasMes = obterComprasEParcelasDoMes(mesChave);
+            
+            if (comprasMes[index]) {
+                let itemModificado = comprasMes[index];
+                itemModificado.categoria = novaCategoria;
+
+                // Salva a regra aprendida para este estabelecimento em definitivo
+                if (!db.regrasCategorias) db.regrasCategorias = {};
+                db.regrasCategorias[itemModificado.descricao] = novaCategoria;
+
+                // Atualiza na base de faturas do mês se ela já existir gravada
+                if (db.faturas && db.faturas[mesChave] && db.faturas[mesChave].compras[index]) {
+                    db.faturas[mesChave].compras[index].categoria = novaCategoria;
+                }
+
+                localStorage.setItem('fincontrol_db_v13', JSON.stringify(db));
                 renderizarTela();
             }
         }
@@ -407,7 +472,7 @@
             let mesChave = document.getElementById('seletorMes').value;
             if (db.faturas && db.faturas[mesChave] && db.faturas[mesChave].compras[index]) {
                 db.faturas[mesChave].compras[index].nota = novaNota;
-                localStorage.setItem('fincontrol_db_v11', JSON.stringify(db));
+                localStorage.setItem('fincontrol_db_v13', JSON.stringify(db));
             }
         }
 
@@ -415,9 +480,8 @@
             let mesChave = document.getElementById('seletorMes').value;
             if (db.faturas && db.faturas[mesChave] && db.faturas[mesChave].compras) {
                 db.faturas[mesChave].compras.splice(index, 1);
-                // Atualiza o valor da fatura fechada do mês com base nas compras restantes
                 db.faturas[mesChave].faturaFechada = db.faturas[mesChave].compras.reduce((acc, c) => acc + c.valor, 0);
-                localStorage.setItem('fincontrol_db_v11', JSON.stringify(db));
+                localStorage.setItem('fincontrol_db_v13', JSON.stringify(db));
                 renderizarTela();
             }
         }
@@ -485,7 +549,6 @@
             elSaldo.innerText = `R$ ${saldoReal.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
             elSaldo.className = `text-xl font-bold mt-1 ${saldoReal >= 0 ? 'text-blue-400' : 'text-rose-400'}`;
 
-            // Totais por Categoria (Normalizando para evitar incompatibilidade com acentuação/maiúsculas)
             let totaisCategoria = {};
             categoriasDisponiveis.forEach(cat => totaisCategoria[cat] = 0);
             
