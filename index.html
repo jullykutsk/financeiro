@@ -3,13 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MindCash-Up - Paz Financeira & Saúde Emocional</title>
+    <title>MindCash-Up | Paz Financeira & Saúde Emocional</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { background-color: #0b0f19; color: #f8fafc; }
+        body { 
+            background: radial-gradient(circle at top, #0f172a 0%, #07090e 100%); 
+            color: #f8fafc; 
+        }
         input[type="month"]::-webkit-calendar-picker-indicator {
             filter: invert(1);
             cursor: pointer;
+        }
+        /* Efeito de brilho suave alinhado à marca */
+        .mind-glow {
+            box-shadow: 0 0 25px -5px rgba(16, 185, 129, 0.08);
         }
     </style>
 </head>
@@ -17,61 +24,61 @@
 
     <div class="max-w-6xl mx-auto p-4 md:p-6 space-y-6">
         
-        <!-- Cabeçalho Moderno & Fluído (Sem Emojis) -->
-        <header class="bg-gradient-to-br from-slate-900/90 to-slate-800/80 p-5 rounded-3xl border border-slate-700/60 shadow-xl shadow-black/40 backdrop-blur-xl flex flex-col md:flex-row justify-between items-center gap-4">
+        <!-- Cabeçalho Alinhado à Marca -->
+        <header class="bg-gradient-to-br from-slate-900/95 via-slate-900/80 to-slate-950/90 p-5 md:p-6 rounded-3xl border border-emerald-500/20 shadow-2xl shadow-emerald-950/20 backdrop-blur-xl flex flex-col md:flex-row justify-between items-center gap-4 mind-glow">
             
-            <div class="flex items-center gap-3.5 w-full md:w-auto">
-                <div class="w-12 h-12 bg-gradient-to-tr from-emerald-500/30 to-emerald-400/10 text-emerald-400 rounded-2xl flex items-center justify-center text-lg font-black border border-emerald-500/30 shadow-inner">
+            <div class="flex items-center gap-4 w-full md:w-auto">
+                <div class="w-13 h-13 w-14 h-14 bg-gradient-to-br from-emerald-400 to-teal-600 text-slate-950 rounded-2xl flex items-center justify-center text-xl font-black shadow-lg shadow-emerald-500/20 tracking-tighter">
                     MC
                 </div>
                 <div>
                     <div class="flex items-center gap-2">
-                        <h1 class="font-black text-xl text-white tracking-tight">MindCash</h1>
-                        <span class="text-[10px] uppercase font-extrabold bg-emerald-500 text-slate-950 px-2 py-0.5 rounded-full shadow-sm shadow-emerald-500/50">Up</span>
+                        <h1 class="font-black text-2xl text-white tracking-tight">MindCash</h1>
+                        <span class="text-[10px] uppercase font-black bg-emerald-400 text-slate-950 px-2.5 py-0.5 rounded-full shadow-md shadow-emerald-500/40">Up</span>
                     </div>
-                    <p class="text-xs text-slate-400 font-medium">Paz Financeira & Saúde Emocional</p>
+                    <p class="text-xs text-emerald-400/80 font-medium tracking-wide">Clareza Mental & Evolução Financeira</p>
                 </div>
             </div>
             
             <div class="flex items-center gap-2.5 w-full md:w-auto justify-end overflow-x-auto pb-1 md:pb-0">
-                <div class="relative bg-slate-950/80 border border-slate-700/80 rounded-2xl px-3 py-2 flex items-center gap-2 shadow-inner">
+                <div class="relative bg-slate-950/90 border border-slate-700/60 rounded-2xl px-3.5 py-2 flex items-center gap-2 shadow-inner">
                     <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">MÊS:</span>
                     <input type="month" id="seletorMes" class="bg-transparent text-xs font-bold text-emerald-400 focus:outline-none cursor-pointer" onchange="renderizarTela()">
                 </div>
                 
-                <button onclick="exportarDados()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700/80 px-3.5 py-2.5 rounded-2xl text-xs font-semibold transition flex items-center gap-1.5 shadow-md active:scale-95" title="Salvar Backup">
+                <button onclick="exportarDados()" class="bg-slate-800/80 hover:bg-slate-700 text-slate-200 border border-slate-700/60 px-3.5 py-2.5 rounded-2xl text-xs font-semibold transition flex items-center gap-1.5 shadow-md active:scale-95" title="Salvar Backup">
                     💾 <span class="hidden sm:inline">Backup</span>
                 </button>
 
-                <button onclick="document.getElementById('fileBackupInput').click()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700/80 px-3.5 py-2.5 rounded-2xl text-xs font-semibold transition flex items-center gap-1.5 shadow-md active:scale-95" title="Carregar Backup">
+                <button onclick="document.getElementById('fileBackupInput').click()" class="bg-slate-800/80 hover:bg-slate-700 text-slate-200 border border-slate-700/60 px-3.5 py-2.5 rounded-2xl text-xs font-semibold transition flex items-center gap-1.5 shadow-md active:scale-95" title="Carregar Backup">
                     📂 <span class="hidden sm:inline">Restaurar</span>
                 </button>
                 <input type="file" id="fileBackupInput" accept="*" class="hidden" onchange="importarDados(event)">
             </div>
         </header>
 
-        <!-- Resumo de Caixa -->
+        <!-- Resumo de Caixa (Cards Mind-Up) -->
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3.5">
-            <div class="bg-slate-900/60 p-4 rounded-3xl border border-slate-800 shadow-lg backdrop-blur flex flex-col justify-between">
+            <div class="bg-slate-900/60 p-4 rounded-3xl border border-slate-800/80 shadow-lg backdrop-blur flex flex-col justify-between">
                 <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Total Entradas</span>
                 <h2 id="totalEntradas" class="text-2xl font-black text-emerald-400 mt-2">R$ 0,00</h2>
             </div>
-            <div class="bg-slate-900/60 p-4 rounded-3xl border border-slate-800 shadow-lg backdrop-blur flex flex-col justify-between">
+            <div class="bg-slate-900/60 p-4 rounded-3xl border border-slate-800/80 shadow-lg backdrop-blur flex flex-col justify-between">
                 <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">(-) Fixos & Assinaturas</span>
                 <h2 id="totalFixosEmprestimos" class="text-2xl font-black text-amber-400 mt-2">R$ 0,00</h2>
             </div>
-            <div class="bg-slate-900/60 p-4 rounded-3xl border border-slate-800 shadow-lg backdrop-blur flex flex-col justify-between">
+            <div class="bg-slate-900/60 p-4 rounded-3xl border border-slate-800/80 shadow-lg backdrop-blur flex flex-col justify-between">
                 <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">(-) Cartões (Faturas/Parcelas)</span>
                 <h2 id="totalFaturaCartao" class="text-2xl font-black text-rose-400 mt-2">R$ 0,00</h2>
             </div>
-            <div class="bg-gradient-to-br from-emerald-950/40 to-slate-900/80 p-4 rounded-3xl border border-emerald-500/30 shadow-lg backdrop-blur flex flex-col justify-between">
-                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">(=) Saldo Líquido Previsto</span>
+            <div class="bg-gradient-to-br from-emerald-950/40 via-slate-900/80 to-slate-900 p-4 rounded-3xl border border-emerald-500/30 shadow-lg backdrop-blur flex flex-col justify-between">
+                <span class="text-[10px] font-bold text-emerald-400 uppercase tracking-widest">(=) Saldo Líquido Previsto</span>
                 <h2 id="saldoLiquidoReal" class="text-2xl font-black text-blue-400 mt-2">R$ 0,00</h2>
             </div>
         </div>
 
         <!-- Adicionar Lançamento Manual -->
-        <div class="bg-slate-900/60 p-5 rounded-3xl border border-slate-800 shadow-lg backdrop-blur space-y-4">
+        <div class="bg-slate-900/60 p-5 rounded-3xl border border-slate-800/80 shadow-lg backdrop-blur space-y-4">
             <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-2">
                 <span>➕</span> Adicionar Novo Lançamento:
             </h3>
@@ -110,7 +117,7 @@
         <div class="space-y-4">
             
             <!-- 1. GRUPO: ENTRADAS -->
-            <div class="bg-slate-900/60 rounded-3xl border border-emerald-500/30 shadow-lg backdrop-blur overflow-hidden">
+            <div class="bg-slate-900/60 rounded-3xl border border-emerald-500/20 shadow-lg backdrop-blur overflow-hidden">
                 <div class="p-4 flex justify-between items-center cursor-pointer select-none bg-emerald-950/20" onclick="alternarGrupo('entrada')">
                     <div class="flex items-center gap-2.5">
                         <span class="text-xs bg-emerald-500 text-slate-950 font-black px-2 py-0.5 rounded-lg uppercase">Entradas</span>
@@ -122,7 +129,7 @@
             </div>
 
             <!-- 2. GRUPO: CUSTOS FIXOS -->
-            <div class="bg-slate-900/60 rounded-3xl border border-rose-500/30 shadow-lg backdrop-blur overflow-hidden">
+            <div class="bg-slate-900/60 rounded-3xl border border-rose-500/20 shadow-lg backdrop-blur overflow-hidden">
                 <div class="p-4 flex justify-between items-center cursor-pointer select-none bg-rose-950/20" onclick="alternarGrupo('fixo')">
                     <div class="flex items-center gap-2.5">
                         <span class="text-xs bg-rose-500 text-slate-950 font-black px-2 py-0.5 rounded-lg uppercase">Custos Fixos</span>
@@ -134,7 +141,7 @@
             </div>
 
             <!-- 3. GRUPO: EMPRÉSTIMOS -->
-            <div class="bg-slate-900/60 rounded-3xl border border-amber-500/30 shadow-lg backdrop-blur overflow-hidden">
+            <div class="bg-slate-900/60 rounded-3xl border border-amber-500/20 shadow-lg backdrop-blur overflow-hidden">
                 <div class="p-4 flex justify-between items-center cursor-pointer select-none bg-amber-950/20" onclick="alternarGrupo('emprestimo')">
                     <div class="flex items-center gap-2.5">
                         <span class="text-xs bg-amber-500 text-slate-950 font-black px-2 py-0.5 rounded-lg uppercase">Empréstimos</span>
@@ -146,7 +153,7 @@
             </div>
 
             <!-- 4. GRUPO: ASSINATURAS -->
-            <div class="bg-slate-900/60 rounded-3xl border border-purple-500/30 shadow-lg backdrop-blur overflow-hidden">
+            <div class="bg-slate-900/60 rounded-3xl border border-purple-500/20 shadow-lg backdrop-blur overflow-hidden">
                 <div class="p-4 flex justify-between items-center cursor-pointer select-none bg-purple-950/20" onclick="alternarGrupo('assinatura')">
                     <div class="flex items-center gap-2.5">
                         <span class="text-xs bg-purple-500 text-slate-950 font-black px-2 py-0.5 rounded-lg uppercase">Assinaturas</span>
@@ -160,7 +167,7 @@
         </div>
 
         <!-- Botão de Colar Texto da Fatura -->
-        <div class="bg-slate-900/60 p-5 rounded-3xl border border-slate-800 shadow-lg backdrop-blur space-y-3">
+        <div class="bg-slate-900/60 p-5 rounded-3xl border border-slate-800/80 shadow-lg backdrop-blur space-y-3">
             <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-2">
                 <span>⚡</span> Lançar Fatura do Cartão (Raio-X):
             </h3>
@@ -172,7 +179,7 @@
         </div>
 
         <!-- Painel de Gastos Por Categoria -->
-        <div class="bg-slate-900/60 p-5 rounded-3xl border border-slate-800 shadow-lg backdrop-blur">
+        <div class="bg-slate-900/60 p-5 rounded-3xl border border-slate-800/80 shadow-lg backdrop-blur">
             <div class="flex justify-between items-center cursor-pointer select-none" onclick="alternarPainelCategorias()">
                 <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-2">
                     <span>📊</span> TOTAL GASTOS POR CATEGORIA
@@ -185,7 +192,7 @@
         </div>
 
         <!-- Tabela do Raio-X -->
-        <div class="bg-slate-900/60 rounded-3xl border border-slate-800 shadow-lg overflow-hidden backdrop-blur">
+        <div class="bg-slate-900/60 rounded-3xl border border-slate-800/80 shadow-lg overflow-hidden backdrop-blur">
             <div class="p-5 border-b border-slate-800 flex justify-between items-center">
                 <div>
                     <h3 class="font-bold text-sm text-slate-200">Raio-X de Compras e Parcelas Ativas</h3>
@@ -217,7 +224,7 @@
     </div>
 
     <!-- Modal Colar Texto -->
-    <div id="modalTexto" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 z-50">
+    <div id="modalTexto" class="hidden fixed inset-0 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4 z-50">
         <div class="bg-slate-900 p-6 rounded-3xl border border-slate-700 max-w-lg w-full space-y-4 shadow-2xl">
             <h3 class="font-bold text-sm text-white flex items-center gap-2"><span>📋</span> Copie e cole o texto da fatura abaixo:</h3>
             <textarea id="textoFatura" rows="10" class="w-full bg-slate-950 border border-slate-800 text-xs text-slate-200 p-3.5 rounded-2xl focus:outline-none focus:border-emerald-500 shadow-inner" placeholder="Selecione tudo no PDF do seu celular, copie e cole aqui..."></textarea>
@@ -229,7 +236,7 @@
     </div>
 
     <!-- Modal de Confirmação de Exclusão -->
-    <div id="modalExclusao" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 z-50">
+    <div id="modalExclusao" class="hidden fixed inset-0 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4 z-50">
         <div class="bg-slate-900 p-6 rounded-3xl border border-slate-700 max-w-sm w-full space-y-4 shadow-2xl">
             <h3 class="font-bold text-sm text-white">Excluir Lançamento</h3>
             <p class="text-xs text-slate-300">Como você deseja remover este lançamento?</p>
