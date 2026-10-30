@@ -183,6 +183,19 @@
                 </div>
             </div>
 
+            <!-- PAINEL DE GASTOS SEPARADOS POR CARTÃO (RECOLHÍVEL) -->
+            <div class="bg-[#22272c]/80 p-5 rounded-3xl border border-[#3b434a] shadow-lg backdrop-blur">
+                <div class="flex justify-between items-center cursor-pointer select-none" onclick="alternarPainelCartoes()">
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-[#c5cbd3] flex items-center gap-2">
+                        <span>💳</span> TOTAL GASTOS POR CARTÃO
+                    </h3>
+                    <button id="btnTogglePainelCartoes" class="nao-imprimir text-sm bg-[#1a1e23] hover:bg-[#2d333b] text-[#c5cbd3] px-3.5 py-1.5 rounded-xl transition border border-[#3b434a] font-bold">
+                        ▼
+                    </button>
+                </div>
+                <div id="conteudoPainelCartoes" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5 mt-4 transition-all duration-300 hidden"></div>
+            </div>
+
             <!-- Painel de Gastos Por Categoria -->
             <div class="bg-[#22272c]/80 p-5 rounded-3xl border border-[#3b434a] shadow-lg backdrop-blur">
                 <div class="flex justify-between items-center cursor-pointer select-none" onclick="alternarPainelCategorias()">
@@ -237,11 +250,11 @@
                     <input type="text" id="metaTitulo" placeholder="Título (Ex: Reserva de Emergência 10%, Viagem...)" class="bg-[#1a1e23] border border-[#3b434a] text-xs text-[#f4f1ea] px-3.5 py-3 rounded-2xl focus:outline-none focus:border-[#4a777a]">
                     
                     <select id="metaCategoria" class="bg-[#1a1e23] border border-[#3b434a] text-xs text-[#c5cbd3] px-3.5 py-3 rounded-2xl focus:outline-none focus:border-[#4a777a]">
-                        <option value="Imprevistos">🛡️ Imprevistos (Reserva)</option>
-                        <option value="Lazer">🌴 Lazer & Viagens</option>
-                        <option value="Saúde">🧘 Saúde & Bem-estar</option>
-                        <option value="Educação">📚 Educação & Cursos</option>
-                        <option value="Projetos">🚀 Projetos Pessoais</option>
+                        <option value="Imprevistos">Imprevistos (Reserva)</option>
+                        <option value="Lazer">Lazer & Viagens</option>
+                        <option value="Saúde">Saúde & Bem-estar</option>
+                        <option value="Educação">Educação & Cursos</option>
+                        <option value="Projetos">Projetos Pessoais</option>
                     </select>
 
                     <input type="number" step="0.01" id="metaValorAlvo" placeholder="Valor Alvo R$ (Opcional)" class="bg-[#1a1e23] border border-[#3b434a] text-xs text-[#f4f1ea] px-3.5 py-3 rounded-2xl focus:outline-none focus:border-[#4a777a]">
@@ -292,6 +305,7 @@
         let db = JSON.parse(localStorage.getItem('mindcash_db_v1')) || { faturas: {}, recorrentes: [], metas: [], regrasCategorias: {}, regrasCartoes: {} };
         
         let painelRecolhido = localStorage.getItem('mindcash_painel_recolhido') !== null ? localStorage.getItem('mindcash_painel_recolhido') === 'true' : true;
+        let painelCartoesRecolhido = localStorage.getItem('mindcash_painel_cartoes_recolhido') !== null ? localStorage.getItem('mindcash_painel_cartoes_recolhido') === 'true' : true;
         let gruposRecolhidos = JSON.parse(localStorage.getItem('mindcash_grupos_recolhidos')) || { entrada: true, fixo: true, emprestimo: true, assinatura: true };
         let itemParaExcluirIndex = null;
 
@@ -493,6 +507,24 @@
         function abrirModalTexto() { document.getElementById('modalTexto').classList.remove('hidden'); }
         function fecharModalTexto() { document.getElementById('modalTexto').classList.add('hidden'); }
 
+        function alternarPainelCartoes() {
+            painelCartoesRecolhido = !painelCartoesRecolhido;
+            localStorage.setItem('mindcash_painel_cartoes_recolhido', painelCartoesRecolhido);
+            atualizarEstadoPainelCartoes();
+        }
+
+        function atualizarEstadoPainelCartoes() {
+            let conteudo = document.getElementById('conteudoPainelCartoes');
+            let btn = document.getElementById('btnTogglePainelCartoes');
+            if (painelCartoesRecolhido) {
+                conteudo.classList.add('hidden');
+                btn.innerText = '▼';
+            } else {
+                conteudo.classList.remove('hidden');
+                btn.innerText = '▲';
+            }
+        }
+
         function alternarPainelCategorias() {
             painelRecolhido = !painelRecolhido;
             localStorage.setItem('mindcash_painel_recolhido', painelRecolhido);
@@ -592,7 +624,7 @@
             let linhas = texto.split('\n');
             extrairDadosFatura(linhas);
             fecharModalTexto();
-            document.getElementById('textoFatura').value = ''; // Limpa a caixa de texto
+            document.getElementById('textoFatura').value = '';
         }
 
         function extrairDadosFatura(linhas) {
@@ -660,7 +692,6 @@
             if (!db.faturas[mesChave]) {
                 db.faturas[mesChave] = { faturaFechada: somaValoresNovos, compras: novasCompras };
             } else {
-                // ADICIONA ÀS COMPRAS JÁ EXISTENTES EM VEZ DE SUBSTITUIR
                 db.faturas[mesChave].compras = db.faturas[mesChave].compras.concat(novasCompras);
                 db.faturas[mesChave].faturaFechada = db.faturas[mesChave].compras.reduce((acc, c) => acc + c.valor, 0);
             }
@@ -855,6 +886,35 @@
             elSaldo.innerText = `R$ ${saldoReal.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
             elSaldo.className = `text-2xl font-black mt-2 ${saldoReal >= 0 ? 'text-[#93c5fd]' : 'text-[#d9777f]'}`;
 
+            // SOMAS POR CARTÃO
+            let totaisCartao = {};
+            cartoesDisponiveis.forEach(cart => totaisCartao[cart] = 0);
+
+            comprasMes.forEach(item => {
+                let cartEncontrado = cartoesDisponiveis.find(c => c.toLowerCase() === (item.cartao || "Bradesco").toLowerCase());
+                if (cartEncontrado) {
+                    totaisCartao[cartEncontrado] += item.valor;
+                } else {
+                    totaisCartao["Outro"] += item.valor;
+                }
+            });
+
+            let containerCardsCartoes = document.getElementById('conteudoPainelCartoes');
+            containerCardsCartoes.innerHTML = '';
+            cartoesDisponiveis.forEach(cart => {
+                let valor = totaisCartao[cart];
+                let card = document.createElement('div');
+                card.className = `p-3 rounded-2xl border text-left shadow-sm transition ${valor > 0 ? 'bg-[#22272c] border-[#3b434a]' : 'bg-[#1a1e23]/50 border-[#2d333b] text-[#9fa8b0]'}`;
+                card.innerHTML = `
+                    <p class="text-[10px] font-bold text-[#9fa8b0] uppercase tracking-tight truncate">${cart}</p>
+                    <p class="text-xs font-black mt-1 ${valor > 0 ? 'text-[#d9777f]' : 'text-[#9fa8b0]/50'}">R$ ${valor.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</p>
+                `;
+                containerCardsCartoes.appendChild(card);
+            });
+
+            atualizarEstadoPainelCartoes();
+
+            // SOMAS POR CATEGORIA
             let totaisCategoria = {};
             categoriasDisponiveis.forEach(cat => totaisCategoria[cat] = 0);
             
@@ -875,7 +935,7 @@
                 card.className = `p-3 rounded-2xl border text-left shadow-sm transition ${valor > 0 ? 'bg-[#22272c] border-[#3b434a]' : 'bg-[#1a1e23]/50 border-[#2d333b] text-[#9fa8b0]'}`;
                 card.innerHTML = `
                     <p class="text-[10px] font-bold text-[#9fa8b0] uppercase tracking-tight truncate">${cat}</p>
-                    <p class="text-xs font-black mt-1 ${valor > 0 ? 'text-[#d4a373]': 'text-[#9fa8b0]/50'}">R$ ${valor.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</p>
+                    <p class="text-xs font-black mt-1 ${valor > 0 ? 'text-[#d4a373]' : 'text-[#9fa8b0]/50'}">R$ ${valor.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</p>
                 `;
                 containerCards.appendChild(card);
             });
