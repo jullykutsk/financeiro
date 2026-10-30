@@ -281,7 +281,17 @@
     <div id="modalTexto" class="hidden fixed inset-0 bg-[#1a1e23]/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
         <div class="bg-[#22272c] p-6 rounded-3xl border border-[#3b434a] max-w-lg w-full space-y-4 shadow-2xl">
             <h3 class="font-bold text-sm text-[#f4f1ea] flex items-center gap-2"><span>📋</span> Copie e cole o texto da fatura abaixo:</h3>
-            <textarea id="textoFatura" rows="10" class="w-full bg-[#1a1e23] border border-[#3b434a] text-xs text-[#f4f1ea] p-3.5 rounded-2xl focus:outline-none focus:border-[#4a777a] shadow-inner" placeholder="Selecione tudo no PDF do seu celular, copie e cole aqui..."></textarea>
+            
+            <!-- Seletor de Cartão na Janela de Colar Fatura -->
+            <div class="space-y-1">
+                <label class="text-[11px] font-bold text-[#9fa8b0] uppercase">Cartão Destino da Fatura:</label>
+                <select id="modalSelectCartao" class="w-full bg-[#1a1e23] border border-[#3b434a] text-xs text-[#c5cbd3] p-3 rounded-2xl focus:outline-none focus:border-[#4a777a]" onchange="verificarNovoCartaoModal(this.value)">
+                    <!-- Preenchido dinamicamente via JS -->
+                </select>
+            </div>
+
+            <textarea id="textoFatura" rows="8" class="w-full bg-[#1a1e23] border border-[#3b434a] text-xs text-[#f4f1ea] p-3.5 rounded-2xl focus:outline-none focus:border-[#4a777a] shadow-inner" placeholder="Selecione tudo no PDF do seu celular, copie e cole aqui..."></textarea>
+            
             <div class="flex justify-end gap-2.5 pt-2">
                 <button onclick="fecharModalTexto()" class="bg-[#2d333b] hover:bg-[#38404a] text-[#c5cbd3] px-4 py-2.5 rounded-2xl text-xs font-semibold transition">Cancelar</button>
                 <button onclick="processarTextoBruto()" class="bg-[#4a777a] hover:bg-[#3b6063] text-[#f4f1ea] font-extrabold px-5 py-2.5 rounded-2xl text-xs transition shadow-lg">Processar Fatura</button>
@@ -304,8 +314,8 @@
     <script>
         let db = JSON.parse(localStorage.getItem('mindcash_db_v1')) || { faturas: {}, recorrentes: [], metas: [], regrasCategorias: {}, regrasCartoes: {}, cartoesPersonalizados: [] };
         
-        let painelRecolhido = localStorage.getItem('mindcash_painel_recolhido') !== null ? localStorage.getItem('mindcash_painel_recolhido') === 'true' : true;
-        let painelCartoesRecolhido = localStorage.getItem('mindcash_painel_cartoes_recolhido') !== null ? localStorage.getItem('mindcash_painel_cartoes_recolhido') === 'true' : true;
+        let painelRecolhido = localStorage.getItem('mindcash_painel_recolhido') !== null ? localStorage.getItem('mindcash_painel_recolhido'] === 'true' : true;
+        let painelCartoesRecolhido = localStorage.getItem('mindcash_painel_cartoes_recolhido') !== null ? localStorage.getItem('mindcash_painel_cartoes_recolhido'] === 'true' : true;
         let gruposRecolhidos = JSON.parse(localStorage.getItem('mindcash_grupos_recolhidos')) || { entrada: true, fixo: true, emprestimo: true, assinatura: true };
         let itemParaExcluirIndex = null;
 
@@ -513,12 +523,38 @@
             reader.readAsText(file);
         }
 
-        function abrirModalTexto() { document.getElementById('modalTexto').classList.remove('hidden'); }
+        function abrirModalTexto() {
+            let selectModal = document.getElementById('modalSelectCartao');
+            let cartoes = obterListaCartoes();
+            selectModal.innerHTML = cartoes.map(c => `<option value="${c}">${c}</option>`).join('');
+            selectModal.innerHTML += `<option value="OUTRO_NOVO">+ Adicionar Novo Cartão...</option>`;
+            
+            document.getElementById('modalTexto').classList.remove('hidden');
+        }
+
         function fecharModalTexto() { document.getElementById('modalTexto').classList.add('hidden'); }
+
+        function verificarNovoCartaoModal(valor) {
+            if (valor === "OUTRO_NOVO") {
+                let nomeNovo = prompt("Digite o nome do novo cartão:");
+                if (nomeNovo && nomeNovo.trim() !== "") {
+                    nomeNovo = nomeNovo.trim();
+                    if (!db.cartoesPersonalizados) db.cartoesPersonalizados = [];
+                    if (!db.cartoesPersonalizados.some(c => c.toLowerCase() === nomeNovo.toLowerCase())) {
+                        db.cartoesPersonalizados.push(nomeNovo);
+                        localStorage.setItem('mindcash_db_v1', JSON.stringify(db));
+                    }
+                    abrirModalTexto(); // Atualiza as opções do select
+                    document.getElementById('modalSelectCartao').value = nomeNovo;
+                } else {
+                    document.getElementById('modalSelectCartao').value = obterListaCartoes()[0];
+                }
+            }
+        }
 
         function alternarPainelCartoes() {
             painelCartoesRecolhido = !painelCartoesRecolhido;
-            localStorage.setItem('mindcash_painel_cartoes_recolhido', painelCartoesRecolhido);
+            localStorage.setItem('mindcash_mind_cartoes_recolhido', painelCartoesRecolhido);
             atualizarEstadoPainelCartoes();
         }
 
@@ -631,20 +667,20 @@
 
         function processarTextoBruto() {
             const texto = document.getElementById('textoFatura').value;
+            let cartaoSelecionado = document.getElementById('modalSelectCartao').value;
             if (!texto) return;
             let linhas = texto.split('\n');
-            extrairDadosFatura(linhas);
+            extrairDadosFatura(linhas, cartaoSelecionado);
             fecharModalTexto();
             document.getElementById('textoFatura').value = '';
         }
 
-        function extrairDadosFatura(linhas) {
+        function extrairDadosFatura(linhas, cartaoSelecionado) {
             let mesChave = document.getElementById('seletorMes').value;
             let novasCompras = [];
             let somaValoresNovos = 0;
 
             if (!db.regrasCategorias) db.regrasCategorias = {};
-            if (!db.regrasCartoes) db.regrasCartoes = {};
 
             linhas.forEach(linha => {
                 let linhaNorm = normalizarTexto(linha);
@@ -693,9 +729,7 @@
                     else if (nLower.includes("oficina") || nLower.includes("autopecas") || nLower.includes("pneu") || nLower.includes("mecanica") || nLower.includes("renesto")) categoria = "Manutenção carro";
                 }
 
-                let cartao = db.regrasCartoes[nomeUpper] || "Bradesco";
-
-                novasCompras.push({ descricao: nomeUpper, cartao, categoria, parcela, valor, nota: "" });
+                novasCompras.push({ descricao: nomeUpper, cartao: cartaoSelecionado, categoria, parcela, valor, nota: "" });
                 somaValoresNovos += valor;
             });
 
@@ -775,9 +809,6 @@
             if (comprasMes[index]) {
                 let itemModificado = comprasMes[index];
                 itemModificado.cartao = novoCartao;
-
-                if (!db.regrasCartoes) db.regrasCartoes = {};
-                db.regrasCartoes[itemModificado.descricao] = novoCartao;
 
                 if (db.faturas && db.faturas[mesChave] && db.faturas[mesChave].compras[index]) {
                     db.faturas[mesChave].compras[index].cartao = novoCartao;
