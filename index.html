@@ -99,7 +99,7 @@
     </div>
 
     <script>
-        let db = JSON.parse(localStorage.getItem('fincontrol_db_v6')) || {};
+        let db = JSON.parse(localStorage.getItem('fincontrol_db_v7')) || {};
 
         const termosIgnorar = [
             'total da fatura', 'limite de compras', 'limite de saque', 'recomendado pagamento',
@@ -118,7 +118,12 @@
             "Mercado",
             "Combustível",
             "Saúde",
-            "Manutenção Casa"
+            "Manutenção Casa",
+            "Manutenção carro",
+            "Estudo",
+            "Locomoção",
+            "Lazer",
+            "Presentes"
         ];
 
         function normalizarTexto(txt) {
@@ -202,6 +207,14 @@
                     categoria = "Saúde";
                 } else if (nLower.includes("materiais") || nLower.includes("toka") || nLower.includes("madeira") || nLower.includes("casa china") || nLower.includes("reforma")) {
                     categoria = "Manutenção Casa";
+                } else if (nLower.includes("uber") || nLower.includes("99app") || nLower.includes("taxi") || nLower.includes("99 pop")) {
+                    categoria = "Locomoção";
+                } else if (nLower.includes("oficina") || nLower.includes("autopecas") || nLower.includes("pneu") || nLower.includes("mecanica")) {
+                    categoria = "Manutenção carro";
+                } else if (nLower.includes("livro") || nLower.includes("curso") || nLower.includes("escola") || nLower.includes("faculdade")) {
+                    categoria = "Estudo";
+                } else if (nLower.includes("netflix") || nLower.includes("spotify") || nLower.includes("cinema") || nLower.includes("ingressos")) {
+                    categoria = "Lazer";
                 }
 
                 compras.push({
@@ -209,7 +222,7 @@
                     categoria: categoria,
                     parcela: parcela,
                     valor: valor,
-                    nota: "" // Campo nota inicializado
+                    nota: ""
                 });
             });
 
@@ -222,7 +235,7 @@
                 compras: compras
             };
 
-            localStorage.setItem('fincontrol_db_v6', JSON.stringify(db));
+            localStorage.setItem('fincontrol_db_v7', JSON.stringify(db));
             renderizarTela();
         }
 
@@ -230,7 +243,7 @@
             let mesChave = document.getElementById('seletorMes').value;
             if (db[mesChave] && db[mesChave].compras[index]) {
                 db[mesChave].compras[index].categoria = novaCategoria;
-                localStorage.setItem('fincontrol_db_v6', JSON.stringify(db));
+                localStorage.setItem('fincontrol_db_v7', JSON.stringify(db));
             }
         }
 
@@ -238,7 +251,7 @@
             let mesChave = document.getElementById('seletorMes').value;
             if (db[mesChave] && db[mesChave].compras[index]) {
                 db[mesChave].compras[index].nota = novaNota;
-                localStorage.setItem('fincontrol_db_v6', JSON.stringify(db));
+                localStorage.setItem('fincontrol_db_v7', JSON.stringify(db));
             }
         }
 
@@ -265,7 +278,6 @@
                     ? `<span class="bg-amber-500/10 text-amber-400 border border-amber-500/20 px-2 py-0.5 rounded-md font-semibold text-[10px]">${item.parcela}</span>`
                     : `<span class="bg-slate-700/40 text-slate-400 px-2 py-0.5 rounded-md text-[10px]">${item.parcela}</span>`;
 
-                // Gerar opções do Select de Categoria
                 let optionsCategoria = categoriasDisponiveis.map(cat => 
                     `<option value="${cat}" ${cat === item.categoria ? 'selected' : ''}>${cat}</option>`
                 ).join('');
