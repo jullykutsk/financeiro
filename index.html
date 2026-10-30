@@ -6,120 +6,142 @@
     <title>FinControl Pro - Extensão & Projeção Contínua</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { background-color: #0f172a; color: #f8fafc; }
+        body { background-color: #0b0f19; color: #f8fafc; }
+        /* Suavizar scrollbar e inputs */
+        input[type="month"]::-webkit-calendar-picker-indicator {
+            filter: invert(1);
+            cursor: pointer;
+        }
     </style>
 </head>
-<body class="font-sans antialiased min-h-screen pb-12">
+<body class="font-sans antialiased min-h-screen pb-12 selection:bg-emerald-500 selection:text-slate-950">
 
-    <div class="max-w-5xl mx-auto p-4 md:p-6">
+    <div class="max-w-5xl mx-auto p-4 md:p-6 space-y-6">
         
-        <!-- Cabeçalho -->
-        <header class="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6 bg-slate-800/80 p-4 rounded-2xl border border-slate-700/50 backdrop-blur">
-            <div class="flex items-center gap-3 w-full sm:w-auto justify-between">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 bg-emerald-500/20 text-emerald-400 rounded-xl flex items-center justify-center font-bold text-xl border border-emerald-500/30">
-                        💳
+        <!-- Cabeçalho Moderno & Fluído -->
+        <header class="bg-gradient-to-br from-slate-900/90 to-slate-800/80 p-5 rounded-3xl border border-slate-700/60 shadow-xl shadow-black/40 backdrop-blur-xl flex flex-col md:flex-row justify-between items-center gap-4">
+            
+            <!-- Logo e Título -->
+            <div class="flex items-center gap-3.5 w-full md:w-auto">
+                <div class="w-12 h-12 bg-gradient-to-tr from-emerald-500/30 to-emerald-400/10 text-emerald-400 rounded-2xl flex items-center justify-center text-2xl border border-emerald-500/30 shadow-inner">
+                    💳
+                </div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <h1 class="font-black text-xl text-white tracking-tight">FinControl</h1>
+                        <span class="text-[10px] uppercase font-extrabold bg-emerald-500 text-slate-950 px-2 py-0.5 rounded-full shadow-sm shadow-emerald-500/50">Pro</span>
                     </div>
-                    <div>
-                        <h1 class="font-bold text-lg text-white leading-tight">FinControl <span class="text-xs bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-500/30">Pro</span></h1>
-                        <p class="text-xs text-slate-400">Projeção Contínua & Memória de Categorias</p>
-                    </div>
+                    <p class="text-xs text-slate-400 font-medium">Projeção Contínua & Memória de Categorias</p>
                 </div>
             </div>
             
-            <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto justify-end">
-                <!-- Seletor de Mês -->
-                <input type="month" id="seletorMes" class="bg-slate-900 border border-slate-700 text-xs text-slate-200 px-3 py-2 rounded-xl focus:outline-none focus:border-emerald-500" value="2026-10" onchange="renderizarTela()">
+            <!-- Ações do Cabeçalho (Mês e Backups) -->
+            <div class="flex items-center gap-2.5 w-full md:w-auto justify-end overflow-x-auto pb-1 md:pb-0">
+                <!-- Seletor de Mês Estilizado -->
+                <div class="relative bg-slate-950/80 border border-slate-700/80 rounded-2xl px-3 py-2 flex items-center gap-2 shadow-inner">
+                    <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">📅 Mês:</span>
+                    <input type="month" id="seletorMes" class="bg-transparent text-xs font-bold text-emerald-400 focus:outline-none cursor-pointer" value="2026-10" onchange="renderizarTela()">
+                </div>
                 
-                <!-- Botões de Backup de Segurança -->
-                <button onclick="exportarDados()" class="bg-slate-700 hover:bg-slate-600 text-slate-200 px-3 py-2 rounded-xl text-xs font-semibold transition" title="Baixar arquivo de backup com todas as suas informações">
-                    💾 Salvar Backup
+                <!-- Botão Salvar Backup -->
+                <button onclick="exportarDados()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700/80 px-3.5 py-2.5 rounded-2xl text-xs font-semibold transition flex items-center gap-1.5 shadow-md active:scale-95" title="Salvar Backup">
+                    💾 <span class="hidden sm:inline">Backup</span>
                 </button>
-                <button onclick="document.getElementById('fileBackupInput').click()" class="bg-slate-700 hover:bg-slate-600 text-slate-200 px-3 py-2 rounded-xl text-xs font-semibold transition" title="Restaurar dados de um arquivo salvo anteriormente">
-                    📂 Carregar Backup
+
+                <!-- Botão Carregar Backup -->
+                <button onclick="document.getElementById('fileBackupInput').click()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700/80 px-3.5 py-2.5 rounded-2xl text-xs font-semibold transition flex items-center gap-1.5 shadow-md active:scale-95" title="Carregar Backup">
+                    📂 <span class="hidden sm:inline">Restaurar</span>
                 </button>
                 <input type="file" id="fileBackupInput" accept=".json" class="hidden" onchange="importarDados(event)">
             </div>
         </header>
 
-        <!-- Resumo de Caixa (Aba 1) -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-3 mb-6">
-            <div class="bg-slate-800/60 p-4 rounded-2xl border border-slate-700/40">
-                <span class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Total Entradas</span>
-                <h2 id="totalEntradas" class="text-xl font-bold text-emerald-400 mt-1">R$ 0,00</h2>
+        <!-- Resumo de Caixa (Cards Modernos) -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3.5">
+            <div class="bg-slate-900/60 p-4 rounded-3xl border border-slate-800 shadow-lg backdrop-blur flex flex-col justify-between">
+                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Total Entradas</span>
+                <h2 id="totalEntradas" class="text-2xl font-black text-emerald-400 mt-2">R$ 0,00</h2>
             </div>
-            <div class="bg-slate-800/60 p-4 rounded-2xl border border-slate-700/40">
-                <span class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">(-) Fixos, Empréstimos & Assinaturas</span>
-                <h2 id="totalFixosEmprestimos" class="text-xl font-bold text-amber-400 mt-1">R$ 0,00</h2>
+            <div class="bg-slate-900/60 p-4 rounded-3xl border border-slate-800 shadow-lg backdrop-blur flex flex-col justify-between">
+                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">(-) Fixos & Assinaturas</span>
+                <h2 id="totalFixosEmprestimos" class="text-2xl font-black text-amber-400 mt-2">R$ 0,00</h2>
             </div>
-            <div class="bg-slate-800/60 p-4 rounded-2xl border border-slate-700/40">
-                <span class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">(-) Cartão (Fatura/Parcelas)</span>
-                <h2 id="totalFaturaCartao" class="text-xl font-bold text-rose-400 mt-1">R$ 0,00</h2>
+            <div class="bg-slate-900/60 p-4 rounded-3xl border border-slate-800 shadow-lg backdrop-blur flex flex-col justify-between">
+                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">(-) Cartão (Fatura/Parcelas)</span>
+                <h2 id="totalFaturaCartao" class="text-2xl font-black text-rose-400 mt-2">R$ 0,00</h2>
             </div>
-            <div class="bg-slate-800/60 p-4 rounded-2xl border border-slate-700/40 border-emerald-500/30 bg-emerald-950/10">
-                <span class="text-[10px] font-semibold text-emerald-400 uppercase tracking-wider">(=) Saldo Líquido Previsto</span>
-                <h2 id="saldoLiquidoReal" class="text-xl font-bold text-blue-400 mt-1">R$ 0,00</h2>
+            <div class="bg-gradient-to-br from-emerald-950/40 to-slate-900/80 p-4 rounded-3xl border border-emerald-500/30 shadow-lg backdrop-blur flex flex-col justify-between">
+                <span class="text-[10px] font-bold text-emerald-400 uppercase tracking-widest">(=) Saldo Líquido Previsto</span>
+                <h2 id="saldoLiquidoReal" class="text-2xl font-black text-blue-400 mt-2">R$ 0,00</h2>
             </div>
         </div>
 
         <!-- Adicionar Entradas, Custos Fixos, Empréstimos ou Assinaturas -->
-        <div class="bg-slate-800/60 p-4 rounded-2xl border border-slate-700/40 mb-6 space-y-3">
-            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300">💰 Gestão de Entradas, Fixos e Empréstimos:</h3>
+        <div class="bg-slate-900/60 p-5 rounded-3xl border border-slate-800 shadow-lg backdrop-blur space-y-4">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-2">
+                <span>💰</span> Gestão de Entradas, Fixos e Empréstimos:
+            </h3>
             
             <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
-                <label class="flex items-center gap-2 bg-slate-900/60 p-2.5 rounded-xl border border-slate-700/50 cursor-pointer">
-                    <input type="radio" name="tipoLancamento" value="entrada" checked class="text-emerald-500">
-                    <span class="text-emerald-400 font-medium">Entrada</span>
+                <label class="flex items-center gap-2 bg-slate-950/60 p-3 rounded-2xl border border-slate-800 cursor-pointer hover:border-slate-700 transition">
+                    <input type="radio" name="tipoLancamento" value="entrada" checked class="text-emerald-500 focus:ring-0">
+                    <span class="text-emerald-400 font-semibold">Entrada</span>
                 </label>
-                <label class="flex items-center gap-2 bg-slate-900/60 p-2.5 rounded-xl border border-slate-700/50 cursor-pointer">
-                    <input type="radio" name="tipoLancamento" value="fixo" class="text-rose-500">
-                    <span class="text-rose-400 font-medium">Custo Fixo</span>
+                <label class="flex items-center gap-2 bg-slate-950/60 p-3 rounded-2xl border border-slate-800 cursor-pointer hover:border-slate-700 transition">
+                    <input type="radio" name="tipoLancamento" value="fixo" class="text-rose-500 focus:ring-0">
+                    <span class="text-rose-400 font-semibold">Custo Fixo</span>
                 </label>
-                <label class="flex items-center gap-2 bg-slate-900/60 p-2.5 rounded-xl border border-slate-700/50 cursor-pointer">
-                    <input type="radio" name="tipoLancamento" value="emprestimo" class="text-amber-500">
-                    <span class="text-amber-400 font-medium">Empréstimo</span>
+                <label class="flex items-center gap-2 bg-slate-950/60 p-3 rounded-2xl border border-slate-800 cursor-pointer hover:border-slate-700 transition">
+                    <input type="radio" name="tipoLancamento" value="emprestimo" class="text-amber-500 focus:ring-0">
+                    <span class="text-amber-400 font-semibold">Empréstimo</span>
                 </label>
-                <label class="flex items-center gap-2 bg-slate-900/60 p-2.5 rounded-xl border border-slate-700/50 cursor-pointer">
-                    <input type="radio" name="tipoLancamento" value="assinatura" class="text-purple-500">
-                    <span class="text-purple-400 font-medium">Assinatura</span>
+                <label class="flex items-center gap-2 bg-slate-950/60 p-3 rounded-2xl border border-slate-800 cursor-pointer hover:border-slate-700 transition">
+                    <input type="radio" name="tipoLancamento" value="assinatura" class="text-purple-500 focus:ring-0">
+                    <span class="text-purple-400 font-semibold">Assinatura</span>
                 </label>
             </div>
 
-            <div class="space-y-2">
-                <div class="flex flex-col sm:flex-row gap-2">
-                    <input type="text" id="descLancamento" placeholder="Descrição (Ex: Salário, Aluguel, Netflix...)" class="flex-1 bg-slate-900 border border-slate-700 text-xs text-slate-200 px-3 py-2.5 rounded-xl focus:outline-none focus:border-emerald-500">
-                    <input type="number" step="0.01" id="valorLancamento" placeholder="Valor R$" class="w-full sm:w-36 bg-slate-900 border border-slate-700 text-xs text-slate-200 px-3 py-2.5 rounded-xl focus:outline-none focus:border-emerald-500">
+            <div class="space-y-2.5">
+                <div class="flex flex-col sm:flex-row gap-2.5">
+                    <input type="text" id="descLancamento" placeholder="Descrição (Ex: Salário, Aluguel, Netflix...)" class="flex-1 bg-slate-950 border border-slate-800 text-xs text-slate-200 px-3.5 py-3 rounded-2xl focus:outline-none focus:border-emerald-500 transition shadow-inner">
+                    <input type="number" step="0.01" id="valorLancamento" placeholder="Valor R$" class="w-full sm:w-40 bg-slate-950 border border-slate-800 text-xs text-slate-200 px-3.5 py-3 rounded-2xl focus:outline-none focus:border-emerald-500 transition shadow-inner">
                 </div>
-                <button onclick="adicionarLancamentoManual()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold p-3 rounded-xl text-xs transition shadow-lg shadow-emerald-500/10">Adicionar Lançamento Contínuo</button>
+                <button onclick="adicionarLancamentoManual()" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold p-3.5 rounded-2xl text-xs transition shadow-lg shadow-emerald-500/20 active:scale-[0.99]">
+                    + Adicionar Lançamento Contínuo
+                </button>
             </div>
 
-            <div id="listaLancamentosManuais" class="space-y-1.5 pt-2"></div>
+            <div id="listaLancamentosManuais" class="space-y-2 pt-1"></div>
         </div>
 
         <!-- Botão de Colar Texto da Fatura -->
-        <div class="bg-slate-800/60 p-4 rounded-2xl border border-slate-700/40 mb-6 space-y-3">
-            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300">⚡ Lançar Fatura do Cartão (Raio-X):</h3>
+        <div class="bg-slate-900/60 p-5 rounded-3xl border border-slate-800 shadow-lg backdrop-blur space-y-3">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-2">
+                <span>⚡</span> Lançar Fatura do Cartão (Raio-X):
+            </h3>
             <div>
-                <button onclick="abrirModalTexto()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-semibold p-3 rounded-xl transition text-xs flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/10">
+                <button onclick="abrirModalTexto()" class="w-full bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-extrabold p-3.5 rounded-2xl transition text-xs flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20 active:scale-[0.99]">
                     📋 Colar Texto da Fatura do Mês
                 </button>
             </div>
         </div>
 
         <!-- Painel de Gastos Por Categoria -->
-        <div class="bg-slate-800/60 p-4 rounded-2xl border border-slate-700/40 mb-6">
+        <div class="bg-slate-900/60 p-5 rounded-3xl border border-slate-800 shadow-lg backdrop-blur">
             <div class="flex justify-between items-center cursor-pointer select-none" onclick="alternarPainelCategorias()">
-                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300">📊 Total Gastos por Categoria</h3>
-                <button id="btnTogglePainel" class="text-xs bg-slate-700/60 hover:bg-slate-700 text-slate-300 px-3 py-1 rounded-lg transition">
+                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-2">
+                    <span>📊</span> Total Gastos por Categoria
+                </h3>
+                <button id="btnTogglePainel" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-1.5 rounded-xl transition border border-slate-700">
                     [ Recolher ▲ ]
                 </button>
             </div>
-            <div id="conteudoPainelCategorias" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 mt-3 transition-all duration-300"></div>
+            <div id="conteudoPainelCategorias" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2.5 mt-4 transition-all duration-300"></div>
         </div>
 
         <!-- Tabela do Raio-X -->
-        <div class="bg-slate-800/60 rounded-2xl border border-slate-700/40 overflow-hidden backdrop-blur">
-            <div class="p-4 border-b border-slate-700/40 flex justify-between items-center">
+        <div class="bg-slate-900/60 rounded-3xl border border-slate-800 shadow-lg overflow-hidden backdrop-blur">
+            <div class="p-5 border-b border-slate-800 flex justify-between items-center">
                 <div>
                     <h3 class="font-bold text-sm text-slate-200">Raio-X de Compras e Parcelas Ativas</h3>
                     <p class="text-[11px] text-slate-400">Somente compras reais e parcelas projetadas para este mês.</p>
@@ -129,17 +151,17 @@
             <div class="overflow-x-auto">
                 <table class="w-full text-left border-collapse text-xs">
                     <thead>
-                        <tr class="bg-slate-900/50 text-slate-400 text-[10px] uppercase tracking-wider border-b border-slate-700/40">
-                            <th class="p-3">Descrição da Compra</th>
-                            <th class="p-3">Categoria</th>
-                            <th class="p-3 text-center">Parcela Atual</th>
-                            <th class="p-3 text-right">Valor Parcela</th>
-                            <th class="p-3 text-left min-w-[150px]">Nota / Observação</th>
+                        <tr class="bg-slate-950/60 text-slate-400 text-[10px] uppercase tracking-wider border-b border-slate-800">
+                            <th class="p-3.5">Descrição da Compra</th>
+                            <th class="p-3.5">Categoria</th>
+                            <th class="p-3.5 text-center">Parcela Atual</th>
+                            <th class="p-3.5 text-right">Valor Parcela</th>
+                            <th class="p-3.5 text-left min-w-[160px]">Nota / Observação</th>
                         </tr>
                     </thead>
-                    <tbody id="tabelaRaioX" class="divide-y divide-slate-700/30">
+                    <tbody id="tabelaRaioX" class="divide-y divide-slate-800/60">
                         <tr>
-                            <td colspan="5" class="p-6 text-center text-slate-500">Nenhuma fatura importada. Use o botão acima para colar os dados.</td>
+                            <td colspan="5" class="p-8 text-center text-slate-500">Nenhuma fatura importada. Use o botão acima para colar os dados.</td>
                         </tr>
                     </tbody>
                 </table>
@@ -149,26 +171,26 @@
     </div>
 
     <!-- Modal Colar Texto -->
-    <div id="modalTexto" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50">
-        <div class="bg-slate-800 p-5 rounded-2xl border border-slate-700 max-w-lg w-full space-y-4">
-            <h3 class="font-bold text-sm text-white">Copie e cole o texto da fatura abaixo:</h3>
-            <textarea id="textoFatura" rows="10" class="w-full bg-slate-900 border border-slate-700 text-xs text-slate-200 p-3 rounded-xl focus:outline-none focus:border-emerald-500" placeholder="Selecione tudo no PDF do seu celular, copie e cole aqui..."></textarea>
-            <div class="flex justify-end gap-2">
-                <button onclick="fecharModalTexto()" class="bg-slate-700 hover:bg-slate-600 px-4 py-2 rounded-xl text-xs">Cancelar</button>
-                <button onclick="processarTextoBruto()" class="bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold px-4 py-2 rounded-xl text-xs">Processar Fatura</button>
+    <div id="modalTexto" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 z-50">
+        <div class="bg-slate-900 p-6 rounded-3xl border border-slate-700 max-w-lg w-full space-y-4 shadow-2xl">
+            <h3 class="font-bold text-sm text-white flex items-center gap-2"><span>📋</span> Copie e cole o texto da fatura abaixo:</h3>
+            <textarea id="textoFatura" rows="10" class="w-full bg-slate-950 border border-slate-800 text-xs text-slate-200 p-3.5 rounded-2xl focus:outline-none focus:border-emerald-500 shadow-inner" placeholder="Selecione tudo no PDF do seu celular, copie e cole aqui..."></textarea>
+            <div class="flex justify-end gap-2.5 pt-2">
+                <button onclick="fecharModalTexto()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 px-4 py-2.5 rounded-2xl text-xs font-semibold transition">Cancelar</button>
+                <button onclick="processarTextoBruto()" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold px-5 py-2.5 rounded-2xl text-xs transition shadow-lg shadow-emerald-500/20">Processar Fatura</button>
             </div>
         </div>
     </div>
 
     <!-- Modal de Confirmação de Exclusão de Recorrentes -->
-    <div id="modalExclusao" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50">
-        <div class="bg-slate-800 p-5 rounded-2xl border border-slate-700 max-w-sm w-full space-y-4">
+    <div id="modalExclusao" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 z-50">
+        <div class="bg-slate-900 p-6 rounded-3xl border border-slate-700 max-w-sm w-full space-y-4 shadow-2xl">
             <h3 class="font-bold text-sm text-white">Excluir Lançamento</h3>
             <p class="text-xs text-slate-300">Como você deseja remover este lançamento?</p>
-            <div class="space-y-2 pt-2">
-                <button onclick="confirmarExclusao('apenas_este')" class="w-full bg-slate-700 hover:bg-slate-600 text-white font-medium p-2.5 rounded-xl text-xs">Excluir SOMENTE deste mês</button>
-                <button onclick="confirmarExclusao('este_e_futuros')" class="w-full bg-rose-500 hover:bg-rose-600 text-white font-bold p-2.5 rounded-xl text-xs">Excluir deste mês E DOS PRÓXIMOS</button>
-                <button onclick="fecharModalExclusao()" class="w-full bg-transparent text-slate-400 p-2 text-xs">Cancelar</button>
+            <div class="space-y-2.5 pt-2">
+                <button onclick="confirmarExclusao('apenas_este')" class="w-full bg-slate-800 hover:bg-slate-700 text-white font-medium p-3 rounded-2xl text-xs transition border border-slate-700">Excluir SOMENTE deste mês</button>
+                <button onclick="confirmarExclusao('este_e_futuros')" class="w-full bg-rose-600 hover:bg-rose-500 text-white font-bold p-3 rounded-2xl text-xs transition shadow-lg shadow-rose-600/20">Excluir deste mês E DOS PRÓXIMOS</button>
+                <button onclick="fecharModalExclusao()" class="w-full bg-transparent text-slate-400 p-2 text-xs font-medium hover:text-slate-200">Cancelar</button>
             </div>
         </div>
     </div>
@@ -380,7 +402,6 @@
                 if (nome.length < 3 || nome === "/2026" || nome === "2026") return;
                 let nomeUpper = nome.toUpperCase();
 
-                // Verifica se já existe regra aprendida para este estabelecimento
                 let categoria = "Pessoal";
                 if (db.regrasCategorias[nomeUpper]) {
                     categoria = db.regrasCategorias[nomeUpper];
@@ -454,11 +475,9 @@
                 let itemModificado = comprasMes[index];
                 itemModificado.categoria = novaCategoria;
 
-                // Salva a regra aprendida para este estabelecimento em definitivo
                 if (!db.regrasCategorias) db.regrasCategorias = {};
                 db.regrasCategorias[itemModificado.descricao] = novaCategoria;
 
-                // Atualiza na base de faturas do mês se ela já existir gravada
                 if (db.faturas && db.faturas[mesChave] && db.faturas[mesChave].compras[index]) {
                     db.faturas[mesChave].compras[index].categoria = novaCategoria;
                 }
@@ -521,22 +540,22 @@
                                      item.tipo === 'emprestimo' ? 'Empréstimo' : 'Assinatura';
 
                     let divItem = document.createElement('div');
-                    divItem.className = `flex justify-between items-center bg-slate-900/80 border ${corBorda} p-2.5 rounded-xl text-xs`;
+                    divItem.className = `flex justify-between items-center bg-slate-950/80 border ${corBorda} p-3 rounded-2xl text-xs shadow-inner`;
                     divItem.innerHTML = `
                         <div class="flex items-center gap-2">
-                            <span class="text-[10px] px-2 py-0.5 rounded bg-slate-800 font-semibold uppercase">${badgeTexto}</span>
-                            <span class="text-slate-200 font-medium">${item.descricao}</span>
+                            <span class="text-[10px] px-2 py-0.5 rounded-lg bg-slate-900 font-bold uppercase tracking-wider">${badgeTexto}</span>
+                            <span class="text-slate-200 font-semibold">${item.descricao}</span>
                         </div>
-                        <div class="flex items-center gap-2">
-                            <span class="text-slate-400">R$</span>
-                            <input type="number" step="0.01" value="${item.valor}" onchange="alterarValorManual(${item.id}, this.value)" class="w-20 bg-slate-950 border border-slate-700 text-right px-1.5 py-0.5 rounded text-xs font-bold text-slate-100 focus:outline-none focus:border-emerald-500" />
-                            <button onclick="solicitarExclusaoManual(${item.id})" class="text-slate-500 hover:text-rose-400 font-bold ml-1">✕</button>
+                        <div class="flex items-center gap-2.5">
+                            <span class="text-slate-400 font-medium">R$</span>
+                            <input type="number" step="0.01" value="${item.valor}" onchange="alterarValorManual(${item.id}, this.value)" class="w-24 bg-slate-900 border border-slate-700/80 text-right px-2 py-1 rounded-xl text-xs font-bold text-slate-100 focus:outline-none focus:border-emerald-500 shadow-inner" />
+                            <button onclick="solicitarExclusaoManual(${item.id})" class="text-slate-500 hover:text-rose-400 font-bold p-1 transition" title="Excluir">✕</button>
                         </div>
                     `;
                     listaDiv.appendChild(divItem);
                 });
             } else {
-                listaDiv.innerHTML = `<p class="text-[11px] text-slate-500 text-center py-1">Nenhum lançamento recorrente ativo para este mês.</p>`;
+                listaDiv.innerHTML = `<p class="text-[11px] text-slate-500 text-center py-2 italic">Nenhum lançamento recorrente ativo para este mês.</p>`;
             }
 
             let saldoReal = totalEntradas - (totalFixosEmprestimos + valorFaturaMes);
@@ -547,7 +566,7 @@
             
             let elSaldo = document.getElementById('saldoLiquidoReal');
             elSaldo.innerText = `R$ ${saldoReal.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
-            elSaldo.className = `text-xl font-bold mt-1 ${saldoReal >= 0 ? 'text-blue-400' : 'text-rose-400'}`;
+            elSaldo.className = `text-2xl font-black mt-2 ${saldoReal >= 0 ? 'text-blue-400' : 'text-rose-400'}`;
 
             let totaisCategoria = {};
             categoriasDisponiveis.forEach(cat => totaisCategoria[cat] = 0);
@@ -566,10 +585,10 @@
             categoriasDisponiveis.forEach(cat => {
                 let valor = totaisCategoria[cat];
                 let card = document.createElement('div');
-                card.className = `p-2.5 rounded-xl border text-left ${valor > 0 ? 'bg-slate-900/80 border-slate-700/80' : 'bg-slate-900/30 border-slate-800 text-slate-500'}`;
+                card.className = `p-3 rounded-2xl border text-left shadow-sm transition ${valor > 0 ? 'bg-slate-950/80 border-slate-700/60' : 'bg-slate-950/30 border-slate-900/50 text-slate-600'}`;
                 card.innerHTML = `
-                    <p class="text-[10px] font-medium text-slate-400 truncate">${cat}</p>
-                    <p class="text-xs font-bold mt-0.5 ${valor > 0 ? 'text-amber-400' : 'text-slate-600'}">R$ ${valor.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</p>
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-tight truncate">${cat}</p>
+                    <p class="text-xs font-black mt-1 ${valor > 0 ? 'text-amber-400' : 'text-slate-600'}">R$ ${valor.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</p>
                 `;
                 containerCards.appendChild(card);
             });
@@ -580,34 +599,34 @@
             tbody.innerHTML = '';
 
             if (comprasMes.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-slate-500">Nenhuma fatura importada ou parcela projetada para este mês.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="5" class="p-8 text-center text-slate-500 italic">Nenhuma fatura importada ou parcela projetada para este mês.</td></tr>`;
                 return;
             }
 
             comprasMes.forEach((item, index) => {
                 let tr = document.createElement('tr');
-                tr.className = "hover:bg-slate-700/20 transition";
+                tr.className = "hover:bg-slate-800/30 transition";
                 
                 let badgeParcela = item.parcela !== "À vista" 
-                    ? `<span class="bg-amber-500/10 text-amber-400 border border-amber-500/20 px-2 py-0.5 rounded-md font-semibold text-[10px]">${item.parcela}</span>`
-                    : `<span class="bg-slate-700/40 text-slate-400 px-2 py-0.5 rounded-md text-[10px]">${item.parcela}</span>`;
+                    ? `<span class="bg-amber-500/10 text-amber-400 border border-amber-500/20 px-2 py-1 rounded-lg font-bold text-[10px]">${item.parcela}</span>`
+                    : `<span class="bg-slate-800/40 text-slate-400 px-2 py-1 rounded-lg text-[10px]">${item.parcela}</span>`;
 
                 let optionsCategoria = categoriasDisponiveis.map(cat => 
                     `<option value="${cat}" ${cat.toLowerCase() === item.categoria.toLowerCase() ? 'selected' : ''}>${cat}</option>`
                 ).join('');
 
                 tr.innerHTML = `
-                    <td class="p-3 font-medium text-slate-200">${item.descricao}</td>
-                    <td class="p-3">
-                        <select onchange="alterarCategoria(${index}, this.value)" class="bg-slate-900 border border-slate-700/80 text-slate-300 px-2 py-1 rounded-md text-[11px] focus:outline-none focus:border-emerald-500">
+                    <td class="p-3.5 font-semibold text-slate-200">${item.descricao}</td>
+                    <td class="p-3.5">
+                        <select onchange="alterarCategoria(${index}, this.value)" class="bg-slate-950 border border-slate-700/80 text-slate-300 px-2.5 py-1.5 rounded-xl text-[11px] font-medium focus:outline-none focus:border-emerald-500 shadow-inner">
                             ${optionsCategoria}
                         </select>
                     </td>
-                    <td class="p-3 text-center">${badgeParcela}</td>
-                    <td class="p-3 text-right font-semibold text-slate-200">R$ ${item.valor.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
-                    <td class="p-3 flex items-center justify-between gap-2">
-                        <input type="text" value="${item.nota || ''}" placeholder="Adicionar nota..." onchange="alterarNota(${index}, this.value)" class="w-full bg-slate-900/60 border border-slate-700/50 text-slate-300 text-[11px] px-2 py-1 rounded-md focus:outline-none focus:border-emerald-500 placeholder:text-slate-600" />
-                        <button onclick="excluirItemRaioX(${index})" class="text-slate-500 hover:text-rose-400 font-bold px-1.5 py-0.5 text-xs transition" title="Excluir item">✕</button>
+                    <td class="p-3.5 text-center">${badgeParcela}</td>
+                    <td class="p-3.5 text-right font-black text-slate-200">R$ ${item.valor.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+                    <td class="p-3.5 flex items-center justify-between gap-2">
+                        <input type="text" value="${item.nota || ''}" placeholder="Nota..." onchange="alterarNota(${index}, this.value)" class="w-full bg-slate-950 border border-slate-800 text-slate-300 text-[11px] px-2.5 py-1.5 rounded-xl focus:outline-none focus:border-emerald-500 placeholder:text-slate-600 shadow-inner" />
+                        <button onclick="excluirItemRaioX(${index})" class="text-slate-500 hover:text-rose-400 font-bold p-1.5 rounded-lg hover:bg-rose-500/10 transition" title="Excluir item">✕</button>
                     </td>
                 `;
                 tbody.appendChild(tr);
