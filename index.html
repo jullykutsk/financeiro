@@ -573,7 +573,8 @@
             'pagamento de contas', 'saque a vista', 'crediario', 'com juros', 'ultrapassem o limite',
             'será devolvida em fatura', 'de acordo com a legislação', 'caso o pagamento realizado',
             '1ª ela de', '1a ela de', '(=)total', '(-) creditos', '(+)compras', 'total para gilberto',
-            'juros do rotativo', 'multa por atraso', 'juros de mora', 'iof do rotativo', 'credito por parcelamento'
+            'juros do rotativo', 'multa por atraso', 'juros de mora', 'iof do rotativo', 'credito por parcelamento',
+            'detalhes de consumo', 'movimentacoes na fatura', 'cartao visa', 'vencimento'
         ];
 
         function normalizarTexto(txt) {
@@ -793,27 +794,28 @@
                 if (isNaN(valor) || valor <= 0) return;
 
                 let parcela = "À vista";
-                let regexParcela = /(\d{1,2})\/(\d{1,2})/g;
+                let regexParcela = /(\d{1,2})\s*(?:de|\/)\s*(\d{1,2})/gi;
                 let matches = [...linha.matchAll(regexParcela)];
 
                 matches.forEach(m => {
                     let numAtual = parseInt(m[1], 10);
                     let numTotal = parseInt(m[2], 10);
-                    if (numAtual <= numTotal && numTotal > 1 && numTotal <= 48 && numTotal !== 26) {
+                    if (numAtual <= numTotal && numTotal > 1 && numTotal <= 48) {
                         parcela = `${String(numAtual).padStart(2, '0')}/${String(numTotal).padStart(2, '0')}`;
                     }
                 });
 
                 let nome = linha
                     .replace(/R?\$?\s*\d{1,3}(?:\.\d{3})*,\d{2}/g, '')
-                    .replace(/\d{1,2}\/\d{1,2}/g, '')
+                    .replace(/(\d{1,2}\s*(?:de|\/)\s*\d{1,2})/gi, '')
                     .replace(/PARC/gi, '')
+                    .replace(/ELA\s*\d+\s*(?:de|\/)\s*\d+/gi, '')
+                    .replace(/DE\s*\d+/gi, '')
                     .replace(/^\d+\s+/, '')
                     .replace(/[\.\*\%]/g, ' ')
-                    .replace(/SERÁ DEVOLVIDA EM FATURA.*/gi, '')
                     .trim();
 
-                if (nome.length < 3 || nome === "/2026" || nome === "2026") return;
+                if (nome.length < 3 || nome === "/2026" || nome === "2026" || nome.toLowerCase() === "total") return;
                 let nomeUpper = nome.toUpperCase();
 
                 let categoria = primeiraCat;
@@ -1075,7 +1077,7 @@
                     card.className = `p-2.5 rounded-2xl border text-left shadow-sm transition ${valor > 0 ? 'bg-[#22272c] border-[#3b434a]' : 'bg-[#1a1e23]/50 border-[#2d333b] text-[#9fa8b0]'}`;
                     card.innerHTML = `
                         <p class="text-[9px] font-bold text-[#9fa8b0] uppercase tracking-tight truncate">${cart}</p>
-                        <p class="text-[11px] font-black mt-1 ${valor > 0 ? 'text-[#d9777f]' : 'text-[#9fa8b0]/50'}">R$ ${valor.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</p>
+                        <p class="text-[11px] font-black mt-1 ${valor > 0 ? 'text-[#d9777f]': 'text-[#9fa8b0]/50'}">R$ ${valor.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</p>
                     `;
                     containerCardsCartoes.appendChild(card);
                 });
