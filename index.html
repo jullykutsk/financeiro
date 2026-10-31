@@ -339,7 +339,7 @@
             metas: [], 
             regrasCategorias: {}, 
             regrasCartoes: {}, 
-            cartoesPersonalizados: [],
+            cartoesPersonalizados: ["Bradesco", "Mercado Pago"], 
             categoriasPersonalizadas: ["Pessoal", "Mercado", "Combustível", "Saúde", "Manutenção Casa", "Manutenção carro", "Estudo", "Locomoção", "Lazer", "Presentes"]
         };
         
@@ -347,8 +347,10 @@
         let itemParaExcluirIndex = null;
 
         function obterListaCartoes() {
-            let extras = db.cartoesPersonalizados || [];
-            return [...extras];
+            if (!db.cartoesPersonalizados || db.cartoesPersonalizados.length === 0) {
+                db.cartoesPersonalizados = ["Bradesco", "Mercado Pago"];
+            }
+            return db.cartoesPersonalizados;
         }
 
         function obterListaCategorias() {
@@ -570,7 +572,8 @@
             'valor total financiado', 'total a financiar', 'valor do iof', 'valor total a pagar',
             'pagamento de contas', 'saque a vista', 'crediario', 'com juros', 'ultrapassem o limite',
             'será devolvida em fatura', 'de acordo com a legislação', 'caso o pagamento realizado',
-            '1ª ela de', '1a ela de', '(=)total', '(-) creditos', '(+)compras', 'total para gilberto'
+            '1ª ela de', '1a ela de', '(=)total', '(-) creditos', '(+)compras', 'total para gilberto',
+            'juros do rotativo', 'multa por atraso', 'juros de mora', 'iof do rotativo', 'credito por parcelamento'
         ];
 
         function normalizarTexto(txt) {
@@ -601,7 +604,7 @@
                             metas: conteudo.metas || [],
                             regrasCategorias: conteudo.regrasCategorias || {},
                             regrasCartoes: conteudo.regrasCartoes || {},
-                            cartoesPersonalizados: conteudo.cartoesPersonalizados || [],
+                            cartoesPersonalizados: conteudo.cartoesPersonalizados || ["Bradesco", "Mercado Pago"],
                             categoriasPersonalizadas: conteudo.categoriasPersonalizadas || ["Pessoal", "Mercado", "Combustível", "Saúde", "Manutenção Casa", "Manutenção carro", "Estudo", "Locomoção", "Lazer", "Presentes"]
                         };
                         localStorage.setItem('mindcash_db_v1', JSON.stringify(db));
@@ -638,7 +641,7 @@
                 let nomeNovo = prompt("Digite o nome do novo cartão:");
                 if (nomeNovo && nomeNovo.trim() !== "") {
                     nomeNovo = nomeNovo.trim();
-                    if (!db.cartoesPersonalizados) db.cartoesPersonalizados = [];
+                    if (!db.cartoesPersonalizados) db.cartoesPersonalizados = ["Bradesco", "Mercado Pago"];
                     if (!db.cartoesPersonalizados.some(c => c.toLowerCase() === nomeNovo.toLowerCase())) {
                         db.cartoesPersonalizados.push(nomeNovo);
                         localStorage.setItem('mindcash_db_v1', JSON.stringify(db));
@@ -898,7 +901,7 @@
                 let nomeNovo = prompt("Digite o nome do novo cartão:");
                 if (nomeNovo && nomeNovo.trim() !== "") {
                     nomeNovo = nomeNovo.trim();
-                    if (!db.cartoesPersonalizados) db.cartoesPersonalizados = [];
+                    if (!db.cartoesPersonalizados) db.cartoesPersonalizados = ["Bradesco", "Mercado Pago"];
                     if (!db.cartoesPersonalizados.some(c => c.toLowerCase() === nomeNovo.toLowerCase())) {
                         db.cartoesPersonalizados.push(nomeNovo);
                     }
