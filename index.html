@@ -19,6 +19,9 @@
         .mind-glow {
             box-shadow: 0 10px 30px -10px rgba(74, 119, 122, 0.2);
         }
+        @media print {
+            .nao-imprimir { display: none !important; }
+        }
     </style>
 </head>
 <body class="font-sans antialiased min-h-screen pb-12 selection:bg-[#4a777a] selection:text-white">
@@ -41,7 +44,7 @@
             <div class="flex flex-wrap items-center gap-2 w-full md:w-auto justify-start md:justify-end">
                 
                 <!-- Botões de Alternância de Abas -->
-                <div class="bg-[#1a1e23] p-1 rounded-2xl border border-[#3b434a] flex items-center gap-1 z-10">
+                <div class="nao-imprimir bg-[#1a1e23] p-1 rounded-2xl border border-[#3b434a] flex items-center gap-1 z-10">
                     <button type="button" onclick="mudarAba('dashboard')" id="abaBtnDashboard" class="px-3 py-1 rounded-xl text-[11px] font-bold transition bg-[#4a777a] text-[#f4f1ea] cursor-pointer">Controle Geral</button>
                     <button type="button" onclick="mudarAba('metas')" id="abaBtnMetas" class="px-3 py-1 rounded-xl text-[11px] font-bold transition text-[#9fa8b0] hover:text-[#f4f1ea] cursor-pointer">Metas & Projetos</button>
                 </div>
@@ -51,13 +54,13 @@
                         <input type="month" id="seletorMes" class="bg-transparent text-[10px] font-bold text-[#829c95] focus:outline-none cursor-pointer w-28" onchange="renderizarTela()">
                     </div>
                     
-                    <button onclick="gerarPDF()" class="bg-[#4a777a] hover:bg-[#3b6063] text-[#f4f1ea] border border-[#4a777a]/50 px-2.5 py-2 rounded-2xl text-[11px] font-bold transition flex items-center gap-1 shadow-md active:scale-95" title="Baixar PDF do Mês">
+                    <button onclick="gerarPDF()" class="nao-imprimir bg-[#4a777a] hover:bg-[#3b6063] text-[#f4f1ea] border border-[#4a777a]/50 px-2.5 py-2 rounded-2xl text-[11px] font-bold transition flex items-center gap-1 shadow-md active:scale-95" title="Baixar PDF do Mês">
                         PDF
                     </button>
                 </div>
                 
                 <!-- Grupo de Backup e Restaurar (Apenas visível na aba Controle Geral) -->
-                <div id="botoesBackupRestaurar" class="flex items-center gap-2">
+                <div id="botoesBackupRestaurar" class="nao-imprimir flex items-center gap-2">
                     <button onclick="exportarDados()" class="bg-[#2d333b] hover:bg-[#38404a] text-[#c5cbd3] border border-[#3b434a] px-2.5 py-2 rounded-2xl text-[11px] font-semibold transition shadow-md active:scale-95" title="Salvar Backup">
                         Backup
                     </button>
@@ -92,8 +95,8 @@
                 </div>
             </div>
 
-            <!-- Adicionar Lançamento Manual -->
-            <div id="blocoAdicionar" class="bg-[#22272c]/80 p-4 rounded-3xl border border-[#3b434a] shadow-lg backdrop-blur space-y-3">
+            <!-- Adicionar Lançamento Manual (Oculto no PDF) -->
+            <div id="blocoAdicionar" class="nao-imprimir bg-[#22272c]/80 p-4 rounded-3xl border border-[#3b434a] shadow-lg backdrop-blur space-y-3">
                 <h3 class="text-[11px] font-bold uppercase tracking-wider text-[#c5cbd3]">
                     Adicionar Novo Lançamento:
                 </h3>
@@ -175,8 +178,8 @@
                 </div>
             </div>
 
-            <!-- Botão de Colar Texto da Fatura -->
-            <div id="blocoFaturaBtn" class="bg-[#22272c]/80 p-4 rounded-3xl border border-[#3b434a] shadow-lg backdrop-blur space-y-2.5">
+            <!-- Botão de Colar Texto da Fatura (Oculto no PDF) -->
+            <div id="blocoFaturaBtn" class="nao-imprimir bg-[#22272c]/80 p-4 rounded-3xl border border-[#3b434a] shadow-lg backdrop-blur space-y-2.5">
                 <h3 class="text-[11px] font-bold uppercase tracking-wider text-[#c5cbd3]">
                     Lançar Fatura do Cartão (Raio-X):
                 </h3>
@@ -200,7 +203,7 @@
                 
                 <div id="conteudoPainelCartoes" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 transition-all duration-300 hidden"></div>
                 
-                <div id="painelGerirCartoes" class="pt-2.5 border-t border-[#3b434a]/50 hidden">
+                <div id="painelGerirCartoes" class="nao-imprimir pt-2.5 border-t border-[#3b434a]/50 hidden">
                     <p class="text-[10px] text-[#9fa8b0] mb-1.5 font-semibold">Cartões criados:</p>
                     <div id="listaCartoesPersonalizados" class="flex flex-wrap gap-1.5"></div>
                 </div>
@@ -219,7 +222,7 @@
                 
                 <div id="conteudoPainelCategorias" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 transition-all duration-300 hidden"></div>
 
-                <div id="painelGerirCategorias" class="pt-2.5 border-t border-[#3b434a]/50 hidden space-y-2.5">
+                <div id="painelGerirCategorias" class="nao-imprimir pt-2.5 border-t border-[#3b434a]/50 hidden space-y-2.5">
                     <div class="flex gap-2">
                         <input type="text" id="novaCategoriaInput" placeholder="Nome da nova categoria..." class="flex-1 bg-[#1a1e23] border border-[#3b434a] text-[11px] text-[#f4f1ea] px-3 py-2 rounded-xl focus:outline-none focus:border-[#4a777a]">
                         <button onclick="adicionarNovaCategoria()" class="bg-[#4a777a] hover:bg-[#3b6063] text-[#f4f1ea] px-3 py-2 rounded-xl text-[11px] font-bold transition">Adicionar</button>
@@ -544,10 +547,12 @@
             let elemento = document.getElementById('conteudoPDF');
             let mesAtual = document.getElementById('seletorMes').value;
             
-            let blocoAdd = document.getElementById('blocoAdicionar');
-            let blocoFat = document.getElementById('blocoFaturaBtn');
-            blocoAdd.style.display = 'none';
-            blocoFat.style.display = 'none';
+            // Garante que o painel de Raio-X esteja expandido para sair completo no PDF
+            let painelRaioX = document.getElementById('conteudoPainelRaioX');
+            let estavaFechado = painelRaioX.classList.contains('hidden');
+            if (estavaFechado) {
+                painelRaioX.classList.remove('hidden');
+            }
 
             let opt = {
                 margin:       [10, 10, 10, 10],
@@ -558,8 +563,9 @@
             };
 
             html2pdf().from(elemento).set(opt).save().then(() => {
-                blocoAdd.style.display = 'block';
-                blocoFat.style.display = 'block';
+                if (estavaFechado) {
+                    painelRaioX.classList.add('hidden');
+                }
             });
         }
 
@@ -794,7 +800,6 @@
                 if (isNaN(valor) || valor <= 0) return;
 
                 let parcela = "À vista";
-                // Regex robusta para capturar formatos como "2 de 10", "2 DE 2", "1/4", "1 de 4"
                 let regexParcela = /(\d{1,2})\s*(?:de|\/)\s*(\d{1,2})/gi;
                 let matches = [...linha.matchAll(regexParcela)];
 
@@ -1164,14 +1169,16 @@
                 tr.innerHTML = `
                     <td class="p-3 font-semibold text-[#f4f1ea]">${item.descricao}</td>
                     <td class="p-3">
-                        <select onchange="alterarCartao(${index}, this.value)" class="bg-[#1a1e23] border border-[#3b434a] text-[#829c95] px-2 py-1 rounded-xl text-[10px] font-bold focus:outline-none focus:border-[#4a777a] shadow-inner">
+                        <select onchange="alterarCartao(${index}, this.value)" class="nao-imprimir bg-[#1a1e23] border border-[#3b434a] text-[#829c95] px-2 py-1 rounded-xl text-[10px] font-bold focus:outline-none focus:border-[#4a777a] shadow-inner">
                             ${optionsCartao}
                         </select>
+                        <span class="hidden print:inline text-[#f4f1ea]">${item.cartao || ''}</span>
                     </td>
                     <td class="p-3">
-                        <select onchange="alterarCategoria(${index}, this.value)" class="bg-[#1a1e23] border border-[#3b434a] text-[#c5cbd3] px-2 py-1 rounded-xl text-[10px] font-medium focus:outline-none focus:border-[#4a777a] shadow-inner">
+                        <select onchange="alterarCategoria(${index}, this.value)" class="nao-imprimir bg-[#1a1e23] border border-[#3b434a] text-[#c5cbd3] px-2 py-1 rounded-xl text-[10px] font-medium focus:outline-none focus:border-[#4a777a] shadow-inner">
                             ${optionsCategoria}
                         </select>
+                        <span class="hidden print:inline text-[#f4f1ea]">${item.categoria}</span>
                     </td>
                     <td class="p-3 text-center">${badgeParcela}</td>
                     <td class="p-3 text-right font-black text-[#f4f1ea]">R$ ${item.valor.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
