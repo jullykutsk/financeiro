@@ -572,7 +572,7 @@
             'valor total financiado', 'total a financiar', 'valor do iof', 'valor total a pagar',
             'pagamento de contas', 'saque a vista', 'crediario', 'com juros', 'ultrapassem o limite',
             'será devolvida em fatura', 'de acordo com a legislação', 'caso o pagamento realizado',
-            '1ª ela de', '1a ela de', '(=)total', '(-) creditos', '(+)compras', 'total para gilberto',
+            '(=)total', '(-) creditos', '(+)compras', 'total para gilberto',
             'juros do rotativo', 'multa por atraso', 'juros de mora', 'iof do rotativo', 'credito por parcelamento',
             'detalhes de consumo', 'movimentacoes na fatura', 'cartao visa', 'vencimento'
         ];
@@ -794,6 +794,7 @@
                 if (isNaN(valor) || valor <= 0) return;
 
                 let parcela = "À vista";
+                // Regex robusta para capturar formatos como "2 de 10", "2 DE 2", "1/4", "1 de 4"
                 let regexParcela = /(\d{1,2})\s*(?:de|\/)\s*(\d{1,2})/gi;
                 let matches = [...linha.matchAll(regexParcela)];
 
@@ -1077,7 +1078,7 @@
                     card.className = `p-2.5 rounded-2xl border text-left shadow-sm transition ${valor > 0 ? 'bg-[#22272c] border-[#3b434a]' : 'bg-[#1a1e23]/50 border-[#2d333b] text-[#9fa8b0]'}`;
                     card.innerHTML = `
                         <p class="text-[9px] font-bold text-[#9fa8b0] uppercase tracking-tight truncate">${cart}</p>
-                        <p class="text-[11px] font-black mt-1 ${valor > 0 ? 'text-[#d9777f]': 'text-[#9fa8b0]/50'}">R$ ${valor.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</p>
+                        <p class="text-[11px] font-black mt-1 ${valor > 0 ? 'text-[#d9777f]' : 'text-[#9fa8b0]/50'}">R$ ${valor.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</p>
                     `;
                     containerCardsCartoes.appendChild(card);
                 });
